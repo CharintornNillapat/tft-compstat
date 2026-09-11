@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Design tokens — dark only (architecture §9). */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* Surfaces & text */
+  --color-surface: #09090b;
+  --color-panel: #131316;
+  --color-raised: #1c1c20;
+  --color-line: #27272a;
+  --color-fg: #f4f4f5;
+  --color-muted: #a1a1aa;
+  --color-faint: #71717a;
+  --color-accent: #c8aa6e;
+
+  /* Champion cost 1–5 */
+  --color-cost-1: #a1a1aa;
+  --color-cost-2: #22c55e;
+  --color-cost-3: #3b82f6;
+  --color-cost-4: #a855f7;
+  --color-cost-5: #f59e0b;
+
+  /* Tier rank */
+  --color-tier-s: #fb7185;
+  --color-tier-a: #fb923c;
+  --color-tier-b: #fbbf24;
+  --color-tier-c: #a3e635;
+
+  /* Placement */
+  --color-place-win: #facc15;
+  --color-place-top4: #2dd4bf;
+  --color-place-bot4: #71717a;
+
+  /* Trait activation tiers */
+  --color-trait-bronze: #b87333;
+  --color-trait-silver: #a8b3bd;
+  --color-trait-gold: #eab308;
+  --color-trait-prismatic: #c4b5fd;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-surface);
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-accent) 35%, transparent);
+  }
+}
