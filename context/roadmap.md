@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1 and 2 complete (2026-09-11). Live at https://tft-compstat.vercel.app, with Set 18 static data and the sample tier lists.
+> **Status:** Phases 1–3 complete (2026-09-12). Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists and four curated comps.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -17,7 +17,7 @@
 |---|---|---|
 | 1 | Foundation & skeleton | ✅ Done (2026-09-11) |
 | 2 | Static game data + tier lists | ✅ Done (2026-09-11) |
-| 3 | Meta comps showcase | 🟡 Built (2026-09-12); waiting on the DB push, the seed and a deploy |
+| 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ⬜ Not started |
 | 5 | Personal dashboard & polish | ⬜ Not started |
 
@@ -75,7 +75,7 @@
 **Goal:** Curated comps browsable at a glance, with board positioning and item builds.
 
 - [x] Comp YAML schema; extend `seed-curated.ts` for `comps` + `comp_units` (unique hexes, ≤3 items, ≥1 carry)
-  - Solved with `seed_comp`, a transactional RPC, instead of a `DEFERRABLE` constraint (architecture §4.9). The migration `20260911180000_seed_comp.sql` is verified on Postgres 17 via PGlite (16 checks), but **not yet pushed**.
+  - Solved with `seed_comp`, a transactional RPC, instead of a `DEFERRABLE` constraint (architecture §4.9). The migration `20260911180000_seed_comp.sql` is verified on Postgres 17 via PGlite (16 checks), and is applied remotely.
   - Also rejects an emblem for a trait the unit already has, and flex units already on the board.
 - [x] `computeActiveTraits(units)` (pure; includes emblems) + tests
 - [x] `/comps`: dense rows (tier, name, style, carries with items, active traits), filters by tier/style + search
@@ -83,17 +83,20 @@
 - [x] Write 4 comps for Set 18 patch 18.2 in `data/curated/18/comps/`: Draven Fast 9 (S), Ashe Fast 9 (S), Flora Malphite (A), Defender Cassiopeia (B)
   - Tiers from the TFT Academy 18.2 comp tier list; boards, carries and items from the BunnyMuffins and EmblemComp build guides (Sep 2026). Filler slots, hexes and star goals are a starting point, and each file says so. **Review them before trusting the ratings.**
   - No comp uses a Riftbeast unit, because `champions` doesn't have them (architecture §11).
-- [ ] `pnpm db:push` (adds `seed_comp`), then `pnpm db:types`
-- [ ] `pnpm seed:curated` to write the comps
-- [ ] Deploy and confirm `/comps` and a guide page render live
+- [x] `pnpm db:push` (adds `seed_comp`), then `pnpm db:types`
+- [x] `pnpm seed:curated` to write the comps
+- [x] Committed and pushed to `main` (`7121b26`); Vercel deploy of that commit confirmed live
 
 **Done when:** the comps list and detail pages render the seeded comps correctly and trait counts match hand-checked boards.
 
-**Verified so far (2026-09-12):**
-- **Checks:** `pnpm check` (68 tests) and `pnpm build` are green. `/comps` builds static (revalidate 1d, expire 1w) and `/comps/[slug]` as Partial Prerender.
+**Verified (2026-09-12):**
+- **Checks:** `pnpm check` (68 tests) and `pnpm build` are green. `/comps` builds static (revalidate 1d, expire 1w) and `/comps/[slug]` as Partial Prerender over the published slugs.
 - **Seeding:** `pnpm seed:curated --dry-run` validates all 6 curated files. A file with a typo'd unit, two units on one hex and a wasted emblem reports all three as `file:line:col` with suggestions, exits 1 and writes nothing.
-- **Traits:** `computeActiveTraits` matches the Draven board checked by hand (Elderwood 3, Brawler/Executioner/Inferno/Juggernaut 2, four uniques, Sprykin and Vanguard inactive).
-- **UI:** checked in headless Edge against the real static data with the comps rendered from YAML. No horizontal overflow at 398px or 930px.
+- **`seed_comp`:** 16 PGlite checks on Postgres 17, including a re-seed that swaps two units' hexes, pruning a removed unit, rollback on a bad unit or a double-booked hex, denial for `anon`/`authenticated`, and RLS still hiding unpublished comps.
+- **Traits:** `computeActiveTraits` matches the Draven board checked by hand (Elderwood 3, Brawler/Executioner/Inferno/Juggernaut 2, four uniques, Sprykin and Vanguard inactive). Live, Defender Cassiopeia shows Defender 4, which only counts because the Defender Emblem is on Cassiopeia.
+- **Live pages:** `/comps` lists all four comps in tier then `order` then name; `/comps/draven-fast-9` and `/comps/defender-cassiopeia` render the board, traits, item builds, early and flex units and the guide markdown. 3★ goals show gold pips. Icons load from CommunityDragon.
+- **UI:** headless Edge at 960px and at a true 398px viewport: no horizontal overflow (scroll width = viewport, nothing past the edge).
+- **Known nit:** the carry's gold rim reads much like the 5-cost cost border, so a 5-cost carry (Draven) is less obvious than a 3-cost one (Cassiopeia). Left for the Phase 5 polish pass.
 
 ---
 
@@ -128,6 +131,7 @@
   - favorite comps table
 - [ ] `/` overview glance panel: rank, last 10 placements, top S-tier comps
 - [ ] Polish: keyboard shortcuts, skeletons, empty/error states (key expired, rate limited), contrast check, Lighthouse pass
+  - Make the board's carry marker distinct from the 5-cost border (both read as gold today).
 - [ ] Optional: match games to curated comps ("your results on curated comps")
 - [ ] Optional admin UI:
   - single-user Supabase Auth with an email allowlist

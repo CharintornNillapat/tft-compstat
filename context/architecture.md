@@ -1,6 +1,6 @@
 # TFT CompStat — Architecture
 
-> **Status:** Approved design (2026-09-11). Phases 1–2 are implemented, and Phase 3 is built (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Status:** Approved design (2026-09-11). Phases 1–3 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
 > **Companion doc:** [`roadmap.md`](./roadmap.md)
 
 ## 0. Product scope & confirmed decisions
