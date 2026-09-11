@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phase 1 complete (2026-09-11). Phase 2 implemented and verified locally (2026-09-11): Set 18 static data and the sample tier lists are in Supabase. Committed and pushed to `main`; waiting on the Vercel deploy.
+> **Status:** Phases 1 and 2 complete (2026-09-11). Live at https://tft-compstat.vercel.app, with Set 18 static data and the sample tier lists.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -16,7 +16,7 @@
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation & skeleton | ✅ Done (2026-09-11) |
-| 2 | Static game data + tier lists | 🟡 Done locally; deploy pending |
+| 2 | Static game data + tier lists | ✅ Done (2026-09-11) |
 | 3 | Meta comps showcase | ⬜ Not started |
 | 4 | Riot API service & match cache | ⬜ Not started |
 | 5 | Personal dashboard & polish | ⬜ Not started |
@@ -56,7 +56,7 @@
 - [x] Vitest: seed schema validation, bad-reference rejection, CommunityDragon transform, `/api/revalidate` (47 tests in total)
 - [x] Sample lists `data/curated/18/{champion,item}-tiers.yaml` seeded. They're placeholder ratings: replace them with your own.
 - [x] Committed and pushed to `main`
-- [ ] Vercel deploy of that commit; confirm the live `/tiers` pages render
+- [x] Vercel deploy of that commit; confirm the live `/tiers` pages render (both return 200 with the seeded lists)
 
 **Done when:** a sample tier list seeds and renders, and a typo'd `api_name` fails the seed with a clear file/path error.
 
@@ -67,7 +67,7 @@
 - **Access:** the anon key can read the new rows, and an anon insert gets 401.
 - **UI (Edge, 960px and 400px):** no horizontal overflow. Tooltips open on hover and on focus, stay inside the viewport, and close on leave or Escape. The cost filter works, and there are no console errors.
 
-**After deploying:** set `SITE_URL=https://<your-app>.vercel.app` in `.env.local` so later syncs and seeds refresh the live pages right away. Without it, pages refresh within a day.
+**Deployed:** `SITE_URL=https://tft-compstat.vercel.app` is set in `.env.local`, so later syncs and seeds refresh the live pages right away.
 
 ---
 
