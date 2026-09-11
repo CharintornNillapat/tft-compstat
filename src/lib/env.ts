@@ -70,6 +70,12 @@ const secretsSchema = z.object({
   REVALIDATE_SECRET: secret,
 });
 
+const revalidateSchema = z.object({
+  REVALIDATE_SECRET: secret,
+  // Site the seed scripts revalidate after writing. Optional, local only; empty = skip.
+  SITE_URL: z.preprocess((value) => (value === "" ? undefined : value), z.url().optional()),
+});
+
 function parseEnv<T extends z.ZodType>(scope: string, schema: T, source: EnvSource): z.infer<T> {
   const result = schema.safeParse(source);
   if (!result.success) {
@@ -88,6 +94,8 @@ export const readSupabaseAdminEnv = (source: EnvSource) =>
   parseEnv("Supabase (admin)", supabaseAdminSchema, source);
 export const readRiotEnv = (source: EnvSource) => parseEnv("Riot", riotSchema, source);
 export const readSecretsEnv = (source: EnvSource) => parseEnv("secrets", secretsSchema, source);
+export const readRevalidateEnv = (source: EnvSource) =>
+  parseEnv("revalidation", revalidateSchema, source);
 
 function memoize<T>(read: () => T): () => T {
   let value: { current: T } | undefined;
@@ -98,3 +106,4 @@ export const supabasePublicEnv = memoize(() => readSupabasePublicEnv(process.env
 export const supabaseAdminEnv = memoize(() => readSupabaseAdminEnv(process.env));
 export const riotEnv = memoize(() => readRiotEnv(process.env));
 export const secretsEnv = memoize(() => readSecretsEnv(process.env));
+export const revalidateEnv = memoize(() => readRevalidateEnv(process.env));

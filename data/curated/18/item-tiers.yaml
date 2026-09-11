@@ -1,0 +1,41 @@
+# SAMPLE: placeholder ratings that exercise the seed pipeline and the page, not
+# meta advice. Replace the tiers with your own, then run `pnpm seed:curated`.
+#
+# Items are api_names from the items table. Set 18 lists most items twice, as
+# DA_… (the Enchanted Wilds versions, built from DA_Component_*) and as the older
+# TFT_Item_…; this sample uses DA_. The page groups entries by item kind.
+slug: items-18.2
+kind: item
+patch: "18.2"
+current: true
+summary: Sample ratings to test the pipeline. Replace them with your own.
+tiers:
+  S:
+    - DA_InfinityEdge
+    - DA_GuinsoosRageblade
+    - DA_JeweledGauntlet
+    - DA_Artifact_InfinityForce
+    - DA_18_EmblemHunter
+  A:
+    - DA_SpearOfShojin
+    - DA_Bloodthirster
+    - DA_WarmogsArmor
+    - DA_BrambleVest
+    - DA_Artifact_Fishbones
+    - DA_InfinityEdgeRadiant
+    - DA_18_EmblemBlossom
+  B:
+    - DA_Morellonomicon
+    - DA_LastWhisper
+    - DA_HextechGunblade
+    - DA_Crownguard
+    - DA_Artifact_LichBane
+    - TFT_Item_ZekesHerald
+  C:
+    - DA_RedBuff
+    - DA_SteraksGage
+    - DA_Quicksilver
+    - DA_TacticiansCrown
+    - TFT_Item_Moonstone
+notes:
+  DA_InfinityEdge: "Sample note: recipes and emblem traits show in the tooltip."

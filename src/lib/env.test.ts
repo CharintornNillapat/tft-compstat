@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  readRevalidateEnv,
   readRiotEnv,
   readSecretsEnv,
   readSupabaseAdminEnv,
@@ -90,5 +91,22 @@ describe("readSecretsEnv", () => {
     }
     expect(message).toMatch(/CRON_SECRET/);
     expect(message).not.toContain(leaky);
+  });
+});
+
+describe("readRevalidateEnv", () => {
+  const secret = { REVALIDATE_SECRET: "x".repeat(32) };
+
+  it("treats SITE_URL as optional, including an empty value", () => {
+    expect(readRevalidateEnv(secret).SITE_URL).toBeUndefined();
+    expect(readRevalidateEnv({ ...secret, SITE_URL: "" }).SITE_URL).toBeUndefined();
+    expect(readRevalidateEnv({ ...secret, SITE_URL: "https://x.vercel.app" }).SITE_URL).toBe(
+      "https://x.vercel.app",
+    );
+  });
+
+  it("rejects a malformed SITE_URL and does not need CRON_SECRET", () => {
+    expect(() => readRevalidateEnv({ ...secret, SITE_URL: "x.vercel.app" })).toThrowError(/SITE_URL/);
+    expect(() => readRevalidateEnv({ SITE_URL: "https://x.vercel.app" })).toThrowError(/REVALIDATE_SECRET/);
   });
 });

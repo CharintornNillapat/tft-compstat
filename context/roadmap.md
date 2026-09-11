@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phase 1 local work done (2026-09-11). It's waiting on three steps that need your accounts: fix the service-role key, push the migration to Supabase, and the first Vercel deploy (see Phase 1 → *Remaining*).
+> **Status:** Phase 1 complete (2026-09-11). Phase 2 implemented and verified locally (2026-09-11): Set 18 static data and the sample tier lists are in Supabase. Committed and pushed to `main`; waiting on the Vercel deploy.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -15,8 +15,8 @@
 ## Progress at a glance
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Foundation & skeleton | 🟡 DB live; Vercel deploy pending |
-| 2 | Static game data + tier lists | ⬜ Not started |
+| 1 | Foundation & skeleton | ✅ Done (2026-09-11) |
+| 2 | Static game data + tier lists | 🟡 Done locally; deploy pending |
 | 3 | Meta comps showcase | ⬜ Not started |
 | 4 | Riot API service & match cache | ⬜ Not started |
 | 5 | Personal dashboard & polish | ⬜ Not started |
@@ -36,10 +36,8 @@
 - [x] Vitest set up; `pnpm check` (typecheck + lint + test) green, 10 tests; `pnpm build` green; all routes smoke-tested (200/404) at 960px and 400px
 - [x] `.env.local`: `SUPABASE_SERVICE_ROLE_KEY` now holds the `service_role` key (was the anon key)
 - [x] Project linked (`ulpapntggzqipodxtwzb`), migration pushed (`pnpm db:push`), types regenerated (`pnpm db:types`); `pnpm check` + `pnpm build` still green
-- [x] Initial git commit
-
-**Remaining (needs your accounts):**
-- [ ] Vercel project + env vars (all 9 from `.env.example`); first deploy
+- [x] Initial git commit; pushed to GitHub (`CharintornNillapat/tft-compstat`)
+- [x] Vercel project + env vars (all 9 from `.env.example`); first deploy
 
 **Done when:** the deployed URL shows the shell, the migration is applied remotely, and `pnpm check && pnpm build` passes.
 
@@ -48,14 +46,28 @@
 ## Phase 2 — Static game data + tier lists
 **Goal:** Real champion, trait and item reference data, plus the champion and item tier list pages.
 
-- [ ] `scripts/sync-static.ts`: CommunityDragon → `tft_sets`, `traits`, `champions` (costs 1–5, summons filtered), `items` (kinds, components, emblem → trait)
-- [ ] Icon URL helper + `next/image` remote patterns
-- [ ] Zod schemas for tier YAML; `scripts/seed-curated.ts` (tier lists part) + `/api/revalidate` (architecture §7)
-- [ ] Components: `ChampionIcon`, `ItemIcon`, `TierRow`, `CostFilter`
-- [ ] `/tiers/champions` (tier rows, cost 1–5 filter, notes on hover) and `/tiers/items` (grouped by kind)
-- [ ] Vitest: seed schema validation, bad-reference rejection
+- [x] `scripts/sync-static.ts` (`pnpm sync:static [--set N] [--dry-run]`): CommunityDragon → `tft_sets`, `traits`, `champions` (costs 1–5, summons filtered), `items` (kinds, components, emblem → trait). Details in architecture §4.8.
+  - Synced Set 18 "Enchanted Wilds" from game data 16.18: 36 traits, 64 champions, 771 items.
+  - Riot's Data Dragon shop list filters out summons (Riftbeast monsters, Elder Dragon). If it has no units for the set, the sync keeps units with a cost and traits, and warns.
+- [x] Icon URL helper (`cdragonAssetUrl`, URLs pinned to the game-data version) + `next/image` remote patterns
+- [x] Zod schemas for tier YAML; `scripts/seed-curated.ts` (`pnpm seed:curated [--dry-run]`, tier lists part) + `/api/revalidate` (architecture §7)
+- [x] Components: `ChampionIcon`, `ItemIcon`, `TierRow`/`TierBadge`, `CostFilter`, plus `HoverTip`, `EmptyState` and the two tier boards
+- [x] `/tiers/champions` (tier rows, cost 1–5 filter, notes on hover) and `/tiers/items` (grouped by kind, recipes on hover)
+- [x] Vitest: seed schema validation, bad-reference rejection, CommunityDragon transform, `/api/revalidate` (47 tests in total)
+- [x] Sample lists `data/curated/18/{champion,item}-tiers.yaml` seeded. They're placeholder ratings: replace them with your own.
+- [x] Committed and pushed to `main`
+- [ ] Vercel deploy of that commit; confirm the live `/tiers` pages render
 
 **Done when:** a sample tier list seeds and renders, and a typo'd `api_name` fails the seed with a clear file/path error.
+
+**Verified (2026-09-11):**
+- **Checks:** `pnpm check` (47 tests) and `pnpm build` are green. Both tier pages prerender, with revalidate 1d and expire 1w.
+- **Seeding and revalidation:** the sample lists seed into Supabase and render, and a second run changes nothing. Removing or moving a unit prunes or updates its row. With `SITE_URL` pointing at a local `next start`, a re-seed updates the prerendered page on the next request.
+- **Typo handling:** a typo'd `api_name` stops the seed before any write and exits 1, e.g. `data/curated/18/champion-tiers.yaml:13:33  tiers.S[2]: unknown set 18 champion "DA_18_Sivr". Did you mean DA_18_Sivir?`.
+- **Access:** the anon key can read the new rows, and an anon insert gets 401.
+- **UI (Edge, 960px and 400px):** no horizontal overflow. Tooltips open on hover and on focus, stay inside the viewport, and close on leave or Escape. The cost filter works, and there are no console errors.
+
+**After deploying:** set `SITE_URL=https://<your-app>.vercel.app` in `.env.local` so later syncs and seeds refresh the live pages right away. Without it, pages refresh within a day.
 
 ---
 
@@ -63,6 +75,7 @@
 **Goal:** Curated comps browsable at a glance, with board positioning and item builds.
 
 - [ ] Comp YAML schema; extend `seed-curated.ts` for `comps` + `comp_units` (unique hexes, ≤3 items, ≥1 carry)
+  - Replacing units needs the hex unique constraint made `DEFERRABLE` (a migration) or a transactional RPC. See architecture §7 step 5.
 - [ ] `computeActiveTraits(units)` (pure; includes emblems) + tests
 - [ ] `/comps`: dense rows (tier, name, style, carries with items, active traits), filters by tier/style + search
 - [ ] `/comps/[slug]`: `HexBoard`, carry item builds, early units, flex units, guide markdown
@@ -115,6 +128,6 @@
 
 ## Before Phase 1: what you'll need on hand
 - [x] A Supabase account and a new project (free tier), ref `ulpapntggzqipodxtwzb`
-- [ ] A Vercel account linked to the GitHub repo
+- [x] A Vercel account linked to the GitHub repo
 - [x] A Riot developer account. A **Personal API Key** is recommended; a dev key works but expires every 24h.
 - [x] Your Riot ID and platform: `BurdenInMyHand#6969`, `th2`

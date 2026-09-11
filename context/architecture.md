@@ -1,6 +1,6 @@
 # TFT CompStat — Architecture
 
-> **Status:** Approved design (2026-09-11). Phase 1 is implemented and its decisions are recorded below. This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Status:** Approved design (2026-09-11). Phases 1–2 are implemented and their decisions are recorded below (§4.7, §4.8, §7, §8). This is the source of truth for implementation. Update it whenever a phase changes a decision.
 > **Companion doc:** [`roadmap.md`](./roadmap.md)
 
 ## 0. Product scope & confirmed decisions
@@ -54,7 +54,7 @@ A minimalist, dark, data-dense TFT companion site built for a second monitor whi
 | Styling | Tailwind CSS v4, dark only | Design tokens in `@theme` (`src/app/globals.css`); `tabular-nums` everywhere |
 | DB | Supabase Postgres + RLS | Supabase CLI migrations in `supabase/migrations/`; generated types in `src/lib/supabase/types.ts` |
 | Validation | Zod | Env vars, YAML seeds, Riot DTO subset |
-| Static game data | CommunityDragon `cdragon/tft/en_us.json` | Champion, trait and item names, costs, breakpoints, icons |
+| Static game data | CommunityDragon `cdragon/tft/en_us.json`; Riot Data Dragon `tft-champion.json` | CommunityDragon: champion, trait and item names, costs, breakpoints, icons. Data Dragon: which units are in the shop (§4.8) |
 | Charts | Inline SVG (sparkline, placement histogram) | No chart library needed at this scale |
 | Tests | Vitest | Pure functions: limiter, header parsing, comp signature, stats, seed schemas |
 | Tooling | pnpm 12, ESLint 9 (flat config), Supabase CLI as a devDependency, `tsx` for scripts | Bundled Next docs live in `node_modules/next/dist/docs/`. Check them before using a Next API (see `AGENTS.md`). |
@@ -71,11 +71,12 @@ data/curated/<setId>/
   item-tiers.yaml
   comps/<slug>.yaml
 scripts/
-  sync-static.ts             CommunityDragon → tft_sets/champions/traits/items
+  sync-static.ts             CommunityDragon → tft_sets/champions/traits/items (+ revalidate "static")
   seed-curated.ts            YAML → tier_lists/tier_entries/comps/comp_units (+ revalidate)
   riot-setup.ts              Riot ID → puuid; insert riot_accounts + sync_state
   riot-backfill.ts           deeper history, run locally, same limiter
   rederive.ts                recompute player_matches from matches.raw (0 API calls)
+  lib/{db,revalidate}.ts     paging/chunking helpers; POST /api/revalidate client
 supabase/migrations/         SQL (schema, RLS, RPCs)
 src/app/
   page.tsx                   Overview (glance panel)
@@ -83,14 +84,17 @@ src/app/
   tiers/champions/page.tsx, tiers/items/page.tsx
   me/page.tsx                Personal dashboard
   api/cron/sync/route.ts, api/revalidate/route.ts
-src/components/              ChampionIcon, ItemIcon, TraitBadge, TierRow, HexBoard, PlacementPill, StatTile, Sparkline
+src/components/              ChampionIcon, ItemIcon, TraitBadge, TierRow, CostFilter, HoverTip, HexBoard, PlacementPill, StatTile, Sparkline
 src/lib/
   env.ts                     Zod-validated env
-  supabase/{server,admin,types}.ts   admin = service role, `import 'server-only'`
+  cache-tags.ts              the cache tags /api/revalidate accepts
+  supabase/{server,admin,types,result}.ts   admin = service role, `import 'server-only'`; result = `must()`
+  static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds)
+  static/cdragon.ts          pure CommunityDragon → rows transform
   riot/{routing,client,limiter,errors,schemas,endpoints}.ts
   sync/{sync-service,derive,comp-signature}.ts
   stats/{summary,comps,champions}.ts pure functions
-  curated/{schemas,queries}.ts
+  curated/{schemas,validate,queries}.ts
 ```
 
 ---
@@ -111,7 +115,7 @@ create table tft_sets (
   id         smallint primary key,               -- e.g. 15
   mutator    text not null,                      -- CDragon set key
   name       text not null,
-  patch      text,                               -- '15.4'
+  patch      text,                               -- game-data version of the last sync, '16.18' (not the TFT patch label, see §4.8)
   is_active  boolean not null default false
 );
 create unique index one_active_set on tft_sets (is_active) where is_active;
@@ -120,7 +124,7 @@ create table traits (
   api_name    text primary key,                  -- matches Riot traits[].name
   set_id      smallint not null references tft_sets(id),
   name        text not null,
-  breakpoints jsonb not null,                    -- [{ "min": 2, "style": 1 }, ...]
+  breakpoints jsonb not null,                    -- [{ "min": 2, "style": "bronze" }, ...] sorted by min (§4.8)
   icon_url    text
 );
 
@@ -308,6 +312,45 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 - **Verified** on real Postgres 17 via PGlite (32 checks): every constraint, RLS as anon and authenticated, denied access to `matches`/`sync_state`/RPC, service-role writes, and lock acquire/refuse/cooldown/expiry.
 - **Types:** `src/lib/supabase/types.ts` is generated from the linked project by `pnpm db:types`. Never edit it by hand; rerun it after every migration push.
 
+### 4.8 Static data sync (Phase 2)
+`scripts/sync-static.ts` (`pnpm sync:static [--set N] [--dry-run]`) wraps the pure transform in `src/lib/static/cdragon.ts`. Phase 2 needed no schema change.
+
+**Sources**
+- The version comes from CommunityDragon `latest/content-metadata.json` (`16.18.…` → `16.18`). The sync then fetches `cdragon/tft/en_us.json` from that **pinned** directory, the same one the icon URLs use.
+- The set is the newest *standard* one, whose mutator is exactly `TFTSet<N>` (not `_PAIRS`, `_TURBO`, `_PVEMODE` or events). `--set N` overrides it.
+- Display names come from a small map in `cdragon.ts`. CommunityDragon's names are internal: Set 18 ships as "Set10".
+
+**Versions:** TFT patch labels are per set since Set 17 (17.1 on 2026-04-15, 18.1 on 2026-08-26, 18.2 on 2026-09-10). The client data version is separate (16.18 = TFT 18.2). `tft_sets.patch` stores the data version. Curated YAML carries the TFT label shown on the site.
+
+**Champions**
+- A shop unit has a cost of 1–5 and at least one trait, **and** appears in Riot's Data Dragon `tft-champion.json`, preferring the release matching the data version. The Data Dragon check removes summons that CommunityDragon lists with a cost and traits (the Set 18 Riftbeast monsters, Elder Dragon).
+- If Data Dragon lists no units for the set, the sync keeps every cost-and-traits unit and warns.
+- Element variants such as the nine Set 18 Lux forms stay as separate rows, because match data names them.
+- Champion `traits` in CommunityDragon are display names. They're mapped to trait api names within the set. When a name is shared (Set 17 has 8 "Stargazer" variants), the shortest api name wins and the sync warns.
+- `icon_url` uses `tileIcon` (128px face crop), falling back to `squareIcon`, then `icon`.
+
+**Traits**
+- Every trait of the set is stored, so emblems and match data always resolve.
+- `breakpoints` stores **style names**, because CommunityDragon and Riot's match API number styles differently. CommunityDragon codes map as 1 bronze, 3 silver, 4 unique, 5 gold, 6 prismatic; other codes don't occur.
+- Effects without a unit count are dropped. When a count repeats, the lowest style is kept.
+- Phase 4 maps Riot's match-API `style` onto the same names.
+
+**Items**
+- The sync stores every entry in the set's pool (`setData[].items`), so curated lists and match data can reference any of them.
+- `kind` comes from hashed CommunityDragon tags first: `component`, `{7ea41d13}` completed, `{6ef5c598}` radiant, `{44ace175}` artifact, `{27557a09}` support, `{ebcd1bac}` emblem. Fallbacks: "Radiant" or "Artifact"/"_Item_Ornn" in the api name, then a two-component recipe means completed. Everything else is `other`.
+- Emblems are recognized by that tag or by a name of the form "<Trait> Emblem". `grants_trait` comes from the name, because `associatedTraits` is empty.
+- Names drop client markup (`<rules>…</rules>`). An empty name falls back to the api name.
+- Items that leave the pool keep their rows with `is_active = false`.
+- **Set 18 lists most items twice:** `DA_…` (the Enchanted Wilds versions, built from `DA_Component_*`) and the older `TFT_Item_…`. Both are stored; which one match data uses is a Phase 4 check (§11).
+
+**Icons:** `https://raw.communitydragon.org/<version>/game/<path lowercased, .tex → .png>`. CommunityDragon keeps old version directories (checked back to 13.1), so a stored URL keeps pointing at the synced file.
+
+**Writes**
+- The writes are idempotent upserts in FK order: set, traits, champions, items (in batches of 500).
+- The old active set is cleared before the new one is set.
+- Reads page past PostgREST's 1000-row cap.
+- A failed run is fixed by re-running it.
+
 ---
 
 ## 5. Riot API service design
@@ -420,23 +463,35 @@ guide: |
 ```
 
 ```yaml
-# data/curated/<setId>/champion-tiers.yaml
-slug: champions-xx.y
-kind: champion
-patch: "xx.y"
-current: true
-tiers:
-  S: [TFTxx_Jinx, TFTxx_UnitC]
+# data/curated/<setId>/champion-tiers.yaml   (item lists: item-tiers.yaml, kind: item)
+slug: champions-18.2          # unique across files; lowercase, "-" or "."
+kind: champion                # must match the file name
+patch: "18.2"                 # TFT patch label, quoted (unquoted 18.10 would be the number 18.1)
+current: true                 # the list the site shows; at most one per kind across all files
+title: Champion tier list     # optional (this is the default)
+summary: What changed.        # optional, shown above the list (→ tier_lists.notes)
+tiers:                        # S/A/B/C, all optional; list order = display order
+  S: [DA_18_Ashe, DA_18_Sivir]
   A: [ ... ]
-notes: { TFTxx_Jinx: "Best 4-cost carry this patch" }
+notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must be listed in a tier
 ```
 
-**Seed script steps:**
-1. Parse the YAML and validate it with Zod.
-2. Check every `api_name` against the static tables. Any bad reference fails the run, with the file and path in the error.
-3. Upsert in one transaction, replacing each comp's `comp_units`.
-4. Unpublish comps whose YAML was removed.
-5. `POST /api/revalidate` to bust the cache tags.
+**Seed script steps** (Phase 2 implements the tier-list half, `pnpm seed:curated [--dry-run]`)
+1. Find the files: `data/curated/<setId>/{champion,item}-tiers.yaml`. Other `.yaml` names in a set folder produce a warning.
+2. Parse the YAML and validate it with Zod. The pure logic lives in `src/lib/curated/{schemas,validate}.ts`.
+3. Check every `api_name` against the static tables. Champions must belong to the folder's set; items may be any stored item.
+   - Every issue is collected and printed as `file:line:col  yaml.path: message`, with a "Did you mean …?" drawn from api names and display names.
+   - Any issue aborts the whole run before anything is written.
+   - Cross-file rules: slugs are unique, and each kind has at most one `current: true`.
+4. Write each list. supabase-js has no transactions, so every step is a single atomic statement that never leaves a list empty:
+   - Upsert `tier_lists` by slug.
+   - Upsert the entries on `(tier_list_id, champion_api_name | item_api_name)`. This updates tier, position and note in place.
+   - Delete the entries that left the file.
+   - Then flip `is_current`: clear the kind's old current list first (unique index), then set the new one.
+   - A failed run is fixed by re-running it, and pages keep their cached copy until step 6.
+   - Tier lists whose YAML was removed stay in the DB as history.
+5. *(Phase 3)* Replace each comp's `comp_units` and unpublish comps whose YAML was removed. Swapping two units' hexes conflicts with the non-deferrable `unique (comp_id, hex_row, hex_col)` under an upsert, so Phase 3 needs that constraint `DEFERRABLE` or a transactional RPC (§11).
+6. `POST /api/revalidate` with the written tags (`tiers`). The script skips this with a warning when `SITE_URL` is unset.
 
 ---
 
@@ -445,10 +500,19 @@ notes: { TFTxx_Jinx: "Best 4-cost carry this patch" }
   - Uncached data and request-time `params` must render inside `<Suspense>`. The static shell prerenders and the rest streams in. `/comps/[slug]` is already Partial Prerender.
   - Client components using `usePathname` (the nav) sit in a Suspense boundary. Without it, dynamic routes fail the build.
 - **Curated/static pages** (`/comps`, `/tiers/*`) are Server Components.
-  - Query functions use `'use cache'` + `cacheTag('comps' | 'tiers' | 'static')` + `cacheLife`.
-  - `/api/revalidate` calls `revalidateTag(tag, …)` after seeding. In Next 16 it takes a cache-life profile as its second argument; check the bundled docs in Phase 2.
+  - Query functions (`src/lib/curated/queries.ts`) use `'use cache'` + `cacheTag(...)` + `cacheLife('days')`, so they prerender into the static shell.
+  - The build output shows `/tiers/*` as static with revalidate 1d and expire 1w. The one-day lifetime is only a safety net; the scripts revalidate on demand.
+  - Tags are listed in `src/lib/cache-tags.ts`: `static` (sets, traits, champions, items) and `tiers`. Phase 3 adds `comps`. Tier queries carry both `tiers` and `static`, since they join champion and item data.
+  - `POST /api/revalidate` needs `Authorization: Bearer $REVALIDATE_SECRET`, compared in constant time. The body is `{"tags": [...]}` using known tags only.
+  - It calls `revalidateTag(tag, { expire: 0 })`. That's the Next 16 form for callers outside a Server Action, and the next visit renders fresh data instead of serving the pre-seed copy once more. The one-argument form is deprecated.
+  - The page (a Server Component) fetches data. Interactive parts are client components that get plain props: `ChampionTierBoard` (cost filter state) and `ItemTierBoard`.
+  - Both boards share one tooltip (`useHoverTip`/`HoverTip`). It opens on mouse hover, focus or tap, stays inside the viewport, and closes on leave, blur, Escape, scroll or a tap elsewhere.
 - **`/me` and `/`** are dynamic but read only from Supabase. Each view is one query to `player_matches` plus the latest `rank_snapshots` and `sync_state`. Riot is never called during render.
-- Icons come from CommunityDragon URLs via `next/image` `remotePatterns`. They can be mirrored to Supabase Storage later if needed.
+- Icons come from CommunityDragon URLs via `next/image`.
+  - `remotePatterns` allows only `https://raw.communitydragon.org/*/game/assets/**` with no query string.
+  - `minimumCacheTTL` is 31 days, because a version-pinned URL's content never changes.
+  - Next 16's default `imageSizes` start at 32, so a 16px icon is served as the 32px variant.
+  - The icons can be mirrored to Supabase Storage later if needed.
 
 ---
 
@@ -483,10 +547,15 @@ notes: { TFTxx_Jinx: "Best 4-cost carry this patch" }
 | `RIOT_GAME_NAME`, `RIOT_TAG_LINE`, `RIOT_PLATFORM` | server | Your account; regions are derived from the platform |
 | `CRON_SECRET` | server | Vercel Cron auth |
 | `REVALIDATE_SECRET` | server | Seed script → cache revalidation |
+| `SITE_URL` | local scripts only, optional | Site that `sync:static`/`seed:curated` revalidate after writing. Empty = skip with a warning. Not needed on Vercel. |
 
-`src/lib/env.ts` validates **per scope**: `supabasePublicEnv()`, `supabaseAdminEnv()`, `riotEnv()` and `secretsEnv()`. Each is lazy and memoized, so a consumer only needs its own variables. Error messages name the variable but never echo its value. The public and admin scopes also reject **swapped keys**: an anon/publishable key in `SUPABASE_SERVICE_ROLE_KEY`, or a service/secret key in the public anon variable.
+`src/lib/env.ts` validates **per scope**: `supabasePublicEnv()`, `supabaseAdminEnv()`, `riotEnv()`, `secretsEnv()`, and `revalidateEnv()` (`REVALIDATE_SECRET` + optional `SITE_URL`, used by `/api/revalidate` and the scripts). Each is lazy and memoized, so a consumer only needs its own variables. Error messages name the variable but never echo its value. The public and admin scopes also reject **swapped keys**: an anon/publishable key in `SUPABASE_SERVICE_ROLE_KEY`, or a service/secret key in the public anon variable.
 
-**Scripts and `server-only`:** `admin.ts` imports `server-only`, which throws under plain Node. Phase 2 scripts should run with `tsx --conditions=react-server`, or build their own client.
+**Scripts and `server-only`:**
+- Scripts run through `tsx --conditions=react-server --env-file-if-exists=.env.local`, as the `sync:static` and `seed:curated` package scripts do.
+- The condition lets them import `admin.ts`, which imports `server-only`. Plain Node throws on that import.
+- The env-file flag loads `.env.local`. Variables already set in the shell take precedence, e.g. `SITE_URL=http://localhost:3000 pnpm seed:curated`.
+- pnpm 12 fails installs on unapproved build scripts, so `pnpm-workspace.yaml` lists `esbuild: false`. tsx's esbuild binary comes from an optional platform package.
 
 ---
 
@@ -495,5 +564,12 @@ notes: { TFTxx_Jinx: "Best 4-cost carry this patch" }
 - [ ] Confirm `th2` is still your account's live platform. Riot has been consolidating SEA shards. In Phase 4, `riot-setup.ts` should ask Riot's account-region lookup (`/riot/account/v1/region/by-game/tft/by-puuid/{puuid}`) instead of trusting `RIOT_PLATFORM`.
 - [x] After `supabase link`: regenerate `types.ts` with `pnpm db:types`. The hand-written version was overwritten before the first commit, so no diff was possible. `pnpm check` and `pnpm build` pass against the generated types.
 - [ ] `tft/league/v1/by-puuid` availability for your platform. The fallback is the summoner-id-based entries endpoint (Phase 4).
-- [ ] CommunityDragon icon path conversion (`.tex` → `.png` URL rule) and the current-set key (Phase 2).
+- [x] CommunityDragon icon path conversion (`.tex` → `.png` URL rule) and the current-set key (Phase 2). Resolved in §4.8: lowercase the path, `.tex` → `.png`, and pin it to the version directory; the set is the newest standard `TFTSet<N>`, with a `--set` override.
 - [ ] Confirm Vercel Hobby function duration and cron limits at deploy time (Phase 1/4).
+- [ ] Set 18 moved TFT to Unreal Engine and to `DA_…` unit and item names. In Phase 4, check against a real match:
+  - Do `units[].character_id` and `itemNames[]` use the `DA_…` or the `TFT_Item_…` item names?
+  - What does `tft_set_number` report (expected 18)?
+  - What does `game_version` look like? It decides how `matches.patch` maps to TFT's "18.2" labels, versus the data version 16.18.
+- [ ] Map Riot's match-API trait `style` (0–4) onto the stored style names (bronze/silver/gold/prismatic/unique) in Phase 4.
+- [ ] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` (a migration) or a transactional RPC, so a seed can swap two units' hexes (§7 step 5).
+- [ ] Data Dragon's `tft-champion.json` is the shop-unit filter (§4.8). If Riot stops publishing TFT data there after the Unreal move, the sync falls back to cost + traits and warns. Summons would then need another filter.
