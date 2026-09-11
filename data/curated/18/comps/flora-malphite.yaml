@@ -1,0 +1,31 @@
+# Patch 18.2 meta comp. Tier, core units and items from the BunnyMuffins build
+# guide (Sep 2026). Filler slots, early units, hexes and star goals are a starting
+# point: edit freely, then run `pnpm seed:curated`.
+#
+# Format: architecture §7. Rows run 0 (front) to 3 (back), columns 0-6; odd rows
+# sit half a hex to the right. `star` defaults to 2 and `carry` to false.
+slug: flora-malphite
+name: Flora Malphite
+tier: A
+style: fast8
+difficulty: 2
+patch: "18.2"
+summary: Level 8 AP board. Soraka and Zyra scale behind Malphite with Flora Fatalis, Blackthorn and Summoner.
+early_units: [DA_18_RekSai, DA_18_Veigar, DA_18_Warwick, DA_18_Azir]
+board:
+  - { unit: DA_18_Soraka, row: 3, col: 0, carry: true, items: [DA_RabadonsDeathcap, DA_NashorsTooth, DA_AdaptiveHelm] }
+  - { unit: DA_18_Zyra, row: 3, col: 1, carry: true, items: [DA_JeweledGauntlet, DA_VoidStaff, DA_SpearOfShojin] }
+  - { unit: DA_18_Azir, row: 3, col: 5 }
+  - { unit: DA_18_Yorick, row: 0, col: 1 }
+  - { unit: DA_18_RekSai, row: 0, col: 2 }
+  - { unit: DA_18_Malphite, row: 0, col: 3, items: [DA_GargoyleStoneplate, DA_Crownguard, DA_SpiritVisage] }
+  - { unit: DA_18_Warwick, row: 0, col: 4 }
+  - { unit: DA_Fiddlesticks18, row: 0, col: 5 }
+guide: |
+  **Early:** Play the cheap Blackthorn units (Rek'Sai, Veigar, Warwick) and put AP items on whoever holds them best until Zyra and Soraka show up.
+
+  **Mid:** This board is expensive. Roll hard at 4-2 for Malphite, Soraka and Zyra. The Flora Fatalis emblem is close to essential.
+
+  **Late:** Selling a 3-cost to Flora Fatalis makes Malphite stronger. Keep Malphite alive, since the backline scales off him.
+
+  **Positioning:** Malphite in the middle of the front row. Soraka and Zyra share a back corner, and Azir takes the other side.

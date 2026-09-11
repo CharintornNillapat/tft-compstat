@@ -38,6 +38,12 @@
   --color-trait-silver: #a8b3bd;
   --color-trait-gold: #eab308;
   --color-trait-prismatic: #c4b5fd;
+  --color-trait-unique: #f97316;
+}
+
+/* Pointy-top hexagon (the board and trait icons); the element's height should be ~1.155× its width. */
+@utility hex {
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
 
 @layer base {
@@ -67,5 +73,44 @@
 
   ::selection {
     background-color: color-mix(in oklab, var(--color-accent) 35%, transparent);
+  }
+}
+
+/* Comp guide markdown (GuideMarkdown). */
+@layer components {
+  .guide > * + * {
+    margin-top: 0.6em;
+  }
+  .guide :is(h3, h4, h5) {
+    margin-top: 1em;
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+  .guide :is(strong, code) {
+    color: var(--color-fg);
+  }
+  .guide :is(ul, ol) {
+    padding-left: 1.25em;
+  }
+  .guide ul {
+    list-style: disc;
+  }
+  .guide ol {
+    list-style: decimal;
+  }
+  .guide li + li {
+    margin-top: 0.25em;
+  }
+  .guide a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .guide code {
+    border-radius: 0.25rem;
+    background-color: var(--color-raised);
+    padding: 0 0.3em;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
   }
 }

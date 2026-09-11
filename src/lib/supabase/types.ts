@@ -600,6 +600,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      seed_comp: { Args: { p_comp: Json; p_units: Json }; Returns: string }
     }
     Enums: {
       comp_style:

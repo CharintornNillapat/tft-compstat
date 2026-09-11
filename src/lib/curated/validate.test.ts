@@ -1,26 +1,37 @@
 import { describe, expect, it } from "vitest";
 import {
+  checkCompSet,
   checkTierListSet,
   formatIssue,
   formatPath,
   suggestApiNames,
+  validateComp,
   validateTierList,
   type ReferenceIndex,
+  type SeedComp,
   type SeedTierList,
 } from "./validate";
 
 const index: ReferenceIndex = {
   champions: new Map([
-    ["DA_18_Ashe", { name: "Ashe", setId: 18 }],
-    ["DA_18_Sivir", { name: "Sivir", setId: 18 }],
-    ["DA_18_KhaZix", { name: "Kha'Zix", setId: 18 }],
-    ["DA_Lux18_Base", { name: "Lux", setId: 18 }],
-    ["TFT17_Jinx", { name: "Jinx", setId: 17 }],
+    ["DA_18_Ashe", { name: "Ashe", setId: 18, traits: ["DA_18_Blossom", "DA_18_Hunter"] }],
+    ["DA_18_Sivir", { name: "Sivir", setId: 18, traits: ["DA_Primal18", "DA_18_Hunter"] }],
+    ["DA_18_KhaZix", { name: "Kha'Zix", setId: 18, traits: ["DA_18_Rival"] }],
+    ["DA_Lux18_Base", { name: "Lux", setId: 18, traits: ["DA_18_LuxUniqueTrait"] }],
+    ["DA_18_Sett", { name: "Sett", setId: 18, traits: ["DA_18_Blossom", "DA_18_Brawler"] }],
+    ["TFT17_Jinx", { name: "Jinx", setId: 17, traits: [] }],
   ]),
   items: new Map([
-    ["DA_InfinityEdge", { name: "Infinity Edge" }],
-    ["TFT_Item_InfinityEdge", { name: "Infinity Edge" }],
-    ["DA_18_EmblemHunter", { name: "Hunter Emblem" }],
+    ["DA_InfinityEdge", { name: "Infinity Edge", grantsTrait: null }],
+    ["TFT_Item_InfinityEdge", { name: "Infinity Edge", grantsTrait: null }],
+    ["DA_LastWhisper", { name: "Last Whisper", grantsTrait: null }],
+    ["DA_WarmogsArmor", { name: "Warmogs Armor", grantsTrait: null }],
+    ["DA_18_EmblemHunter", { name: "Hunter Emblem", grantsTrait: "DA_18_Hunter" }],
+    ["DA_18_EmblemBrawler", { name: "Brawler Emblem", grantsTrait: "DA_18_Brawler" }],
+  ]),
+  traits: new Map([
+    ["DA_18_Hunter", { name: "Hunter" }],
+    ["DA_18_Brawler", { name: "Brawler" }],
   ]),
 };
 
@@ -180,6 +191,154 @@ describe("checkTierListSet", () => {
     expect(checkTierListSet([list("a.yaml", "a", true), list("b.yaml", "a", true)])).toEqual([
       { file: "b.yaml", path: "slug", message: '"a" is also used by a.yaml' },
       { file: "b.yaml", path: "current", message: "a.yaml is also the current champion list; only one can be current" },
+    ]);
+  });
+});
+
+const COMP_FILE = "data/curated/18/comps/ashe-hunters.yaml";
+
+const compYaml = `
+slug: ashe-hunters
+name: Ashe Hunters
+tier: A
+style: fast8
+difficulty: 2
+patch: "18.2"
+summary: Sample comp.
+early_units: [DA_18_Sett, DA_18_Sivir]
+flex_units: [DA_18_KhaZix]
+board:
+  - { unit: DA_18_Ashe, row: 3, col: 0, star: 2, carry: true, items: [DA_InfinityEdge, DA_LastWhisper, DA_18_EmblemBrawler] }
+  - { unit: DA_18_Sett, row: 0, col: 3, items: [DA_WarmogsArmor] }
+  - { unit: DA_18_Sivir, row: 3, col: 1, star: 1 }
+guide: |
+  **Early:** play Sett.
+`;
+
+const validateCompText = (text: string, file = COMP_FILE) => validateComp({ file, text, setId: 18, index });
+
+/** Replaces the first occurrence of `from` in the sample comp. */
+const compVariant = (from: string, to: string) => {
+  if (!compYaml.includes(from)) throw new Error(`fixture has no "${from}"`);
+  return compYaml.replace(from, to);
+};
+
+describe("validateComp: valid files", () => {
+  it("turns a valid file into a DB-ready comp with defaults filled in", () => {
+    const { comp, issues } = validateCompText(compYaml);
+    expect(issues).toEqual([]);
+    expect(comp).toEqual({
+      file: COMP_FILE,
+      slug: "ashe-hunters",
+      setId: 18,
+      patch: "18.2",
+      name: "Ashe Hunters",
+      tier: "A",
+      style: "fast8",
+      difficulty: 2,
+      summary: "Sample comp.",
+      guide: "**Early:** play Sett.",
+      sortOrder: 0,
+      isPublished: true,
+      earlyUnits: ["DA_18_Sett", "DA_18_Sivir"],
+      flexUnits: ["DA_18_KhaZix"],
+      units: [
+        {
+          apiName: "DA_18_Ashe",
+          row: 3,
+          col: 0,
+          star: 2,
+          isCarry: true,
+          items: ["DA_InfinityEdge", "DA_LastWhisper", "DA_18_EmblemBrawler"],
+        },
+        { apiName: "DA_18_Sett", row: 0, col: 3, star: 2, isCarry: false, items: ["DA_WarmogsArmor"] },
+        { apiName: "DA_18_Sivir", row: 3, col: 1, star: 1, isCarry: false, items: [] },
+      ],
+    });
+  });
+});
+
+describe("validateComp: board rules", () => {
+  it("rejects a typo'd unit or item with the file, line and path", () => {
+    const { comp, issues } = validateCompText(compVariant("unit: DA_18_Sett,", "unit: DA_18_Set,"));
+    expect(comp).toBeUndefined();
+    expect(issues).toHaveLength(1);
+    expect(formatIssue(issues[0]!)).toBe(
+      `${COMP_FILE}:13:13  board[1].unit: unknown set 18 champion "DA_18_Set". Did you mean DA_18_Sett?`,
+    );
+    expect(validateCompText(compVariant("DA_LastWhisper", "DA_LastWisper")).issues[0]).toMatchObject({
+      path: "board[0].items[1]",
+      line: 12,
+      message: 'unknown item "DA_LastWisper". Did you mean DA_LastWhisper?',
+    });
+  });
+
+  it("rejects a unit placed twice and two units on one hex", () => {
+    expect(validateCompText(compVariant("unit: DA_18_Sivir", "unit: DA_18_Ashe")).issues[0]).toMatchObject({
+      path: "board[2].unit",
+      message: "DA_18_Ashe is already on the board at board[0]",
+    });
+    expect(validateCompText(compVariant("row: 3, col: 1", "row: 3, col: 0")).issues[0]).toMatchObject({
+      path: "board[2].col",
+      message: "row 3, col 0 is already taken by DA_18_Ashe at board[0]",
+    });
+  });
+
+  it("enforces the board's shape, 3 items per unit and at least one carry", () => {
+    expect(validateCompText(compVariant("row: 0, col: 3", "row: 4, col: 3")).issues[0]).toMatchObject({
+      path: "board[1].row",
+      message: "must be a row from 0 (front) to 3 (back)",
+    });
+    expect(validateCompText(compVariant("col: 3", "col: 7")).issues[0]?.message).toBe("must be a column from 0 to 6");
+    expect(
+      validateCompText(compVariant("DA_18_EmblemBrawler]", "DA_18_EmblemBrawler, DA_WarmogsArmor]")).issues[0],
+    ).toMatchObject({ path: "board[0].items", message: "a unit holds at most 3 items" });
+    expect(validateCompText(compVariant("carry: true", "carry: false")).issues[0]).toMatchObject({
+      path: "board",
+      message: expect.stringMatching(/^needs at least one carry/),
+    });
+  });
+
+  it("rejects an emblem for a trait the unit already has", () => {
+    const { issues } = validateCompText(compVariant("DA_18_EmblemBrawler]", "DA_18_EmblemHunter]"));
+    expect(issues[0]).toMatchObject({
+      path: "board[0].items[2]",
+      message: "Ashe is already Hunter, so Hunter Emblem adds nothing",
+    });
+  });
+
+  it("checks early and flex units", () => {
+    expect(validateCompText(compVariant("flex_units: [DA_18_KhaZix]", "flex_units: [DA_18_Sivir]")).issues[0]).toMatchObject({
+      path: "flex_units[0]",
+      message: "DA_18_Sivir is already on the board at board[2]; flex units are swaps",
+    });
+    expect(validateCompText(compVariant("[DA_18_Sett, DA_18_Sivir]", "[DA_18_Sett, DA_18_Sett]")).issues[0]).toMatchObject({
+      path: "early_units[1]",
+      message: "DA_18_Sett is already listed at early_units[0]",
+    });
+    expect(validateCompText(compVariant("[DA_18_KhaZix]", "[TFT17_Jinx]")).issues[0]?.message).toBe(
+      "TFT17_Jinx is a set 17 champion, but this file is in the set 18 folder",
+    );
+  });
+
+  it("requires the slug to match the file name", () => {
+    const { issues } = validateCompText(compYaml, "data/curated/18/comps/ashe.yaml");
+    expect(issues[0]).toMatchObject({ path: "slug", message: 'is "ashe-hunters", but the file is named ashe; they must match' });
+  });
+
+  it("rejects unknown styles and keys", () => {
+    expect(validateCompText(compVariant("style: fast8", "style: fast7")).issues[0]?.path).toBe("style");
+    expect(validateCompText(compVariant("tier: A", "tier: A\nteir: S")).issues[0]?.message).toMatch(/teir/);
+  });
+});
+
+describe("checkCompSet", () => {
+  const comp = (file: string, slug: string) => ({ file, slug }) as SeedComp;
+
+  it("rejects a slug used in two set folders", () => {
+    expect(checkCompSet([comp("data/curated/17/comps/a.yaml", "a"), comp("data/curated/18/comps/b.yaml", "b")])).toEqual([]);
+    expect(checkCompSet([comp("data/curated/17/comps/a.yaml", "a"), comp("data/curated/18/comps/a.yaml", "a")])).toEqual([
+      { file: "data/curated/18/comps/a.yaml", path: "slug", message: '"a" is also used by data/curated/17/comps/a.yaml' },
     ]);
   });
 });

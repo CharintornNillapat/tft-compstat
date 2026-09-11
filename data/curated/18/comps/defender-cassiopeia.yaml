@@ -1,0 +1,33 @@
+# Patch 18.2 meta comp. Tier from the TFT Academy comp tier list ("Defender
+# Cassio"); core units, items and positioning from the BunnyMuffins build guide
+# (Sep 2026). Filler slots and star goals are a starting point: edit freely, then
+# run `pnpm seed:curated`.
+#
+# Format: architecture §7. Rows run 0 (front) to 3 (back), columns 0-6; odd rows
+# sit half a hex to the right. `star` defaults to 2 and `carry` to false.
+slug: defender-cassiopeia
+name: Defender Cassiopeia
+tier: B
+style: reroll_3
+difficulty: 2
+patch: "18.2"
+summary: 3-cost reroll. A 3-star Cassiopeia with a Defender Emblem, shielded by Rammus and Fiddlesticks.
+early_units: [DA_18_Camille, DA_18_Elise, DA_18_Caitlyn]
+flex_units: [DA_18_Shen, DA_18_Caitlyn]
+board:
+  - { unit: DA_18_Cassiopeia, row: 3, col: 4, star: 3, carry: true, items: [DA_18_EmblemDefender, DA_HextechGunblade, DA_RabadonsDeathcap] }
+  - { unit: DA_18_Morgana, row: 3, col: 1 }
+  - { unit: DA_18_Soraka, row: 3, col: 5 }
+  - { unit: DA_18_Camille, row: 0, col: 1 }
+  - { unit: DA_18_Elise, row: 0, col: 2 }
+  - { unit: DA_18_Lillia, row: 0, col: 4 }
+  - { unit: DA_18_Rammus, row: 0, col: 5, star: 3, items: [DA_BrambleVest, DA_DragonsClaw, DA_WarmogsArmor] }
+  - { unit: DA_Fiddlesticks18, row: 0, col: 6 }
+guide: |
+  **Early:** Play Coven from the opener (Camille, Elise, Caitlyn), or commit when an early Cassiopeia shows up.
+
+  **Mid:** Slow roll at level 7 for 3-star Cassiopeia and Rammus. Cassiopeia wants Hextech Gunblade, then Rabadon's Deathcap or Archangel's Staff, then Spear of Shojin or Blue Buff. With the Defender Emblem, the emblem takes one of those slots.
+
+  **Late:** Level to 8 for Soraka to complete Flora Fatalis, and Lillia to reach 4 Defenders.
+
+  **Positioning:** Fiddlesticks goes on the outside edge with Rammus next to him, so the enemy's aggro bounces between them.

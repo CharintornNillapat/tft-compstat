@@ -1,9 +1,9 @@
 import { isNode, LineCounter, parseDocument } from "yaml";
-import { TIER_RANKS, type TierRank } from "@/lib/static/game";
-import { TIER_LIST_FILES, tierListFileSchema, type TierListKind } from "./schemas";
+import { TIER_RANKS, type CompStyle, type TierRank } from "@/lib/static/game";
+import { compFileSchema, TIER_LIST_FILES, tierListFileSchema, type TierListKind } from "./schemas";
 
 /**
- * Curated YAML → validated, DB-ready tier lists (architecture §7 steps 1–2).
+ * Curated YAML → validated, DB-ready tier lists and comps (architecture §7 steps 1–3).
  * Pure: the seed script supplies file text and the reference index from the DB.
  * Every issue names the file, line and YAML path so a typo is quick to find.
  */
@@ -19,8 +19,9 @@ export type SeedIssue = {
 
 /** What curated files may reference, loaded from the static tables. */
 export type ReferenceIndex = {
-  champions: ReadonlyMap<string, { name: string; setId: number }>;
-  items: ReadonlyMap<string, { name: string }>;
+  champions: ReadonlyMap<string, { name: string; setId: number; traits: readonly string[] }>;
+  items: ReadonlyMap<string, { name: string; grantsTrait: string | null }>;
+  traits: ReadonlyMap<string, { name: string }>;
 };
 
 export type SeedTierList = {
@@ -33,6 +34,33 @@ export type SeedTierList = {
   summary: string | null;
   isCurrent: boolean;
   entries: { tier: TierRank; position: number; apiName: string; note: string | null }[];
+};
+
+export type SeedCompUnit = {
+  apiName: string;
+  row: number;
+  col: number;
+  star: number;
+  isCarry: boolean;
+  items: string[];
+};
+
+export type SeedComp = {
+  file: string;
+  slug: string;
+  setId: number;
+  patch: string;
+  name: string;
+  tier: TierRank;
+  style: CompStyle;
+  difficulty: number | null;
+  summary: string | null;
+  guide: string | null;
+  sortOrder: number;
+  isPublished: boolean;
+  earlyUnits: string[];
+  flexUnits: string[];
+  units: SeedCompUnit[];
 };
 
 const DEFAULT_TITLES: Record<TierListKind, string> = {
@@ -53,7 +81,7 @@ export function formatIssue({ file, line, col, path, message }: SeedIssue): stri
 }
 
 /** Parses YAML and returns an issue builder that points at the value's line. */
-function parseYaml(file: string, text: string) {
+export function parseYaml(file: string, text: string) {
   const lineCounter = new LineCounter();
   const doc = parseDocument(text, { lineCounter });
 
@@ -129,20 +157,27 @@ function didYouMean(input: string, candidates: Iterable<readonly [string, { name
   return suggestions.length ? `. Did you mean ${suggestions.join(" or ")}?` : "";
 }
 
-function referenceProblem(
-  kind: TierListKind,
-  apiName: string,
-  setId: number,
-  index: ReferenceIndex,
-): string | undefined {
-  if (kind === "item") {
-    return index.items.has(apiName) ? undefined : `unknown item "${apiName}"${didYouMean(apiName, index.items)}`;
-  }
+/** Why `apiName` isn't a champion of `setId`, or undefined when it is. */
+export function championProblem(apiName: string, setId: number, index: ReferenceIndex): string | undefined {
   const champion = index.champions.get(apiName);
   if (champion && champion.setId === setId) return undefined;
   if (champion) return `${apiName} is a set ${champion.setId} champion, but this file is in the set ${setId} folder`;
   const setChampions = [...index.champions].filter(([, c]) => c.setId === setId);
   return `unknown set ${setId} champion "${apiName}"${didYouMean(apiName, setChampions)}`;
+}
+
+/** Why `apiName` isn't a stored item, or undefined when it is. Any set's items are allowed. */
+export function itemProblem(apiName: string, index: ReferenceIndex): string | undefined {
+  return index.items.has(apiName) ? undefined : `unknown item "${apiName}"${didYouMean(apiName, index.items)}`;
+}
+
+/** The trait an emblem would give `champion`, when the champion (or an earlier emblem) already has it. */
+function wastedEmblem(champion: string, heldTraits: ReadonlySet<string>, item: string, index: ReferenceIndex) {
+  const trait = index.items.get(item)?.grantsTrait;
+  if (!trait || !heldTraits.has(trait)) return undefined;
+  const traitName = index.traits.get(trait)?.name ?? trait;
+  const championName = index.champions.get(champion)?.name ?? champion;
+  return `${championName} is already ${traitName}, so ${index.items.get(item)!.name} adds nothing`;
 }
 
 export function validateTierList(input: {
@@ -179,7 +214,7 @@ export function validateTierList(input: {
         return;
       }
       listedAt.set(apiName, formatPath(path));
-      const problem = referenceProblem(kind, apiName, setId, index);
+      const problem = kind === "item" ? itemProblem(apiName, index) : championProblem(apiName, setId, index);
       if (problem) issues.push(yaml.issue(path, problem));
       entries.push({ tier, position, apiName, note: data.notes[apiName] ?? null });
     });
@@ -229,4 +264,125 @@ export function checkTierListSet(lists: readonly SeedTierList[]): SeedIssue[] {
     }
   }
   return issues;
+}
+
+/**
+ * One `comps/<slug>.yaml`. Beyond the schema: the slug matches the file name, every
+ * unit and item exists, units and hexes are unique on the board, at least one unit
+ * is a carry, no emblem goes to a unit that already has its trait, and flex units
+ * are swaps rather than units already on the board.
+ */
+export function validateComp(input: {
+  /** Repo-relative path, used in issues. */
+  file: string;
+  text: string;
+  setId: number;
+  index: ReferenceIndex;
+}): { comp?: SeedComp; issues: SeedIssue[] } {
+  const { file, setId, index } = input;
+  const yaml = parseYaml(file, input.text);
+  if (yaml.syntaxIssues.length) return { issues: yaml.syntaxIssues };
+
+  const parsed = compFileSchema.safeParse(yaml.data);
+  if (!parsed.success) {
+    return { issues: parsed.error.issues.map((issue) => yaml.issue(issue.path, issue.message)) };
+  }
+  const data = parsed.data;
+  const issues: SeedIssue[] = [];
+
+  const fileSlug = file.split("/").at(-1)!.replace(/\.ya?ml$/, "");
+  if (data.slug !== fileSlug) {
+    issues.push(yaml.issue(["slug"], `is "${data.slug}", but the file is named ${fileSlug}; they must match`));
+  }
+
+  const unitAt = new Map<string, string>();
+  const hexAt = new Map<string, string>();
+  data.board.forEach((unit, i) => {
+    const path = ["board", i];
+    const firstAt = unitAt.get(unit.unit);
+    if (firstAt) {
+      issues.push(yaml.issue([...path, "unit"], `${unit.unit} is already on the board at ${firstAt}`));
+    } else {
+      unitAt.set(unit.unit, formatPath(path));
+    }
+
+    const hex = `${unit.row},${unit.col}`;
+    const takenBy = hexAt.get(hex);
+    if (takenBy) {
+      issues.push(yaml.issue([...path, "col"], `row ${unit.row}, col ${unit.col} is already taken by ${takenBy}`));
+    } else {
+      hexAt.set(hex, `${unit.unit} at ${formatPath(path)}`);
+    }
+
+    const problem = championProblem(unit.unit, setId, index);
+    if (problem) issues.push(yaml.issue([...path, "unit"], problem));
+    const heldTraits = new Set(problem ? [] : index.champions.get(unit.unit)!.traits);
+    unit.items.forEach((item, j) => {
+      const itemIssue = itemProblem(item, index) ?? (problem ? undefined : wastedEmblem(unit.unit, heldTraits, item, index));
+      if (itemIssue) issues.push(yaml.issue([...path, "items", j], itemIssue));
+      const granted = index.items.get(item)?.grantsTrait;
+      if (granted) heldTraits.add(granted);
+    });
+  });
+  if (!data.board.some((unit) => unit.carry)) {
+    issues.push(yaml.issue(["board"], "needs at least one carry: mark its main damage dealer with carry: true"));
+  }
+
+  for (const key of ["early_units", "flex_units"] as const) {
+    const listedAt = new Map<string, string>();
+    data[key].forEach((apiName, i) => {
+      const path = [key, i];
+      const firstAt = listedAt.get(apiName);
+      if (firstAt) {
+        issues.push(yaml.issue(path, `${apiName} is already listed at ${firstAt}`));
+        return;
+      }
+      listedAt.set(apiName, formatPath(path));
+      const problem = championProblem(apiName, setId, index);
+      if (problem) issues.push(yaml.issue(path, problem));
+      else if (key === "flex_units" && unitAt.has(apiName)) {
+        issues.push(yaml.issue(path, `${apiName} is already on the board at ${unitAt.get(apiName)}; flex units are swaps`));
+      }
+    });
+  }
+
+  if (issues.length) return { issues };
+  return {
+    issues,
+    comp: {
+      file,
+      slug: data.slug,
+      setId,
+      patch: data.patch,
+      name: data.name,
+      tier: data.tier,
+      style: data.style,
+      difficulty: data.difficulty ?? null,
+      summary: data.summary ?? null,
+      guide: data.guide ?? null,
+      sortOrder: data.order,
+      isPublished: data.published,
+      earlyUnits: data.early_units,
+      flexUnits: data.flex_units,
+      units: data.board.map((unit) => ({
+        apiName: unit.unit,
+        row: unit.row,
+        col: unit.col,
+        star: unit.star,
+        isCarry: unit.carry,
+        items: unit.items,
+      })),
+    },
+  };
+}
+
+/** Checks across files: comp slugs are unique across every set folder. */
+export function checkCompSet(comps: readonly SeedComp[]): SeedIssue[] {
+  const bySlug = new Map<string, string>();
+  return comps.flatMap((comp): SeedIssue[] => {
+    const other = bySlug.get(comp.slug);
+    if (other) return [{ file: comp.file, path: "slug", message: `"${comp.slug}" is also used by ${other}` }];
+    bySlug.set(comp.slug, comp.file);
+    return [];
+  });
 }

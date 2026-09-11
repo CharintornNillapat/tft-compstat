@@ -1,6 +1,6 @@
 # TFT CompStat — Architecture
 
-> **Status:** Approved design (2026-09-11). Phases 1–2 are implemented and their decisions are recorded below (§4.7, §4.8, §7, §8). This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Status:** Approved design (2026-09-11). Phases 1–2 are implemented, and Phase 3 is built (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
 > **Companion doc:** [`roadmap.md`](./roadmap.md)
 
 ## 0. Product scope & confirmed decisions
@@ -84,7 +84,8 @@ src/app/
   tiers/champions/page.tsx, tiers/items/page.tsx
   me/page.tsx                Personal dashboard
   api/cron/sync/route.ts, api/revalidate/route.ts
-src/components/              ChampionIcon, ItemIcon, TraitBadge, TierRow, CostFilter, HoverTip, HexBoard, PlacementPill, StatTile, Sparkline
+src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx), TierRow, CostFilter, ToggleGroup, HoverTip,
+                             HexBoard, CompList, CompGuide, GuideMarkdown, PlacementPill, StatTile, Sparkline
 src/lib/
   env.ts                     Zod-validated env
   cache-tags.ts              the cache tags /api/revalidate accepts
@@ -95,6 +96,8 @@ src/lib/
   sync/{sync-service,derive,comp-signature}.ts
   stats/{summary,comps,champions}.ts pure functions
   curated/{schemas,validate,queries}.ts
+  curated/traits.ts          computeActiveTraits (pure, client-safe)
+  curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
 ```
 
 ---
@@ -351,6 +354,26 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 - Reads page past PostgREST's 1000-row cap.
 - A failed run is fixed by re-running it.
 
+### 4.9 Curated comps (Phase 3)
+- **Migration:** `supabase/migrations/20260911180000_seed_comp.sql` adds one function and no tables.
+- **`seed_comp(p_comp jsonb, p_units jsonb) → uuid`** writes one comp in a single transaction. It upserts `comps` by slug, deletes the comp's `comp_units` and inserts the new ones.
+  - Why an RPC instead of making `unique (comp_id, hex_row, hex_col)` `DEFERRABLE`: supabase-js has no transactions, so a deferrable constraint wouldn't help across separate calls. The RPC also means readers never see a comp with half its units.
+  - Like `acquire_sync_lock`, it uses `set search_path = ''` and qualified names, and only `service_role` may execute it.
+  - Verified on Postgres 17 via PGlite (16 checks):
+    - insert with defaults
+    - a re-seed keeps the id and swaps two units' hexes
+    - a removed unit is pruned
+    - an unknown champion or a double-booked hex rolls back the whole call
+    - `anon`/`authenticated` are denied
+    - RLS still hides unpublished comps and their units
+- **Unpublishing:** comps whose YAML file was removed get `is_published = false`. The row stays as history, and RLS hides it and its units from `anon`.
+- **Active traits** (`src/lib/curated/traits.ts`, `computeActiveTraits`) are computed on read and never stored:
+  - Each champion counts once per trait, even when it's fielded twice.
+  - An emblem adds its trait (`items.grants_trait`) to its holder. One the unit already has adds nothing, and the seed rejects that case.
+  - `level` is the number of breakpoints reached (Riot's `tier_current`), and `style` is the style of the highest breakpoint reached.
+  - Display order: prismatic, gold, silver, bronze, then unique, then inactive traits. Within a style, higher counts come first, then names alphabetically.
+- **Which comps are shown:** `/comps` lists the published comps of the **active set**. `/comps/[slug]` shows any published comp.
+
 ---
 
 ## 5. Riot API service design
@@ -446,21 +469,31 @@ Computing on read is sub-millisecond over 20–50 rows and never goes stale. Raw
 ## 7. Curated seed format (YAML → Zod → upsert)
 
 ```yaml
-# data/curated/<setId>/comps/jinx-snipers.yaml   (illustrative)
-slug: jinx-snipers
-name: Jinx Snipers
-tier: S
-style: fast8
-difficulty: 2
-patch: "xx.y"
-summary: Stable top-4 fast 8 into 2★ Jinx.
-early_units: [TFTxx_UnitA, TFTxx_UnitB]
-board:
-  - { unit: TFTxx_Jinx,  row: 3, col: 0, star: 2, carry: true, items: [TFT_Item_GuinsoosRageblade, TFT_Item_InfinityEdge, TFT_Item_LastWhisper] }
-  - { unit: TFTxx_Tank1, row: 0, col: 3, star: 2, items: [TFT_Item_WarmogsArmor] }
-guide: |
+# data/curated/<setId>/comps/<slug>.yaml   (one comp per file; see data/curated/18/comps/)
+slug: draven-fast-9           # = file name and URL (/comps/draven-fast-9); lowercase words joined by "-"
+name: Draven Fast 9
+tier: S                       # S/A/B/C
+style: fast9                  # fast8, fast9, reroll_1, reroll_2, reroll_3, flex
+difficulty: 3                 # optional: 1 easy, 2 medium, 3 hard
+patch: "18.2"                 # TFT patch label, quoted
+order: 1                      # optional: order within its tier on /comps (then by name); default 0
+published: true               # optional: false hides it but keeps the row; default true
+summary: One-line pitch.      # optional, shown in the list
+early_units: [DA_18_Sivir]    # optional; may overlap the board
+flex_units: [DA_18_Shen]      # optional; swaps, so not units already on the board
+board:                        # ≥1 unit; row 0 (front) to 3 (back), col 0-6; star 1-3 (default 2)
+  - { unit: DA_Draven18, row: 3, col: 0, carry: true, items: [DA_GuinsoosRageblade, DA_KrakensFury, DA_Deathblade] }
+  - { unit: DA_18_Maokai, row: 0, col: 3, star: 1, items: [DA_GargoyleStoneplate] }
+guide: |                      # optional markdown; raw HTML is not rendered
   **Early:** ... **Mid:** ... **Positioning:** ...
 ```
+
+**Comp checks** (on top of the schema; all issues are collected as for tier lists):
+- The slug matches the file name, and slugs are unique across every set folder.
+- Units belong to the folder's set, and items may be any stored item. A typo gets a "Did you mean …?".
+- Each unit and each hex appears at most once on the board. A unit holds at most 3 items, and at least one unit is a carry.
+- An emblem can't go to a unit that already has its trait, from the champion itself or from an earlier emblem.
+- Early and flex lists have no duplicates, and flex units aren't already on the board.
 
 ```yaml
 # data/curated/<setId>/champion-tiers.yaml   (item lists: item-tiers.yaml, kind: item)
@@ -476,8 +509,8 @@ tiers:                        # S/A/B/C, all optional; list order = display orde
 notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must be listed in a tier
 ```
 
-**Seed script steps** (Phase 2 implements the tier-list half, `pnpm seed:curated [--dry-run]`)
-1. Find the files: `data/curated/<setId>/{champion,item}-tiers.yaml`. Other `.yaml` names in a set folder produce a warning.
+**Seed script steps** (`pnpm seed:curated [--dry-run]`; tier lists since Phase 2, comps since Phase 3)
+1. Find the files: `data/curated/<setId>/{champion,item}-tiers.yaml` and `data/curated/<setId>/comps/*.yaml`. Other files produce a warning.
 2. Parse the YAML and validate it with Zod. The pure logic lives in `src/lib/curated/{schemas,validate}.ts`.
 3. Check every `api_name` against the static tables. Champions must belong to the folder's set; items may be any stored item.
    - Every issue is collected and printed as `file:line:col  yaml.path: message`, with a "Did you mean …?" drawn from api names and display names.
@@ -490,8 +523,8 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
    - Then flip `is_current`: clear the kind's old current list first (unique index), then set the new one.
    - A failed run is fixed by re-running it, and pages keep their cached copy until step 6.
    - Tier lists whose YAML was removed stay in the DB as history.
-5. *(Phase 3)* Replace each comp's `comp_units` and unpublish comps whose YAML was removed. Swapping two units' hexes conflicts with the non-deferrable `unique (comp_id, hex_row, hex_col)` under an upsert, so Phase 3 needs that constraint `DEFERRABLE` or a transactional RPC (§11).
-6. `POST /api/revalidate` with the written tags (`tiers`). The script skips this with a warning when `SITE_URL` is unset.
+5. Write each comp with the `seed_comp` RPC (§4.9). It's one transaction per comp, so swapping two units' hexes is fine. Then unpublish every published comp whose slug no longer has a file.
+6. `POST /api/revalidate` with the tags that were written (`tiers`, `comps`). The script skips this with a warning when `SITE_URL` is unset. The site must already know a tag: a deploy that predates `comps` answers 400, and the script exits 1 after writing the data.
 
 ---
 
@@ -502,7 +535,12 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
 - **Curated/static pages** (`/comps`, `/tiers/*`) are Server Components.
   - Query functions (`src/lib/curated/queries.ts`) use `'use cache'` + `cacheTag(...)` + `cacheLife('days')`, so they prerender into the static shell.
   - The build output shows `/tiers/*` as static with revalidate 1d and expire 1w. The one-day lifetime is only a safety net; the scripts revalidate on demand.
-  - Tags are listed in `src/lib/cache-tags.ts`: `static` (sets, traits, champions, items) and `tiers`. Phase 3 adds `comps`. Tier queries carry both `tiers` and `static`, since they join champion and item data.
+  - Tags are listed in `src/lib/cache-tags.ts`: `static` (sets, traits, champions, items), `tiers` and `comps`. Tier and comp queries also carry `static`, since they join champion, item and trait data.
+  - `/comps` is static (revalidate 1d, expire 1w). `getComps()` returns the active set's published comps, with traits computed on the server, and a client `CompList` filters them.
+  - `/comps/[slug]` is Partial Prerender.
+    - `generateStaticParams` returns every published slug. Cache Components rejects an empty list, so with no comps it returns the placeholder `__none__`, which renders the 404 page.
+    - Other slugs get the App Shell and stream in on first visit. `notFound()` runs inside Suspense, so an unknown slug is a soft 404: status 200 with `noindex`.
+    - `generateMetadata` uses the same cached `getComp(slug)`.
   - `POST /api/revalidate` needs `Authorization: Bearer $REVALIDATE_SECRET`, compared in constant time. The body is `{"tags": [...]}` using known tags only.
   - It calls `revalidateTag(tag, { expire: 0 })`. That's the Next 16 form for callers outside a Server Action, and the next visit renders fresh data instead of serving the pre-seed copy once more. The one-argument form is deprecated.
   - The page (a Server Component) fetches data. Interactive parts are client components that get plain props: `ChampionTierBoard` (cost filter state) and `ItemTierBoard`.
@@ -522,7 +560,8 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - Cost borders: 1 gray, 2 green, 3 blue, 4 purple, 5 gold.
   - Tier badges: S rose, A orange, B amber, C lime.
   - Placement pills: 1st gold, 2–4 teal, 5–8 muted.
-  - Trait styles: bronze, silver, gold, prismatic.
+  - Trait styles: bronze, silver, gold, prismatic, plus orange for unique (1-unit) traits. Active trait icons are black on a hexagon in the style color; inactive ones are gray.
+  - Star goals: ★ bronze, ★★ silver, ★★★ gold.
 - **Layout:**
   - A single top nav: Overview · Comps · Champions · Items · Me.
   - Keyboard shortcuts `1–5` switch pages and `/` focuses search.
@@ -531,7 +570,12 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - `ChampionIcon`: cost border, star pips, mini item icons.
   - `TraitBadge`: style color and count.
   - `TierRow`: tier label plus a wrapping icon row.
-  - `HexBoard`: 4×7 with odd rows offset.
+  - `HexBoard`: 4×7 pointy-top hexes, front row (0) at the top, odd rows shifted right by half a hex.
+    - Positions are percentages of an aspect-ratio box, so it scales from 400px to about 512px wide.
+    - Each unit shows a cost-colored rim, a gold outer rim when it's a carry, star pips and up to 3 item icons, with details on hover.
+  - `/comps` rows: tier, name, style and difficulty; carries (with items), a divider, then the rest of the board; active traits as icon + count.
+    - The whole row links to the guide, and units and traits keep their own tooltips.
+    - Filters: tier and style toggles (only those present), plus search across comp, unit, item and trait names.
   - `PlacementPill`, `StatTile`, `Sparkline`.
 - **States:** skeletons while loading, empty states ("No ranked games this set"), and a sync status badge ("synced 3m ago", "cooldown 1:12", "key expired").
 
@@ -571,5 +615,6 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - What does `tft_set_number` report (expected 18)?
   - What does `game_version` look like? It decides how `matches.patch` maps to TFT's "18.2" labels, versus the data version 16.18.
 - [ ] Map Riot's match-API trait `style` (0–4) onto the stored style names (bronze/silver/gold/prismatic/unique) in Phase 4.
-- [ ] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` (a migration) or a transactional RPC, so a seed can swap two units' hexes (§7 step 5).
+- [x] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` or a transactional RPC. Resolved with the `seed_comp` RPC (§4.9); the constraint is unchanged.
+- [ ] **Riftbeast units are missing from `champions`.** `sync-static` filters units that Data Dragon doesn't list in the shop (§4.8), which drops the Set 18 Riftbeast monsters: Pebbles (`DA_18_Sentry`), Cinderling, Scuttlecrab, Krug, Sentinel, Brambleback and Elder Dragon. They are real board units — several 18.2 meta comps field them, and Riftbeast Reroll and Dragon Princess carry them — so curated comps can't reference them today, and Phase 4 won't resolve their `character_id` to a cost. Decide whether to keep the filter (and find another summon filter) before Phase 4 derivation.
 - [ ] Data Dragon's `tft-champion.json` is the shop-unit filter (§4.8). If Riot stops publishing TFT data there after the Unreal move, the sync falls back to cost + traits and warns. Summons would then need another filter.

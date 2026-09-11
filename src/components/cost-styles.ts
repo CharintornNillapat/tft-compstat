@@ -8,6 +8,14 @@ export const COST_BORDER: Record<number, string> = {
   5: "border-cost-5",
 };
 
+export const COST_BG: Record<number, string> = {
+  1: "bg-cost-1",
+  2: "bg-cost-2",
+  3: "bg-cost-3",
+  4: "bg-cost-4",
+  5: "bg-cost-5",
+};
+
 export const COST_TEXT: Record<number, string> = {
   1: "text-cost-1",
   2: "text-cost-2",

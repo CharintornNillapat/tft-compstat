@@ -1,0 +1,35 @@
+# Patch 18.2 meta comp. Tier from the TFT Academy comp tier list ("Blossom
+# Fast-9"); core units and items from the BunnyMuffins build guide (Sep 2026).
+# Filler slots, hexes and star goals are a starting point: edit freely, then run
+# `pnpm seed:curated`.
+#
+# Format: architecture §7. Rows run 0 (front) to 3 (back), columns 0-6; odd rows
+# sit half a hex to the right. `star` defaults to 2 and `carry` to false.
+slug: ashe-fast-9
+name: Ashe Fast 9
+tier: S
+style: fast9
+difficulty: 2
+patch: "18.2"
+order: 2
+summary: The easiest fast 9. Open Blossom to farm upgraded wisps, then cap with Ashe and Ahri behind Maokai and the Brawlers.
+early_units: [DA_Karma18, DA_18_Yorick, DA_18_Yunara]
+flex_units: [DA_Lux18_Blossom, DA_18_MasterYi_AD]
+board:
+  - { unit: DA_18_Ashe, row: 3, col: 0, carry: true, items: [DA_SpearOfShojin, DA_RedBuff, DA_LastWhisper] }
+  - { unit: DA_18_Ahri, row: 3, col: 1, carry: true, items: [DA_JeweledGauntlet, DA_StrikersFlail, DA_NashorsTooth] }
+  - { unit: DA_Karma18, row: 3, col: 5 }
+  - { unit: DA_18_Yorick, row: 1, col: 2 }
+  - { unit: DA_18_GnarSmall, row: 0, col: 1, star: 1 }
+  - { unit: DA_Taric18, row: 0, col: 2, star: 1 }
+  - { unit: DA_18_Maokai, row: 0, col: 3, star: 1, items: [DA_GargoyleStoneplate, DA_WarmogsArmor, DA_SpiritVisage] }
+  - { unit: DA_18_Sett, row: 0, col: 4 }
+  - { unit: DA_18_Alistar, row: 0, col: 5 }
+guide: |
+  **Early:** Three Blossom units make one of the strongest openers in the set, and the wisps they grow are worth a lot. Karma, Yorick and Yunara are the usual starters.
+
+  **Mid:** This line often comes from an Invoker Morgana or Sivir board. Keep your economy and level on curve. Ahri holds the AP items until Ashe arrives.
+
+  **Late:** Hit level 9 and find Ashe so you don't stall at 8. Ashe needs a mana item (Spear of Shojin or Blue Buff). Swap the 1-cost Blossoms for Lux (Blossom) or Master Yi to keep Blossom 5 as you upgrade.
+
+  **Positioning:** Ashe and Ahri share a back corner. Maokai and Taric hold the middle of the front row, with Brawlers on the flanks.

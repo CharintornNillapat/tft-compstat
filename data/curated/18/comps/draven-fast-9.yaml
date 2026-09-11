@@ -1,0 +1,36 @@
+# Patch 18.2 meta comp. Tier from the TFT Academy comp tier list ("Elderwood
+# Executioners"); board and items from the EmblemComp and BunnyMuffins build
+# guides (Sep 2026). Hexes and star goals are a starting point: edit freely, then
+# run `pnpm seed:curated`.
+#
+# Format: architecture §7. Rows run 0 (front) to 3 (back), columns 0-6; odd rows
+# sit half a hex to the right. `star` defaults to 2 and `carry` to false.
+slug: draven-fast-9
+name: Draven Fast 9
+tier: S
+style: fast9
+difficulty: 3
+patch: "18.2"
+order: 1
+summary: High-roll fast 9. Play an AD opener, hit level 9 by 5-2, and cap with Draven behind Maokai and a 5-cost frontline.
+early_units: [DA_18_Sivir, DA_Nidalee18_AP, DA_18_Aphelios]
+board:
+  - { unit: DA_Draven18, row: 3, col: 0, carry: true, items: [DA_GuinsoosRageblade, DA_KrakensFury, DA_Deathblade] }
+  - { unit: DA_18_Ezreal, row: 3, col: 1 }
+  - { unit: DA_18_Ivern, row: 3, col: 5, star: 1 }
+  - { unit: DA_18_Kennen, row: 1, col: 3, star: 1 }
+  - { unit: DA_18_GnarSmall, row: 0, col: 1, star: 1 }
+  - { unit: DA_Amumu18, row: 0, col: 2 }
+  - { unit: DA_18_Maokai, row: 0, col: 3, star: 1, items: [DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor] }
+  - { unit: DA_Taric18, row: 0, col: 4, star: 1 }
+  - { unit: DA_18_Alistar, row: 0, col: 5 }
+guide: |
+  **Early:** Play the strongest AD opener you're offered and slam Guinsoo's Rageblade early. Draven needs it, so keep it for him. Sivir, Nidalee or Aphelios can hold the AD items through stage 3.
+
+  **Mid:** Push levels and take losses in stage 4 if you have to. The goal is level 9 by 5-2. Levels 8 to 10 cost 4 gold less in 18.2, which is why this line is strong now.
+
+  **Late:** At 9, roll for Draven and the 5-cost frontline (Maokai, Taric, Gnar, Kennen, Ivern). A Vanguard Emblem turns on Vanguard with Taric; Executioner is the next best emblem.
+
+  **Positioning:** Draven in a back corner, with Ezreal beside him. Maokai tanks in the middle of the front row.
+
+  Missing level 9 usually means a bottom-4 finish. If you're low on HP in stage 4, stabilise at 8 instead.
