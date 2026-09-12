@@ -3,13 +3,14 @@ import { PageHeader } from "@/components/page-header";
 import { SkeletonPanel } from "@/components/skeleton";
 import { MetaBrief } from "./meta-brief";
 import { OverviewGlance } from "./overview-glance";
+import { OverviewOpeners } from "./overview-openers";
 import { TopComps } from "./top-comps";
 
 /**
- * Glance panel for a second monitor (architecture §8). `TopComps` and `MetaBrief` are
- * cached reads and prerender into the static shell; the player data is uncached and
- * streams in. `MetaBrief` spans the whole second row, so the three panels above it
- * keep their columns.
+ * Glance panel for a second monitor (architecture §8). `TopComps`, `MetaBrief` and
+ * `OverviewOpeners` are cached reads and prerender into the static shell; the player
+ * data is uncached and streams in. The last two span the whole row, so the three
+ * panels above them keep their columns.
  */
 export default function OverviewPage() {
   return (
@@ -30,6 +31,7 @@ export default function OverviewPage() {
         </Suspense>
         <TopComps />
         <MetaBrief />
+        <OverviewOpeners />
       </div>
     </>
   );

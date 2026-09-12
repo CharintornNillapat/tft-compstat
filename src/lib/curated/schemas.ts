@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BOARD_COLS, BOARD_ROWS, COMP_STYLES, MAX_UNIT_ITEMS, TIER_RANKS } from "@/lib/static/game";
+import { BOARD_COLS, BOARD_ROWS, COMP_STYLES, MAX_UNIT_ITEMS, TIER_RANKS, type TierRank } from "@/lib/static/game";
 
 /**
  * Curated YAML formats (architecture §7). Shape is checked here; references to
@@ -24,6 +24,14 @@ export const COMPS_DIR = "comps";
  * reaches the DB and `seed:curated` only needs to know not to warn about it.
  */
 export const META_NOTES_FILE = "meta-notes.yaml";
+
+/**
+ * The stage-2 opener boards shown on `/`: `data/curated/<setId>/openers.yaml`.
+ * Read at build time like the patch brief above, so it is never seeded either —
+ * but it *does* hold `api_name`s, which `openers.ts` checks against the static
+ * lookup tables during prerender rather than against the DB during a seed.
+ */
+export const OPENERS_FILE = "openers.yaml";
 
 const apiName = z
   .string({ error: "must be an api_name string" })
@@ -167,3 +175,60 @@ export const metaNotesFileSchema = z
   });
 
 export type MetaNotesFile = z.infer<typeof metaNotesFileSchema>;
+
+/**
+ * Openers are rated on early-board strength and streak potential alone, so the
+ * C band is left off: a stage-2 board you would not open on is not worth a row.
+ */
+export const OPENER_TIERS = ["S", "A", "B"] as const satisfies readonly TierRank[];
+export type OpenerTier = (typeof OPENER_TIERS)[number];
+
+/**
+ * Every limit below is a layout constraint, not a taste one. The card is a glance
+ * on a second monitor: a fifth unit or a fourth slam pushes the icon row into a
+ * second line at 400px, and a ninth opener turns the section into a page.
+ */
+export const OPENER_UNITS = { min: 3, max: 4 } as const;
+export const OPENER_ITEMS = { min: 2, max: 3 } as const;
+export const OPENER_PIVOTS = { min: 2, max: 3 } as const;
+export const MAX_OPENERS = 8;
+
+/** The costs an opener may field. A 3-cost is not something you open on at 2-1. */
+export const OPENER_COSTS: readonly number[] = [1, 2];
+
+/** Same shape as a comp's `slug`, because that is what it has to match. */
+const compSlug = z
+  .string()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must be a comp slug: lowercase words joined by "-", like "ashe-fast-9"');
+
+const sized = <T extends z.ZodType>(item: T, { min, max }: { min: number; max: number }, what: string) =>
+  z
+    .array(item, { error: `must be a list of ${min}-${max} ${what}` })
+    .min(min, `needs at least ${min} ${what}`)
+    .max(max, `holds at most ${max} ${what} before the card stops being a glance`);
+
+export const openerSchema = z.strictObject({
+  /** Shown as the card heading, e.g. "Elderwood Brawlers". */
+  name: z.string().trim().min(1),
+  tier: z.enum(OPENER_TIERS),
+  /** 1- and 2-cost units only; `openers.ts` checks the costs against the static tables. */
+  core_units: sized(apiName, OPENER_UNITS, "champion api_names"),
+  /** Universal early slams, in the order to build them. */
+  slammable_items: sized(apiName, OPENER_ITEMS, "item api_names"),
+  /** Comps this opener pivots into; each must be a published comp slug. */
+  transition_to: sized(compSlug, OPENER_PIVOTS, "comp slugs"),
+  /** One line of play advice. Capped so it stays two lines on the card at 400px. */
+  notes: z.string().trim().min(1, "must not be empty").max(96, "must be at most 96 characters, so the card stays short"),
+});
+
+export const openersFileSchema = z.strictObject({
+  patch,
+  /** Heading of the section; defaults to "Early openers & item slams". */
+  title: z.string().trim().min(1).optional(),
+  openers: z
+    .array(openerSchema, { error: "must be a list of openers" })
+    .min(1, "needs at least one opener; an empty file would render an empty section")
+    .max(MAX_OPENERS, `at most ${MAX_OPENERS} fit before the section stops being a glance`),
+});
+
+export type OpenersFile = z.infer<typeof openersFileSchema>;

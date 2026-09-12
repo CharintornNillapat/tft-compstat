@@ -1,0 +1,169 @@
+import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
+import type { TierRank } from "@/lib/static/game";
+import { getStaticNames } from "@/lib/static/lookup";
+import type { NameBook } from "@/lib/static/names";
+import { readNewestCuratedFile } from "./curated-files";
+import { getComps } from "./queries";
+import { OPENER_COSTS, OPENERS_FILE, openersFileSchema, type OpenerTier } from "./schemas";
+import { formatIssue, parseYaml, suggestApiNames, type SeedIssue } from "./validate";
+
+/**
+ * The stage-2 opener boards on `/` (architecture §7, §8). Like the patch brief,
+ * this file is read from the repo during prerender rather than seeded — but it
+ * names champions, items and comps, so every reference is resolved here instead,
+ * against the same static tables `seed-curated` checks against and the same
+ * published comps `/comps` lists.
+ */
+
+export type OpenerUnit = { apiName: string; name: string; cost: number; iconUrl: string | null };
+export type OpenerItem = { apiName: string; name: string; iconUrl: string | null };
+/** A comp this opener pivots into. `name` is the comp's, so the pill isn't a slug. */
+export type OpenerPivot = { slug: string; name: string; tier: TierRank };
+
+export type Opener = {
+  name: string;
+  tier: OpenerTier;
+  units: OpenerUnit[];
+  items: OpenerItem[];
+  pivots: OpenerPivot[];
+  notes: string;
+};
+
+export type Openers = { patch: string; title: string; openers: Opener[] };
+
+/** What the file's api names and slugs are checked against. */
+export type OpenerReferences = {
+  names: NameBook;
+  comps: ReadonlyMap<string, { name: string; tier: TierRank }>;
+};
+
+const costList = OPENER_COSTS.map((cost) => `${cost}-cost`).join(" and ");
+
+/**
+ * Pure: YAML text plus the reference tables → openers, or the issues that stopped
+ * them, each with `file:line:col`. Beyond the schema: every unit exists and is
+ * cheap enough to open on, every item exists, every pivot is a published comp, and
+ * nothing is listed twice.
+ */
+export function validateOpeners(input: {
+  /** Repo-relative path, used in issues. */
+  file: string;
+  text: string;
+  refs: OpenerReferences;
+}): { openers?: Openers; issues: SeedIssue[] } {
+  const { file, refs } = input;
+  const yaml = parseYaml(file, input.text);
+  if (yaml.syntaxIssues.length) return { issues: yaml.syntaxIssues };
+
+  const parsed = openersFileSchema.safeParse(yaml.data);
+  if (!parsed.success) {
+    return { issues: parsed.error.issues.map((issue) => yaml.issue(issue.path, issue.message)) };
+  }
+  const data = parsed.data;
+  const issues: SeedIssue[] = [];
+
+  const didYouMean = (input: string, candidates: Iterable<readonly [string, { name: string }]>) => {
+    const suggestions = suggestApiNames(input, candidates);
+    return suggestions.length ? `. Did you mean ${suggestions.join(" or ")}?` : "";
+  };
+
+  /** Flags the second and later mentions of a value inside one list. */
+  const duplicates = (values: readonly string[], path: (index: number) => PropertyKey[], what: string) => {
+    const seen = new Set<string>();
+    return values.map((value, i) => {
+      const isDuplicate = seen.has(value);
+      if (isDuplicate) issues.push(yaml.issue(path(i), `${value} is already listed as ${what}`));
+      seen.add(value);
+      return isDuplicate;
+    });
+  };
+
+  const namedAt = new Map<string, number>();
+  const openers = data.openers.map((opener, index): Opener => {
+    const at = (...rest: PropertyKey[]) => ["openers", index, ...rest];
+
+    const first = namedAt.get(opener.name);
+    if (first !== undefined) {
+      issues.push(yaml.issue(at("name"), `"${opener.name}" is already the name of openers[${first}]`));
+    } else {
+      namedAt.set(opener.name, index);
+    }
+
+    const repeatedUnits = duplicates(opener.core_units, (i) => at("core_units", i), "a core unit");
+    const units = opener.core_units.map((apiName, i): OpenerUnit => {
+      const champion = refs.names.champions[apiName];
+      if (!champion) {
+        const candidates = Object.entries(refs.names.champions);
+        issues.push(yaml.issue(at("core_units", i), `unknown champion "${apiName}"${didYouMean(apiName, candidates)}`));
+      } else if (!repeatedUnits[i] && !OPENER_COSTS.includes(champion.cost)) {
+        issues.push(
+          yaml.issue(
+            at("core_units", i),
+            `${champion.name} is a ${champion.cost}-cost; an opener fields ${costList} units`,
+          ),
+        );
+      }
+      return { apiName, name: champion?.name ?? apiName, cost: champion?.cost ?? 0, iconUrl: champion?.iconUrl ?? null };
+    });
+
+    duplicates(opener.slammable_items, (i) => at("slammable_items", i), "a slam");
+    const items = opener.slammable_items.map((apiName, i): OpenerItem => {
+      const item = refs.names.items[apiName];
+      if (!item) {
+        issues.push(
+          yaml.issue(at("slammable_items", i), `unknown item "${apiName}"${didYouMean(apiName, Object.entries(refs.names.items))}`),
+        );
+      }
+      return { apiName, name: item?.name ?? apiName, iconUrl: item?.iconUrl ?? null };
+    });
+
+    duplicates(opener.transition_to, (i) => at("transition_to", i), "a pivot");
+    const pivots = opener.transition_to.map((slug, i): OpenerPivot => {
+      const comp = refs.comps.get(slug);
+      if (!comp) {
+        // Unpublished reads the same as missing here, and it should: either way the
+        // pill would link to a 404.
+        issues.push(yaml.issue(at("transition_to", i), `no published comp has the slug "${slug}"`));
+      }
+      return { slug, name: comp?.name ?? slug, tier: comp?.tier ?? "C" };
+    });
+
+    return { name: opener.name, tier: opener.tier, units, items, pivots, notes: opener.notes };
+  });
+
+  if (issues.length) return { issues };
+  return { issues, openers: { patch: data.patch, title: data.title ?? "Early openers & item slams", openers } };
+}
+
+/**
+ * Tagged `static` and `comps` rather than `cacheLife("max")` like the patch brief:
+ * the YAML ships in the deployment, but the names, icons and comp titles it renders
+ * come from the DB, so a `sync:static` or `seed:curated` has to be able to refresh
+ * it. `getComps()` is the same cached read `/comps` and `TopComps` already make.
+ *
+ * A missing file returns null and the section doesn't render. A file that names a
+ * unit, item or comp that isn't there **throws**, failing the build the way
+ * `seed:curated` aborts on a typo — a dead pivot link is a bug to fix, not a card
+ * to quietly blank out.
+ */
+export async function getOpeners(): Promise<Openers | null> {
+  "use cache";
+  cacheTag("static", "comps");
+  cacheLife("days");
+
+  const found = await readNewestCuratedFile(OPENERS_FILE);
+  if (!found) return null;
+
+  const [{ names }, { comps }] = await Promise.all([getStaticNames(), getComps()]);
+  const { file, text } = found;
+  const { openers, issues } = validateOpeners({
+    file,
+    text,
+    refs: { names, comps: new Map(comps.map((comp) => [comp.slug, { name: comp.name, tier: comp.tier }])) },
+  });
+  if (!openers) {
+    throw new Error(`Invalid ${file}:\n${issues.map((issue) => `  ${formatIssue(issue)}`).join("\n")}`);
+  }
+  return openers;
+}

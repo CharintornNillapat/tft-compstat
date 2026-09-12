@@ -71,6 +71,8 @@ data/curated/<setId>/
   champion-tiers.yaml
   item-tiers.yaml
   comps/<slug>.yaml
+  meta-notes.yaml            the patch brief on /; read at build time, never seeded (§7)
+  openers.yaml               stage-2 opener boards on /; read at build time, never seeded (§7)
 scripts/
   sync-static.ts             CommunityDragon → tft_sets/champions/traits/items (+ revalidate "static")
   seed-curated.ts            YAML → tier_lists/tier_entries/comps/comp_units (+ revalidate)
@@ -110,6 +112,9 @@ src/lib/
   stats/{types,row,filter,summary,comps,champions,rank}.ts  pure functions
   stats/queries.ts           uncached reads for /me and / (anon client)
   curated/{schemas,validate,queries}.ts
+  curated/curated-files.ts   reads the two never-seeded YAML files from the newest set folder
+  curated/meta-brief.ts      pure parse + cached read of meta-notes.yaml (§8)
+  curated/openers.ts         pure validate + cached read of openers.yaml, against the static tables (§8)
   curated/meta-sync.ts       pure: placement histogram → tier bands → tier-list YAML text (§7.1)
   curated/comp-sync.ts       pure: comp feed rows → board, carries, style → comp YAML text (§7.2)
   curated/traits.ts          computeActiveTraits (pure, client-safe)
@@ -599,7 +604,20 @@ nerfs: [Draven — base AD down]        # optional, same caps
 tip: Hold Recurve Bows for Ashe.      # optional, ≤160 chars
 ```
 
-**`meta-notes.yaml` is the one curated file that is never seeded.** It holds no
+```yaml
+# data/curated/<setId>/openers.yaml   (stage-2 openers on /; see data/curated/18/)
+patch: "18.2"                 # TFT patch label, quoted
+title: Early openers & item slams     # optional; defaults to that string
+openers:                      # 1-8 of them
+  - name: Elderwood Brawlers
+    tier: S                   # S, A or B — openers are not rated below B (see below)
+    core_units: [DA_18_Ornn, DA_18_Xayah, DA_18_Alistar]   # 3-4, and 1- or 2-cost only
+    slammable_items: [DA_SunfireCape, DA_GuinsoosRageblade]  # 2-3, in build order
+    transition_to: [ashe-fast-9, elderwood-kayle]          # 2-3 published comp slugs
+    notes: Slam on Xayah and streak.                       # one line, ≤96 chars
+```
+
+**Neither `meta-notes.yaml` nor `openers.yaml` is ever seeded.** It holds no
 `api_name`s, so there is nothing to check against the static tables and nothing for
 the DB to add. The site reads it straight from the repo during prerender
 (`src/lib/curated/meta-brief.ts`, §8), and `seed-curated.ts` knows the name only so
@@ -607,8 +625,21 @@ it doesn't warn about an unexpected file. Entries are free text on purpose: a pa
 note talks about mechanics and numbers, not just units. A brief with no buffs, nerfs
 *or* tip is rejected rather than rendering an empty card.
 
+`openers.yaml` is read the same way, but it **does** hold `api_name`s, so step 3 below
+still happens — just during prerender, against `getStaticNames()` and `getComps()`
+instead of against the DB during a seed (`src/lib/curated/openers.ts`, §8). It checks
+that every unit exists **and costs 1 or 2**, that every item exists, and that every
+`transition_to` slug belongs to a *published* comp, so a pivot pill can never link to
+a 404. Issues are reported together in the same `file:line:col  yaml.path: message`
+form, with the same "Did you mean …?", and any one of them fails the build.
+
+Every cap in the opener schema is a layout constraint rather than a taste one: the
+card is a glance on a second monitor, so a fifth unit or a fourth slam pushes the
+icon row onto another line at 400px. The C band is left off for the same reason a
+comp has one — a stage-2 board you would not open on does not need a row.
+
 **Seed script steps** (`pnpm seed:curated [--dry-run]`; tier lists since Phase 2, comps since Phase 3)
-1. Find the files: `data/curated/<setId>/{champion,item}-tiers.yaml` and `data/curated/<setId>/comps/*.yaml`. Other files produce a warning.
+1. Find the files: `data/curated/<setId>/{champion,item}-tiers.yaml` and `data/curated/<setId>/comps/*.yaml`. Other files produce a warning — except `meta-notes.yaml` and `openers.yaml`, which the script knows by name only so they don't warn.
 2. Parse the YAML and validate it with Zod. The pure logic lives in `src/lib/curated/{schemas,validate}.ts`.
 3. Check every `api_name` against the static tables. Champions must belong to the folder's set; items may be any stored item.
    - Every issue is collected and printed as `file:line:col  yaml.path: message`, with a "Did you mean …?" drawn from api names and display names.
@@ -816,6 +847,9 @@ sample size that grows between any two runs).
     - Every path it reads is joined from the **literal** prefix `process.cwd() + "data/curated"`. That is load-bearing, not style: given a path built from `process.cwd()` alone, Turbopack cannot tell what it resolves to, warns "Dynamic filesystem access causes tracing of the whole project", and ships the entire repo inside the server bundle. The static prefix narrows the trace to that one small folder — and is also what gets the YAML into the deployed function, so no `outputFileTracingIncludes` entry is needed (verified in `.next/server/app/page.js.nft.json`).
     - `yaml` therefore moved from `devDependencies` to `dependencies`: Turbopack bundles it into the server chunk, so it is now a runtime dependency of the site and not just of the scripts.
     - It is a direct child of the page's grid with `md:col-span-3`, so it takes the whole second row and the three panels above keep their columns.
+  - **`OverviewOpeners` (`/`) reads the repo *and* the DB.** `getOpeners()` parses `openers.yaml` the same way, but resolves its api names and pivot slugs through the cached `getStaticNames()` and `getComps()`, so it is `'use cache'` with **`cacheTag("static", "comps")`** and `cacheLife("days")` — a `sync:static` or `seed:curated` has to be able to refresh the names, icons and comp titles it renders, which is exactly what `cacheLife("max")` would prevent. `getComps()` is the same cached read `/comps` and `TopComps` already make, so this adds no query. It shares `readNewestCuratedFile()` (and its literal-prefix tracing rule) with `MetaBrief`.
+    - A file naming a unit that isn't there, a unit that costs more than 2, or a comp that isn't published **fails the build**, listing every such problem at once. That is the point of resolving at build time rather than rendering a fallback: a dead pivot link on a glance panel is worse than a red build.
+    - Server-rendered with **no client component of its own** — it is read between rounds, not interacted with. Like `MetaBrief` it spans `md:col-span-3` and makes its own columns (`md:grid-cols-2 xl:grid-cols-4`); eight cards inside a third of the grid would be a column of slivers.
   - **`refreshMyMatches` calls `refresh()`**, unconditionally. `refresh()` (Next 16, Server-Action-only) re-runs a route's *uncached* server content, which is exactly what a sync changes. The Phase 4 code called `revalidatePath("/me")` and only when `newMatches > 0`, which was wrong twice over: a "you're up to date" refresh never re-rendered, so the sync badge and cooldown countdown kept showing pre-sync values; and what `revalidatePath` invalidates is the prerendered shell, the one part that didn't change. Every `SyncResult` variant also carries `nextAllowedAt` now, so `RefreshButton` starts its countdown from the action's return value instead of waiting for the re-render.
 - Icons come from CommunityDragon URLs via `next/image`.
   - `remotePatterns` allows only `https://raw.communitydragon.org/*/game/assets/**` with no query string.

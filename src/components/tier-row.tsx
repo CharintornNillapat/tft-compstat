@@ -8,6 +8,17 @@ const TIER_BG: Record<TierRank, string> = {
   C: "bg-tier-c",
 };
 
+/**
+ * Tier as a text colour, for places a filled badge would shout — the pivot pills on
+ * the overview's opener cards, where the tier is context rather than the subject.
+ */
+export const TIER_TEXT: Record<TierRank, string> = {
+  S: "text-tier-s",
+  A: "text-tier-a",
+  B: "text-tier-b",
+  C: "text-tier-c",
+};
+
 export function TierBadge({ tier, className = "" }: { tier: TierRank; className?: string }) {
   return <span className={`grid place-items-center rounded font-bold text-surface ${TIER_BG[tier]} ${className}`}>{tier}</span>;
 }

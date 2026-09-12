@@ -220,7 +220,38 @@ Approved task by task rather than as a whole phase.
     what separates them); generated comps that leave the selection are removed; `validateComp` +
     `checkCompSet` run before any write; a comp is written only when its ratings change.
   - Flags: `--no-comps`, `--max-comps` (12), `--min-boards` (300).
+- [x] **Task 6 — Early openers & item slams on `/`** (requested 2026-09-12)
+  - `data/curated/18/openers.yaml`: 8 stage-2 opener boards — `name`, `tier` (S/A/B), `core_units`,
+    `slammable_items`, `transition_to`, `notes`. The **second** never-seeded curated file, read from
+    the repo at build time like `meta-notes.yaml` (architecture §7).
+  - Unlike the patch brief it names champions, items and comps, so `src/lib/curated/openers.ts`
+    resolves all three during prerender: `getStaticNames()` for the names, icons and **costs**, and
+    the already-cached `getComps()` for the pivot titles. `getOpeners()` is `'use cache'` with
+    `cacheTag("static", "comps")` + `cacheLife("days")`, so a `sync:static` or `seed:curated`
+    refreshes it — `cacheLife("max")` would have pinned stale names to the build.
+  - `src/app/overview-openers.tsx`: full-width row under `MetaBrief`, `md:grid-cols-2 xl:grid-cols-4`,
+    tier badge + cost-bordered portraits + numbered slam chips + tier-coloured pivot pills.
+    **No client component of its own** — it is read between rounds, not clicked.
+  - `readNewestCuratedFile()` extracted to `curated/curated-files.ts`, shared with `MetaBrief`, so
+    the literal-prefix file-tracing rule lives in one place. `TIER_TEXT` added to `tier-row.tsx`.
+  - The brief that requested this named Statikk Shiv and a Bruiser/Sprykin pairing; neither exists
+    in Set 18 (`TFT_Item_StatikkShiv` maps to Void Staff), so the boards use the real Set 18 names.
+    **The S/A/B bands are a starting point, not measured data** — the file says so at the top.
 - [ ] Further tasks — not yet specified.
+
+**Verified — Task 6 (2026-09-12):**
+- **Checks:** `pnpm check` (304 tests, up from 292 — 12 new for `validateOpeners`) and `pnpm build`
+  are green. `/` is still Partial Prerender at revalidate 1d / expire 1w.
+- **In the static shell, not the stream:** `.next/server/app/index.html` contains the opener cards,
+  so all 8 are prerendered at build time. 24 pivot links, 56 icons, none broken.
+- **Validation proved by fault injection, not by assertion.** One build with three planted faults
+  reported all three at once and exited:
+  - `openers[0].core_units[0]: Ahri is a 4-cost; an opener fields 1-cost and 2-cost units`
+  - `openers[1].transition_to[2]: no published comp has the slug "ashe-fast-99"`
+  - `openers[3].core_units[2]: unknown champion "DA_18_Sejauni". Did you mean DA_18_Sejuani?`
+- **Layout (headless Edge at 960px and 400px):** `scrollWidth === clientWidth` at both, and no
+  element's box crosses either edge. At 960px the section is two columns, at 400px one.
+  The first render had `BOARD` colliding with the portraits (a `w-7` label column); now `w-9`.
 
 **Verified — Task 5 (2026-09-12):**
 - **Checks:** `pnpm check` (292 tests, up from 260) and `pnpm build` are green; every route keeps

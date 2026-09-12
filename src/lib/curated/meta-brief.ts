@@ -1,7 +1,6 @@
 import "server-only";
-import { readdir, readFile } from "node:fs/promises";
-import path from "node:path";
 import { cacheLife } from "next/cache";
+import { readNewestCuratedFile } from "./curated-files";
 import { META_NOTES_FILE, metaNotesFileSchema } from "./schemas";
 import { formatIssue, parseYaml, type SeedIssue } from "./validate";
 
@@ -19,15 +18,6 @@ export type MetaBrief = {
   nerfs: string[];
   tip: string | null;
 };
-
-/**
- * Every read below joins this **literal** prefix, which is what keeps the build's
- * file tracing scoped: given a path built from `process.cwd()` alone, Turbopack
- * cannot tell what it will resolve to and traces the entire project into the
- * server bundle. A static prefix narrows that to this one small folder.
- */
-const CURATED_DIR = "data/curated";
-const curatedPath = (...parts: string[]) => path.join(process.cwd(), "data", "curated", ...parts);
 
 /** Pure: YAML text → a brief, or the issues that stopped it, with file:line:col. */
 export function parseMetaBrief(file: string, text: string): { brief?: MetaBrief; issues: SeedIssue[] } {
@@ -52,34 +42,6 @@ export function parseMetaBrief(file: string, text: string): { brief?: MetaBrief;
 }
 
 /**
- * The newest set folder that has a brief. Sets only ever go up, so the highest
- * number is the live one — and dropping in `data/curated/19/meta-notes.yaml`
- * hands the card over without touching any code.
- */
-async function readMetaNotesFile(): Promise<{ file: string; text: string } | null> {
-  let entries;
-  try {
-    entries = await readdir(curatedPath(), { withFileTypes: true });
-  } catch {
-    return null;
-  }
-  const setIds = entries
-    .filter((entry) => entry.isDirectory() && /^\d+$/.test(entry.name))
-    .map((entry) => Number(entry.name))
-    .sort((a, b) => b - a);
-
-  for (const setId of setIds) {
-    try {
-      const text = await readFile(curatedPath(String(setId), META_NOTES_FILE), "utf8");
-      return { file: `${CURATED_DIR}/${setId}/${META_NOTES_FILE}`, text };
-    } catch {
-      continue;
-    }
-  }
-  return null;
-}
-
-/**
  * `cacheLife("max")` rather than the `"days"` the DB reads use: this file ships
  * inside the deployment, so only a new build can change it, and a new build id
  * already invalidates the entry. It is parsed once during prerender and never on
@@ -93,7 +55,7 @@ export async function getMetaBrief(): Promise<MetaBrief | null> {
   "use cache";
   cacheLife("max");
 
-  const found = await readMetaNotesFile();
+  const found = await readNewestCuratedFile(META_NOTES_FILE);
   if (!found) return null;
 
   const { file, text } = found;
