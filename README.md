@@ -104,11 +104,11 @@ Comps are also checked for: unique hexes, at most 3 items per unit, at least one
 
 The seed schemas live in `src/lib/curated/schemas.ts`; the YAML shape is documented in [architecture §7](context/architecture.md).
 
-### 3. Tier lists from the live meta — `pnpm sync:meta`
+### 3. Tier lists and comps from the live meta — `pnpm sync:meta`
 
-Optional, and only for the two tier-list files. It reads MetaTFT's public ranked stats and
-rewrites `data/curated/<setId>/{champion,item}-tiers.yaml` so you don't type 140-odd
-ratings by hand. Contract and caveats: architecture §7.1.
+Optional. It reads MetaTFT's public stats and rewrites `data/curated/<setId>/{champion,item}-tiers.yaml`
+plus the generated files in `comps/`, so you don't type 140-odd ratings and a dozen boards
+by hand. Contract and caveats: architecture §7.1 (tier lists) and §7.2 (comps).
 
 ```bash
 pnpm sync:meta --dry-run          # fetch, rate, validate, print what would change; writes nothing
@@ -117,6 +117,8 @@ pnpm sync:meta --seed             # write, then run pnpm seed:curated
 pnpm sync:meta --rank CHALLENGER --days 7
 pnpm sync:meta --min-games 2000   # raise the sample floor (default 500)
 pnpm sync:meta --item-kinds completed,emblem,artifact,radiant
+pnpm sync:meta --no-comps         # tier lists only
+pnpm sync:meta --max-comps 8      # how many comps to write (default 12)
 ```
 
 **Read the dry run before you let it write.** It prints each tier with its average
@@ -134,6 +136,10 @@ What it guarantees:
   A name it skips usually means the patch added something: run `pnpm sync:static`.
 - Your `notes:` are carried across runs, and `current:` is preserved.
 - It writes only when the ratings change, so a no-op run leaves git clean.
+- **Your own comps are never touched.** A generated comp's first line is `# GENERATED`;
+  a comp file without it is reported and kept, even when the sync has one of the same
+  name. Adopting a generated comp as your own is just deleting that header. Generated
+  comps that drop out of the meta are removed, so `/comps` does not accrete dead builds.
 
 The files it writes say `# GENERATED` at the top. Hand edits to them are lost on the next
 sync — except `notes:`, which is the intended place for your own judgement. If you would
@@ -373,7 +379,7 @@ TTFB is unchanged exactly as predicted — the static shell never depended on th
 | `pnpm db:push` / `db:types` | Apply migrations / regenerate types |
 | `pnpm sync:static` | CommunityDragon → static tables |
 | `pnpm seed:curated` | YAML → tier lists and comps |
-| `pnpm sync:meta` | MetaTFT ranked stats → the two tier-list YAML files |
+| `pnpm sync:meta` | MetaTFT ranked stats → the two tier-list YAML files, and the generated comps |
 | `pnpm riot:setup` | Riot ID → puuid; probe routing; seed `riot_accounts` + `sync_state` |
 | `pnpm riot:sync` | One sync locally |
 | `pnpm riot:backfill` | Deeper history |

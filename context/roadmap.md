@@ -206,7 +206,57 @@ Approved task by task rather than as a whole phase.
     `notes:` and `current:` carried across runs; writes only when the ratings actually change.
   - `scripts/lib/references.ts` extracted so `seed-curated` and `sync-meta` share one static read.
   - Flags: `--dry-run`, `--seed`, `--set`, `--rank`, `--days`, `--min-games`, `--item-kinds`.
+- [x] **Task 5 — Automated meta comps (`pnpm sync:meta`, continued)** (requested 2026-09-12)
+  - `scripts/lib/meta-feed.ts` (the MetaTFT HTTP layer, now shared by both halves) +
+    pure `src/lib/curated/comp-sync.ts` (32 tests): MetaTFT's comp clusters →
+    `data/curated/18/comps/<slug>.yaml`. Contract in architecture §7.2.
+  - The endpoints are **not** the ones the task guessed — `/comps` and `/clusters` 404. The real
+    service is `tft-comps-api` (`latest_cluster_info`, `comp_options`, `comp_details`), found by
+    reading the site's JS bundle. Playwright is still not used, and is still not installed.
+  - Board, hexes, stars and item builds are each unit's *most-played* choice in that comp; tier
+    reuses the §7.1 percentile bands; style is `reroll_<cost>` for a three-starred cheap carry,
+    else the modal final level.
+  - Guardrails: hand-written comps are never overwritten or pruned (the `# GENERATED` marker is
+    what separates them); generated comps that leave the selection are removed; `validateComp` +
+    `checkCompSet` run before any write; a comp is written only when its ratings change.
+  - Flags: `--no-comps`, `--max-comps` (12), `--min-boards` (300).
 - [ ] Further tasks — not yet specified.
+
+**Verified — Task 5 (2026-09-12):**
+- **Checks:** `pnpm check` (292 tests, up from 260) and `pnpm build` are green; every route keeps
+  the shape it had, and `/comps` is still Static.
+- **12 comps parsed from the live feed**, all valid, boards of 7-9 units:
+  `S 2 · A 3 · B 5 · C 2` — the §7.1 bands again, `S elderwood-ezreal-draven` (avg 4.20, pick
+  16.5%, 107,910 boards) down to `B rapidfire-aphelios` (avg 4.47, pick 2.4%).
+- **Two feed limits found by probing, and recorded rather than papered over:**
+  1. The comps feed **ignores `rank` and `days`** — the response is byte-identical with and
+     without them. The bracket is therefore applied here from each comp's own `ranks` breakdown,
+     with the denominator recovered from the feed's per-rank `pick` so our pick rate matches the
+     number MetaTFT shows.
+  2. It publishes **no placement histogram for comps**, only a count and a mean, so `top4_rate`
+     cannot be derived and is left out. `gem` is consequently *pick < 3% and avg ≤ 4.30* — the
+     low-pick half of the intended rule exactly, with average placement standing in for top-4.
+     On this patch nothing qualifies, which is the honest answer rather than a badge on the
+     rarest comp.
+- **The hex mapping was established from the data, not assumed.** The feed counts cells from the
+  back row forward, the opposite of our rows. Tanks (Sentinel, Amumu) sit in cells 24-26 and the
+  ranged carry Aphelios in cells 1/7, which is what fixes `row = 3 - floor((cell-1)/7)`.
+- **Both guardrails proved by fault injection, not by assertion:**
+  - Stripping the `# GENERATED` line off `sprykin-veigar.yaml` made the next run report it as
+    `! … (hand-written on disk: kept, not overwritten)` and write 0 comps.
+  - A generated `retired-comp.yaml` outside the selection was listed for removal. The four
+    hand-written comps were never listed, and `git diff` on the comps folder stayed empty
+    through every run.
+- **Two defects the first real write exposed, both fixed:**
+  - A **component** (`DA_Component_RecurveBow`) was written on Varus, because real boards hold
+    half-built items. Builds are now filtered to completed, emblem, artifact and radiant.
+  - **Amumu was marked a priority-3 carry while holding one Thief's Gloves**, because the carry
+    rule read the unit's *usual* item count while the file wrote its *most-played build*. The
+    rule now reads the written build, so every carry visibly holds a full set.
+- **Idempotent:** the run after a write reports 12 comps, 0 to write. The first re-run after the
+  two fixes correctly rewrote only the 7 comps whose boards actually changed.
+- **Not seeded.** The files are written but `pnpm seed:curated` has not been run, so `/comps`
+  still shows the four hand-written comps until you adopt these deliberately.
 
 **Verified — Task 4 (2026-09-12):**
 - **Checks:** `pnpm check` (253 tests, up from 229) and `pnpm build` are green; every route keeps the shape it had.

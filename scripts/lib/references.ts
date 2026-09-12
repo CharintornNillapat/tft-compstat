@@ -21,6 +21,8 @@ export type References = {
    * this answers "is it the sort of item a tier list rates".
    */
   itemKinds: Map<string, ItemKind>;
+  /** Shop cost by `api_name`. `sync-meta` needs it to tell a reroll comp from a fast 8. */
+  costs: Map<string, number>;
 };
 
 export async function loadReferences(): Promise<References> {
@@ -31,7 +33,7 @@ export async function loadReferences(): Promise<References> {
       (from, to) =>
         db
           .from("champions")
-          .select("api_name, name, set_id, traits, is_shop_unit")
+          .select("api_name, name, set_id, traits, is_shop_unit, cost")
           .order("api_name")
           .range(from, to),
       "champions",
@@ -53,5 +55,6 @@ export async function loadReferences(): Promise<References> {
     index,
     shopUnits: new Set(champions.filter((c) => c.is_shop_unit).map((c) => c.api_name)),
     itemKinds: new Map(items.map((i) => [i.api_name, i.kind])),
+    costs: new Map(champions.map((c) => [c.api_name, c.cost])),
   };
 }

@@ -75,12 +75,14 @@ scripts/
   sync-static.ts             CommunityDragon → tft_sets/champions/traits/items (+ revalidate "static")
   seed-curated.ts            YAML → tier_lists/tier_entries/comps/comp_units (+ revalidate)
   sync-meta.ts               MetaTFT ranked stats → the two tier-list YAML files (§7.1)
+                             and the generated comps in comps/ (§7.2)
   riot-setup.ts              Riot ID → puuid; probes routing/league (§5.1); seeds riot_accounts + sync_state;
                              `--fixture` saves an anonymized real match for the derivation tests
   riot-sync.ts               one sync locally, through SyncService (lock, cooldown, budget)
   riot-backfill.ts           deeper history, run locally, same limiter; bypasses the lock on purpose
   rederive.ts                recompute player_matches from matches.raw (0 API calls)
   lib/{db,revalidate}.ts     paging/chunking helpers; POST /api/revalidate client
+  lib/meta-feed.ts           MetaTFT HTTP: the stat feed (§7.1) and the comps feed (§7.2)
   lib/references.ts          the static tables curated scripts check api names against (one read)
 supabase/migrations/         SQL (schema, RLS, RPCs)
 src/app/
@@ -109,6 +111,7 @@ src/lib/
   stats/queries.ts           uncached reads for /me and / (anon client)
   curated/{schemas,validate,queries}.ts
   curated/meta-sync.ts       pure: placement histogram → tier bands → tier-list YAML text (§7.1)
+  curated/comp-sync.ts       pure: comp feed rows → board, carries, style → comp YAML text (§7.2)
   curated/traits.ts          computeActiveTraits (pure, client-safe)
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
 ```
@@ -707,6 +710,84 @@ of the unit. A 5-cost that mostly appears in games somebody had already won read
 than it plays, and a unit that is only ever played as a bad-spot pivot reads worse. The
 bands are a starting point for a human pass, which is exactly why `notes:` survives a
 sync and why the generated `summary:` names its source and sample on the page.
+
+---
+
+### 7.2 Automated comps (`pnpm sync:meta`, Phase 6 Task 5)
+
+The same script also generates the comp files. The rules of §7.1 carry over — the repo
+file is the source of truth, Zod-validated, seeded by the same script, reviewed in a
+git diff — but a comp is a far larger claim than a tier-list row: a board, star goals,
+item builds and an order to build them in. Most of what follows is therefore a stated
+rule for turning "what people played" into "what to play", not a measurement.
+
+**Source.** A *different service* from §7.1: `https://api-hc.metatft.com/tft-comps-api`.
+Three calls, `2 + N` requests in all:
+- `latest_cluster_info` — the patch's comp clusters: `units_string`, `traits_string`
+  and the weighted `name` parts MetaTFT builds its comp names from.
+- `comp_options` — every cluster's `{count, avg}` in one response, which is what makes
+  selection possible without fetching all 54 comps.
+- `comp_details?comp=&cluster_id=` — per comp: `positioning` (a hex histogram per
+  unit), `builds` (item sets with counts), `unit_stats` (appearance share, star and
+  item-count distributions), `final_levels`, `levels`, `early_options` and `ranks`.
+
+**Two properties of this feed decide the design, and neither is obvious:**
+1. **It ignores `rank` and `days`.** Verified: the response is byte-identical with and
+   without them. So the bracket is applied *here*, from each comp's own `ranks`
+   breakdown — boards and a weighted average summed over the requested ranks, and the
+   bracket's own total recovered from the feed's per-rank `pick` (`count / pick`) so
+   our pick rate matches the number MetaTFT itself shows.
+2. **It publishes no placement histogram for comps** — only a count and a mean. Unlike
+   §7.1's units and items there is no eight-bucket `places`, so **top-4 rate cannot be
+   derived** and `top4_rate` is left out of the file rather than guessed. `gem`
+   consequently reads as *pick rate < 3% and average placement ≤ 4.30*: the low-pick
+   half of the intended rule exactly, with average placement standing in for the other.
+
+**Hexes.** The feed numbers hexes `cell_1`…`cell_28` from the **back** row forward,
+which is the opposite of our rows (0 is the front line): `row = 3 - floor((cell-1)/7)`,
+`col = (cell-1) % 7`. This was established from the data, not assumed — tanks sit in
+cells 22-28 and ranged carries in cells 1-7 in every comp checked.
+
+**How a comp is built.** All of it is the feed's own modal choice:
+- **Board:** the `level` most-played shop units, where `level` is the modal final
+  level. The share floor is deliberately low (5%): a cluster is fuzzy, so demanding a
+  unit appear on *most* boards leaves a level-8 comp with five units. A comp with fewer
+  than 6 writable units is skipped and said so — which is what catches the comps built
+  around Riftbeasts and other summons (§11), since none of them can be written down.
+- **Hex:** each unit's most-played cell, assigned greedily most-played unit first. Two
+  units wanting one hex is normal, so the loser falls through to its own next-best.
+- **Star and items:** the modal star level, and the best-sampled item build that is
+  writable. A build is rejected *whole* rather than having an item stripped out of it,
+  because a build minus its emblem is a build nobody played. Rejected: unknown items,
+  components and consumables (real boards hold half-built items; on a comp they read as
+  advice to leave a Recurve Bow on your carry), and an emblem for a trait the unit
+  already has, which `validateComp` refuses anyway.
+- **Carry and priority:** a carry is a unit whose **written** build fills its item
+  slots. Reading this off the build that is actually in the file — rather than off how
+  many items the unit usually holds — is what keeps the two consistent: a unit whose
+  most-played build is one Thief's Gloves is not also written as a three-item carry.
+- **Tier:** the §7.1 percentile bands (`assignTiers`), over the selected comps' average
+  placements. **Style:** a three-starred 1-3 cost carry means `reroll_<cost>` whatever
+  level it ends on; otherwise the modal final level gives `fast9` / `fast8` / `flex`.
+- **`guide`:** assembled from the feed's numbers — the most-played opener, the level
+  timings, the carries' builds — and says in its last line that these are boards people
+  played rather than a plan somebody wrote.
+
+**Hand-written comps are never touched.** A generated file's first line is
+`# GENERATED by \`pnpm sync:meta\``. A file without that marker is reported and kept,
+even when the sync has a comp of the same slug — so adopting a generated comp as your
+own is just deleting its header. Generated files that drop out of the selection are
+removed, which is what keeps `/comps` to the current meta rather than an accreting
+pile. Hand-written files never drop out.
+
+**Before anything is written**, every generated comp goes through `validateComp` and
+`checkCompSet` — the same functions `seed:curated` runs — and any issue aborts the whole
+run with `file:line:col`, leaving every file untouched. A sync writes a comp only when
+its ratings change (`compFingerprint`, which ignores `summary` because it quotes a
+sample size that grows between any two runs).
+
+**Flags:** `--no-comps` to sync only the tier lists, `--max-comps` (default 12) and
+`--min-boards` (default 300 boards in the bracket).
 
 ---
 

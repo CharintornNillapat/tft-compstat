@@ -3,7 +3,7 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 630,400 games on patch 18.2, set 18. Feed updated 2026-09-12T14:01:20.850Z.
+# Sample: 637,600 games on patch 18.2, set 18. Feed updated 2026-09-12T14:30:15.390Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
 # Where they fell, as size and worst average placement: S 13 to 4.07, A 27 to 4.19, B 31 to 4.41, C 18 to 5.15.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
@@ -11,15 +11,15 @@ slug: items-18.2
 kind: item
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 630,400 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 637,600 games over the last 3 days."
 tiers:
   S:
     - DA_TacticiansShield
     - DA_Artifact_SilvermereDawn
     - DA_Bloodthirster
     - DA_BrambleVest
-    - DA_HandOfJustice
     - DA_18_EmblemJuggernaut
+    - DA_HandOfJustice
     - DA_ThiefsGloves
     - DA_SteraksGage
     - DA_BlueBuff
@@ -32,8 +32,8 @@ tiers:
     - DA_18_EmblemVanguard
     - DA_Deathblade
     - DA_ProtectorsVow
-    - DA_ArchangelsStaff
     - DA_18_EmblemInvoker
+    - DA_ArchangelsStaff
     - DA_Quicksilver
     - DA_Crownguard
     - DA_GiantSlayer
@@ -46,14 +46,14 @@ tiers:
     - DA_TitansResolve
     - DA_HextechGunblade
     - DA_RedBuff
-    - DA_Artifact_WitsEnd
     - DA_SunfireCape
+    - DA_Artifact_WitsEnd
     - DA_18_EmblemInferno
     - DA_NashorsTooth
-    - DA_SpearOfShojin
     - DA_TacticiansCape
-    - DA_Morellonomicon
+    - DA_SpearOfShojin
     - DA_Artifact_GoldCollector
+    - DA_Morellonomicon
     - DA_Artifact_LichBane
   B:
     - DA_LastWhisper
@@ -79,9 +79,9 @@ tiers:
     - DA_18_EmblemSlayer
     - DA_18_EmblemFloraFatalis
     - DA_JeweledGauntlet
-    - DA_Artifact_Mittens
-    - DA_Artifact_InfinityForce
     - DA_Artifact_HorizonFocus
+    - DA_Artifact_InfinityForce
+    - DA_Artifact_Mittens
     - DA_GargoyleStoneplate
     - DA_Artifact_RapidFireCannon
     - DA_GuinsoosRageblade
