@@ -56,3 +56,33 @@ export const ITEM_KIND_LABELS = {
 } as const satisfies Record<ItemKind, string>;
 
 export const ITEM_KINDS = Object.keys(ITEM_KIND_LABELS) as ItemKind[];
+
+/**
+ * TFT queues (architecture §4.4). `player_matches.queue_id` stores these, and the
+ * dashboard's `StatsFilter` uses them to separate ranked play from everything else.
+ *
+ * Not to be confused with `RANKED_TFT` in `riot/endpoints.ts` — that's a league
+ * entry's `queueType` string, a different axis entirely.
+ */
+export const QUEUE_IDS = {
+  ranked: 1100,
+  normal: 1090,
+  hyperRoll: 1130,
+  doubleUp: 1160,
+} as const;
+
+export const QUEUE_LABELS: Record<number, string> = {
+  [QUEUE_IDS.ranked]: "Ranked",
+  [QUEUE_IDS.normal]: "Normal",
+  [QUEUE_IDS.hyperRoll]: "Hyper Roll",
+  [QUEUE_IDS.doubleUp]: "Double Up",
+};
+
+/** An unknown queue keeps its id rather than being hidden or guessed at. */
+export function queueLabel(queueId: number): string {
+  return QUEUE_LABELS[queueId] ?? `Queue ${queueId}`;
+}
+
+export function isRankedQueue(queueId: number): boolean {
+  return queueId === QUEUE_IDS.ranked;
+}
