@@ -576,6 +576,23 @@ tiers:                        # S/A/B/C, all optional; list order = display orde
 notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must be listed in a tier
 ```
 
+```yaml
+# data/curated/<setId>/meta-notes.yaml   (the patch brief on /; see data/curated/18/)
+patch: "18.2"                 # TFT patch label, quoted
+title: Patch 18.2 brief       # optional; defaults to "Patch <patch> brief"
+buffs: [Ashe — Ranger bonus up 15%]   # optional, ≤6 entries, ≤48 chars each
+nerfs: [Draven — base AD down]        # optional, same caps
+tip: Hold Recurve Bows for Ashe.      # optional, ≤160 chars
+```
+
+**`meta-notes.yaml` is the one curated file that is never seeded.** It holds no
+`api_name`s, so there is nothing to check against the static tables and nothing for
+the DB to add. The site reads it straight from the repo during prerender
+(`src/lib/curated/meta-brief.ts`, §8), and `seed-curated.ts` knows the name only so
+it doesn't warn about an unexpected file. Entries are free text on purpose: a patch
+note talks about mechanics and numbers, not just units. A brief with no buffs, nerfs
+*or* tip is rejected rather than rendering an empty card.
+
 **Seed script steps** (`pnpm seed:curated [--dry-run]`; tier lists since Phase 2, comps since Phase 3)
 1. Find the files: `data/curated/<setId>/{champion,item}-tiers.yaml` and `data/curated/<setId>/comps/*.yaml`. Other files produce a warning.
 2. Parse the YAML and validate it with Zod. The pure logic lives in `src/lib/curated/{schemas,validate}.ts`.
@@ -616,6 +633,10 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - **Player reads stay uncached** (`src/lib/stats/queries.ts`), which is the §6.3 principle applied to Next's cache as well as Supabase's. Two concrete reasons, not just principle: the header renders a live cooldown countdown from `sync_state.next_allowed_at`, which a cached read would serve wrong by construction; and `after()` stale-on-read writes new matches *after* the response has flushed, with no clean revalidation hook from inside `after()`, so a cached read would serve pre-sync data for a whole `cacheLife` window. Each view is one index-covered query over ≤50 rows — caching would buy ~30ms and cost correctness. `CACHE_TAGS` is therefore unchanged.
   - The stats path uses the **anon** client throughout: `player_matches`, `riot_accounts` and `rank_snapshots` are all anon-readable (§4.6). Only the sync badge needs the service role, which is why `/me` splits into two islands — `MeHeader` (service role, `sync_state`, paints first because it answers "am I looking at fresh data?") and `Dashboard` (anon, the 50-row query). One island would make the faster, more important half wait on the slower one.
   - `/` splits along the same caching boundary: `TopComps` reuses the cached `getComps()` that `/comps` already reads — a hit under the same `comps` tag, so no new query and no new tag — and prerenders into the shell, while `OverviewGlance` is uncached and streams in. `OverviewGlance` returns a **fragment of two `<section>`s** rather than a wrapper, because Suspense creates no DOM box of its own and a wrapper would collapse the grid's three columns into two; its fallback renders two skeletons for the same reason.
+  - **`MetaBrief` (`/`) reads the repo, not the DB.** `getMetaBrief()` is `'use cache'` with **`cacheLife("max")`** and **no cache tag**, unlike every other curated read: the YAML ships inside the deployment, so only a new build can change it, a new build id already invalidates the entry, and there is nothing for `/api/revalidate` to revalidate. It is parsed once during prerender and never on a request. A missing file renders nothing; a malformed one throws and fails the build, the way `seed:curated` aborts.
+    - Every path it reads is joined from the **literal** prefix `process.cwd() + "data/curated"`. That is load-bearing, not style: given a path built from `process.cwd()` alone, Turbopack cannot tell what it resolves to, warns "Dynamic filesystem access causes tracing of the whole project", and ships the entire repo inside the server bundle. The static prefix narrows the trace to that one small folder — and is also what gets the YAML into the deployed function, so no `outputFileTracingIncludes` entry is needed (verified in `.next/server/app/page.js.nft.json`).
+    - `yaml` therefore moved from `devDependencies` to `dependencies`: Turbopack bundles it into the server chunk, so it is now a runtime dependency of the site and not just of the scripts.
+    - It is a direct child of the page's grid with `md:col-span-3`, so it takes the whole second row and the three panels above keep their columns.
   - **`refreshMyMatches` calls `refresh()`**, unconditionally. `refresh()` (Next 16, Server-Action-only) re-runs a route's *uncached* server content, which is exactly what a sync changes. The Phase 4 code called `revalidatePath("/me")` and only when `newMatches > 0`, which was wrong twice over: a "you're up to date" refresh never re-rendered, so the sync badge and cooldown countdown kept showing pre-sync values; and what `revalidatePath` invalidates is the prerendered shell, the one part that didn't change. Every `SyncResult` variant also carries `nextAllowedAt` now, so `RefreshButton` starts its countdown from the action's return value instead of waiting for the re-render.
 - Icons come from CommunityDragon URLs via `next/image`.
   - `remotePatterns` allows only `https://raw.communitydragon.org/*/game/assets/**` with no query string.
@@ -634,6 +655,7 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - Trait styles: bronze, silver, gold, prismatic, plus orange for unique (1-unit) traits. Active trait icons are black on a hexagon in the style color; inactive ones are gray.
   - Star goals: ★ bronze, ★★ silver, ★★★ gold.
   - Carry marker: `--color-carry` (near-white), placed **outside the cost ramp on purpose**. Phase 3 used the gold accent, which read as the 5-cost cost border and left a 5-cost carry indistinguishable from an ordinary 5-cost. A `CarryMark` crosshair glyph carries the same meaning as a *shape*, so it survives colour-vision deficiency.
+  - Patch brief: `--color-buff` (green) and `--color-nerf` (red), their own tokens for the same reason as `--color-carry` — the page's LP delta already spends `place-top4` and `tier-s` on "up" and "down", and a second meaning on the same colours would be ambiguous where they sit inches apart. Each badge also carries a ▲/▼ glyph, so **shape** says buff-or-nerf too.
 - **Layout:**
   - A single top nav: Overview · Comps · Champions · Items · Me.
   - Keyboard shortcuts `1–5` switch pages and `/` focuses search (`Shortcuts` in the root layout; `NAV_ITEMS` is exported from `nav-tabs.tsx` so routes and shortcuts can't drift). The decision lives in the pure `shortcut-match.ts`, because that's where shortcuts actually go wrong: they stay inert while focus is in an input, textarea, select or contenteditable, and never fire with Ctrl/Alt/Meta held. `/` only calls `preventDefault()` once it has found a search box, so on pages without one the browser's quick-find still works. Links carry `aria-keyshortcuts`.

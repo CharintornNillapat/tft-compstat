@@ -1,12 +1,15 @@
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { SkeletonPanel } from "@/components/skeleton";
+import { MetaBrief } from "./meta-brief";
 import { OverviewGlance } from "./overview-glance";
 import { TopComps } from "./top-comps";
 
 /**
- * Glance panel for a second monitor (architecture §8). `TopComps` is a cached read
- * and prerenders into the static shell; the player data is uncached and streams in.
+ * Glance panel for a second monitor (architecture §8). `TopComps` and `MetaBrief` are
+ * cached reads and prerender into the static shell; the player data is uncached and
+ * streams in. `MetaBrief` spans the whole second row, so the three panels above it
+ * keep their columns.
  */
 export default function OverviewPage() {
   return (
@@ -26,6 +29,7 @@ export default function OverviewPage() {
           <OverviewGlance />
         </Suspense>
         <TopComps />
+        <MetaBrief />
       </div>
     </>
   );

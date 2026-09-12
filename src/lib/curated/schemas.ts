@@ -18,6 +18,13 @@ export const TIER_LIST_FILES: Record<TierListKind, string> = {
 /** Comps live one per file: `data/curated/<setId>/comps/<slug>.yaml`. */
 export const COMPS_DIR = "comps";
 
+/**
+ * The patch brief shown on `/`: `data/curated/<setId>/meta-notes.yaml`.
+ * Read straight from the repo at build time rather than seeded, so it never
+ * reaches the DB and `seed:curated` only needs to know not to warn about it.
+ */
+export const META_NOTES_FILE = "meta-notes.yaml";
+
 const apiName = z
   .string({ error: "must be an api_name string" })
   .regex(/^[A-Za-z0-9_]+$/, "must be an api_name like DA_18_Ashe");
@@ -96,3 +103,36 @@ export const compFileSchema = z.strictObject({
 });
 
 export type CompFile = z.infer<typeof compFileSchema>;
+
+/**
+ * One glanceable line of a patch brief. Capped so it stays a single badge on a
+ * second monitor: a sentence here would wrap the card instead of being scanned.
+ */
+const briefEntry = z
+  .string({ error: "must be a short line of text" })
+  .trim()
+  .min(1, "must not be empty")
+  .max(48, "must be at most 48 characters, so it fits on one badge");
+
+const briefEntries = z
+  .array(briefEntry, { error: "must be a list of short lines" })
+  .max(6, "at most 6 fit in the card before it stops being a glance")
+  .default([]);
+
+export const metaNotesFileSchema = z
+  .strictObject({
+    patch,
+    /** Heading of the card; defaults to "Patch <patch> brief". */
+    title: z.string().trim().min(1).optional(),
+    /** What got stronger — shown as green badges. */
+    buffs: briefEntries,
+    /** What got weaker — shown as red badges. */
+    nerfs: briefEntries,
+    /** One line of advice under the badges. */
+    tip: z.string().trim().min(1).max(160, "must be at most 160 characters").optional(),
+  })
+  .refine((file) => file.buffs.length + file.nerfs.length > 0 || file.tip, {
+    error: "needs at least one buff, nerf or tip; an empty brief would render an empty card",
+  });
+
+export type MetaNotesFile = z.infer<typeof metaNotesFileSchema>;

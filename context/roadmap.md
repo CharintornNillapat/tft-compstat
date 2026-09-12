@@ -175,6 +175,26 @@
 
 ---
 
+## Phase 6 — Overview enhancements
+**Goal:** Make `/` answer more of "what should I know before I queue?" without leaving the glance panel.
+Approved task by task rather than as a whole phase.
+
+- [x] **Task 1 — Meta brief / patch notes card** (approved 2026-09-12)
+  - `data/curated/18/meta-notes.yaml`: `patch`, `title`, `buffs`, `nerfs`, `tip`. The one curated file that is **not seeded** — it holds no api names, so the site reads it from the repo at build time instead (architecture §7, §8).
+  - `src/lib/curated/meta-brief.ts`: pure `parseMetaBrief` (8 tests) + `getMetaBrief()` on `'use cache'` with `cacheLife("max")` and no tag, since only a new build can change the file.
+  - `src/app/meta-brief.tsx`: full-width second row of the `/` grid, green ▲ / red ▼ badges on new `--color-buff` / `--color-nerf` tokens, optional tip line.
+  - Entries are capped at 48 chars and 6 per list, which is what keeps them one-line badges rather than a paragraph.
+- [ ] Further tasks — not yet specified.
+
+**Verified (2026-09-12):**
+- **Checks:** `pnpm check` (217 tests, up from 209) and `pnpm build` are green. `/` stays **Partial Prerender** (revalidate 1d, expire 1w), with the brief in the prerendered shell alongside `TopComps`.
+- **Tracing, and a warning worth recording:** the first version joined `process.cwd()` with a path built at runtime. Turbopack warned "Dynamic filesystem access causes tracing of the whole project" and traced the entire repo into the server bundle. Joining from the **literal** `data/curated` prefix instead cleared the warning and cut the page trace to 128 files, with `data/curated/18/meta-notes.yaml` included — so the `outputFileTracingIncludes` entry added alongside it turned out to be redundant and was dropped (checked in `.next/server/app/page.js.nft.json` with and without it).
+- **`yaml` moved to `dependencies`.** Turbopack bundles it into the server chunk rather than tracing the package, so it is now a runtime dependency of the site, not just of the seed scripts.
+- **Rendered, against the real cache with `next start`:** `/` returns 200 in 1.3s with "Patch 18.2 brief", 4 buff badges, 3 nerf badges and the tip line, all in the static shell (they appear ahead of the streamed rank island in the HTML).
+- **Layout (headless Edge over CDP at 960px and 400px):** no route scrolls horizontally (`scrollWidth === clientWidth` on all five). The brief measures 928px inside 960 and 368px inside 400, and none of its 7 badges reach the viewport edge. The only element whose `scrollWidth` exceeds its `clientWidth` on `/` is the pre-existing 3px sparkline wrapper in `overview-glance.tsx`, outside the card.
+
+---
+
 ## Before Phase 1: what you'll need on hand
 - [x] A Supabase account and a new project (free tier), ref `ulpapntggzqipodxtwzb`
 - [x] A Vercel account linked to the GitHub repo

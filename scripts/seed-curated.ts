@@ -19,7 +19,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import type { CacheTag } from "@/lib/cache-tags";
-import { COMPS_DIR, TIER_LIST_FILES, TIER_LIST_KINDS, type TierListKind } from "@/lib/curated/schemas";
+import { COMPS_DIR, META_NOTES_FILE, TIER_LIST_FILES, TIER_LIST_KINDS, type TierListKind } from "@/lib/curated/schemas";
 import {
   checkCompSet,
   checkTierListSet,
@@ -48,7 +48,9 @@ async function findCuratedFiles(): Promise<{ tierFiles: TierFile[]; compFiles: C
   const compFiles: CompFile[] = [];
   if (!existsSync(CURATED_DIR)) return { tierFiles, compFiles };
 
-  const known = new Set(Object.values(TIER_LIST_FILES));
+  // meta-notes.yaml is curated too, but the site reads it straight from the repo at
+  // build time (src/lib/curated/meta-brief.ts). It is known here only so it doesn't warn.
+  const known = new Set([...Object.values(TIER_LIST_FILES), META_NOTES_FILE]);
   const expected = `${[...known].join(", ")} or ${COMPS_DIR}/<slug>.yaml`;
   for (const dir of await readdir(CURATED_DIR, { withFileTypes: true })) {
     if (!dir.isDirectory()) continue;

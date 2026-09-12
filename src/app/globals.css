@@ -32,6 +32,12 @@
      5-cost border, so a 5-cost carry looked like an ordinary 5-cost. */
   --color-carry: #fafafa;
 
+  /* Patch brief: what got stronger vs. weaker. Their own tokens rather than the
+     placement or tier colours, for the same reason --color-carry has one — those
+     already mean something else on this page (the LP delta uses both). */
+  --color-buff: #4ade80;
+  --color-nerf: #f87171;
+
   /* Placement */
   --color-place-win: #facc15;
   --color-place-top4: #2dd4bf;
