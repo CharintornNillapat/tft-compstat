@@ -48,7 +48,7 @@ export function CompList({ comps }: { comps: CompSummary[] }) {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search comps, units, traits, items"
+          placeholder="Search comps, units, traits, items  ( / )"
           aria-label="Search comps"
           className="h-7 w-full min-w-0 rounded border border-line bg-panel px-2 placeholder:text-faint sm:w-60"
         />

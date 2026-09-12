@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV_ITEMS = [
+/** The five routes, and the single source of truth for the 1-5 shortcuts. */
+export const NAV_ITEMS = [
   { href: "/", label: "Overview" },
   { href: "/comps", label: "Comps" },
   { href: "/tiers/champions", label: "Champions" },
@@ -22,13 +23,14 @@ export function NavList({ active }: { active?: string }) {
   return (
     <nav aria-label="Main" className="-mb-px h-full min-w-0 overflow-x-auto">
       <ul className="flex h-full items-stretch">
-        {NAV_ITEMS.map(({ href, label }) => {
+        {NAV_ITEMS.map(({ href, label }, index) => {
           const isActive = href === active;
           return (
             <li key={href}>
               <Link
                 href={href}
                 aria-current={isActive ? "page" : undefined}
+                aria-keyshortcuts={String(index + 1)}
                 className={`flex h-full items-center border-b-2 px-2.5 whitespace-nowrap transition-colors ${
                   isActive
                     ? "border-accent text-fg"

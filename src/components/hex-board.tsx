@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { CompUnit } from "@/lib/curated/queries";
 import { BOARD_COLS, BOARD_ROWS } from "@/lib/static/game";
-import { StarPips, UnitDetails } from "./comp-details";
+import { CarryMark, StarPips, UnitDetails } from "./comp-details";
 import { COST_BG } from "./cost-styles";
 import { HoverTip, useHoverTip } from "./hover-tip";
 import { ItemIcon } from "./item-icon";
@@ -61,7 +61,7 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
                     aria-label={unitLabel(unit)}
                     className="group absolute inset-0 rounded-sm"
                   >
-                    {unit.isCarry ? <span aria-hidden className="hex absolute inset-0.5 bg-accent" /> : null}
+                    {unit.isCarry ? <span aria-hidden className="hex absolute inset-0.5 bg-carry" /> : null}
                     <span
                       aria-hidden
                       className={`hex absolute ${unit.isCarry ? "inset-1.25" : "inset-0.5"} ${COST_BG[unit.cost] ?? "bg-line"}`}
@@ -85,6 +85,7 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
                       )}
                     </span>
                     <StarPips star={unit.star} className="absolute inset-x-0 top-0.5 z-10 text-center text-[10px]" />
+                    {unit.isCarry ? <CarryMark className="absolute right-0 bottom-[22%] z-10" /> : null}
                     {unit.items.length ? (
                       <span className="absolute inset-x-0 bottom-[6%] z-10 flex justify-center gap-px">
                         {unit.items.map((item, i) => (
@@ -102,7 +103,7 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
         )}
       </div>
       <figcaption className="mt-2 text-center text-xs text-faint">
-        Front row at the top · <span className="text-accent">gold rim</span> = carry
+        Front row at the top · <CarryMark className="inline-block align-text-bottom" /> = carry
       </figcaption>
       {tip.active ? (
         <HoverTip id={tip.id} anchor={tip.active.anchor}>

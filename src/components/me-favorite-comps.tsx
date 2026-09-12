@@ -8,7 +8,7 @@ const pct = (value: number) => `${Math.round(value * 100)}%`;
 export function MeFavoriteComps({ comps, names }: { comps: readonly CompStat[]; names: NameBook }) {
   return (
     <div className="overflow-x-auto rounded-md border border-line bg-panel">
-      <table className="w-full min-w-[26rem] border-collapse">
+      <table className="w-full min-w-[20rem] border-collapse">
         <thead>
           <tr className="border-b border-line text-left text-[11px] tracking-wider text-faint uppercase">
             <th scope="col" className="px-3 py-1.5 font-medium">Comp</th>

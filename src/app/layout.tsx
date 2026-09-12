@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Shortcuts } from "@/components/shortcuts";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className="min-h-dvh">
+        <Shortcuts />
         <SiteHeader />
         <main className="mx-auto w-full max-w-6xl px-4 py-4">{children}</main>
       </body>

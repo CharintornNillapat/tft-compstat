@@ -28,6 +28,10 @@
   --color-tier-b: #fbbf24;
   --color-tier-c: #a3e635;
 
+  /* Carry marker. Outside the cost ramp on purpose: the old gold rim read as the
+     5-cost border, so a 5-cost carry looked like an ordinary 5-cost. */
+  --color-carry: #fafafa;
+
   /* Placement */
   --color-place-win: #facc15;
   --color-place-top4: #2dd4bf;

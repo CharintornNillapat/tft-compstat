@@ -31,7 +31,11 @@ export function UnitDetails({ unit }: { unit: CompUnit }) {
         <span className="font-semibold text-fg">{unit.name}</span>
         <span className={COST_TEXT[unit.cost]}>{unit.cost}-cost</span>
         <StarPips star={unit.star} />
-        {unit.isCarry ? <span className="text-accent">Carry</span> : null}
+        {unit.isCarry ? (
+          <span className="inline-flex items-center gap-1 text-carry">
+            <CarryMark /> Carry
+          </span>
+        ) : null}
       </p>
       {unit.traits.length ? <p className="text-muted">{unit.traits.join(" · ")}</p> : null}
       {unit.items.length ? (
@@ -60,5 +64,25 @@ export function TraitDetails({ trait }: { trait: TraitCount }) {
         {trait.count} {trait.count === 1 ? "unit" : "units"} · <TraitBreakpoints trait={trait} />
       </p>
     </>
+  );
+}
+
+/**
+ * The carry marker: a crosshair on a dark disc. A **shape**, not only a colour —
+ * the old treatment was a gold rim, which read as the 5-cost cost border, so a
+ * 5-cost carry was indistinguishable from an ordinary 5-cost (the Phase 3 nit).
+ */
+export function CarryMark({ className = "" }: { className?: string }) {
+  return (
+    <span
+      role="img"
+      aria-label="Carry"
+      className={`grid size-3.5 place-items-center rounded-full bg-surface/90 ring-1 ring-carry/70 ${className}`}
+    >
+      <svg viewBox="0 0 12 12" className="size-2.5 stroke-carry" fill="none" strokeWidth={1.5}>
+        <circle cx="6" cy="6" r="2.5" />
+        <path d="M6 0.5v2M6 9.5v2M0.5 6h2M9.5 6h2" strokeLinecap="round" />
+      </svg>
+    </span>
   );
 }
