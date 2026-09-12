@@ -1,6 +1,7 @@
 # TFT CompStat — Architecture
 
-> **Status:** Approved design (2026-09-11). Phases 1–5 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §5, §6, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Status:** Approved design (2026-09-11). Phases 1–5 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §5, §6, §7, §8, §9), with the deployment regions in §12. This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Operations:** day-to-day runbook in [`../README.md`](../README.md) — seeding, cron verification, key rotation, troubleshooting.
 > **Companion doc:** [`roadmap.md`](./roadmap.md)
 
 ## 0. Product scope & confirmed decisions
@@ -58,7 +59,7 @@ A minimalist, dark, data-dense TFT companion site built for a second monitor whi
 | Charts | Inline SVG (sparkline, placement histogram) | No chart library needed at this scale |
 | Tests | Vitest | Pure functions: limiter, header parsing, comp signature, stats, seed schemas |
 | Tooling | pnpm 12, ESLint 9 (flat config), Supabase CLI as a devDependency, `tsx` for scripts | Bundled Next docs live in `node_modules/next/dist/docs/`. Check them before using a Next API (see `AGENTS.md`). |
-| Hosting | Vercel (Hobby) + Supabase (Free) | Hobby cron runs once a day. The daily sync also stops the Supabase free tier from auto-pausing. |
+| Hosting | Vercel (Hobby, `icn1`) + Supabase (Free, `ap-northeast-2`) | Hobby cron runs once a day. The daily sync also stops the Supabase free tier from auto-pausing. **Functions and the database sit in the same AWS region on purpose** — see §12. |
 
 ---
 
@@ -690,3 +691,29 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
 - [x] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` or a transactional RPC. Resolved with the `seed_comp` RPC (§4.9); the constraint is unchanged.
 - [x] **Riftbeast units were missing from `champions`** (resolved 2026-09-12, Phase 4 pre-requisite). Data Dragon's shop list became `is_shop_unit` instead of a filter (§4.8), so all ten are stored with their real costs. The live diff found two the earlier note had missed, Gromp (`DA_Gromp18_AP`) and Mama Beak (`DA_CrimsonRaptor18`).
 - [x] Data Dragon's `tft-champion.json` now only sets `is_shop_unit` (§4.8), so if Riot stops publishing TFT data there the sync degrades to marking everything buyable rather than dropping rows. The cost-and-traits test is what keeps summons out, and it holds on its own for Set 18.
+
+---
+
+## 12. Deployment regions (2026-09-12)
+
+**Vercel functions run in `icn1` (Seoul), pinned in `vercel.json`. Supabase is in `ap-northeast-2` (Seoul). These are the same AWS region, and that is the point.**
+
+Phases 1–5 ran on Vercel's default function region, `iad1` (us-east-1, Washington D.C.) — a default for new projects, never a deliberate choice. Since page renders read Supabase on every uncached request (§8), every one of those queries crossed the Pacific at roughly 180–200ms a round trip, and `/me` issues several. That was the half-second gap the Phase 5 verification measured between the ~0.15s TTFB and the 1.1–1.7s full stream.
+
+How each region was established, rather than assumed:
+- **Vercel:** the `x-vercel-id` response header reads `<pop>::<region>::<id>` when a function executes. It showed `sin1::iad1::…` — entering at the Singapore PoP, executing in `iad1`.
+- **Supabase:** the project API host sits behind Cloudflare and reveals nothing, but the direct database host `db.<ref>.supabase.co` resolves to an AWS address. It falls inside `2406:da12::/36`, which AWS publishes as `ap-northeast-2`.
+
+Vercel's `icn1` maps to `ap-northeast-2`, so the alignment is exact. Hobby permits a single function region, set with the `regions` key in `vercel.json`.
+
+The change improves **both** network legs at once, which is what made it unambiguous rather than a trade:
+- function → Supabase drops from ~180ms to low single-digit ms per round trip;
+- client → function drops from ~230ms (Thailand → Washington) to ~60–80ms (Thailand → Seoul).
+
+Nothing regresses. The prerendered shells for `/`, `/comps` and `/tiers/*` are served from the CDN PoP nearest the viewer regardless of function region, so TTFB is untouched — measured at ~0.13–0.15s before and after.
+
+Measured from Thailand, five samples per route on a warm cache: `/me` full stream **0.46–0.57s** (was 1.1–1.7s), `/` **0.39–0.56s** (was ~1.07s), authorized no-op cron **1.02s** (was 4.6s).
+
+Two notes for anyone re-measuring:
+- **Warm the cache first.** The first request to a route after any deploy regenerates the shell and reports an inflated TTFB (0.5–1.0s observed), which reads like a regression but is not.
+- **`sin1` (Singapore) is the rejected alternative.** It is closer to the client (~30ms) but leaves a Singapore↔Seoul hop on every database round trip. Since the database round trips outnumber the single client round trip, `icn1` wins. Moving the Supabase project instead would mean recreating it for the same result.

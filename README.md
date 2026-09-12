@@ -247,10 +247,10 @@ Phase 5 verification measured a ~0.15s TTFB but a 1.1–1.7s full stream from Th
 
 | Component | Region | Evidence |
 |---|---|---|
-| Vercel functions | **`iad1`** — us-east-1, Washington D.C. | `x-vercel-id: sin1::iad1::…` on `/api/cron/sync`. `sin1` is the entry PoP; `iad1` is where the function ran. |
+| Vercel functions | was **`iad1`** — us-east-1, Washington D.C. | `x-vercel-id: sin1::iad1::…` on `/api/cron/sync`. `sin1` is the entry PoP; `iad1` is where the function ran. |
 | Supabase Postgres | **`ap-northeast-2`** — Seoul | `db.<ref>.supabase.co` resolves into `2406:da12::/36`, which AWS publishes as `ap-northeast-2`. |
 
-`iad1` is simply Vercel's default for new projects; it was never chosen. So **every Supabase query from a page render crosses the Pacific** — roughly 180–200ms per round trip, and `/me` makes several. That is the missing half-second, and it is network time, not render time.
+`iad1` is simply Vercel's default for new projects; it was never chosen. So **every Supabase query from a page render crossed the Pacific** — roughly 180–200ms per round trip, and `/me` makes several. That was the missing half-second, and it was network time, not render time.
 
 Vercel's `icn1` is `ap-northeast-2` — the *same AWS region* as the database. Hobby allows a single function region, set in `vercel.json`, so the alignment is a one-line change — **applied 2026-09-12**:
 
@@ -287,6 +287,20 @@ Nothing gets worse. The prerendered static shells for `/`, `/comps` and `/tiers/
    ```bash
    curl -s -o /dev/null -w '%{time_starttransfer} %{time_total}\n' https://tft-compstat.vercel.app/me
    ```
+
+### Measured result (2026-09-12, from Thailand)
+
+`x-vercel-id` now reads `sin1::icn1::…`. Five samples per route, warm CDN cache:
+
+| Route | TTFB before → after | Full stream before → after |
+|---|---|---|
+| `/me` | ~0.15s → **0.13–0.15s** (unchanged) | 1.1–1.7s → **0.46–0.57s** |
+| `/` | ~0.15s → **0.13–0.15s** (unchanged) | ~1.07s → **0.39–0.56s** |
+| `/api/cron/sync` (authorized, no-op) | — | 4.6s → **1.02s** |
+
+TTFB is unchanged exactly as predicted — the static shell never depended on the function region. The full stream is now comfortably **inside the "under ~1s" Phase 5 target** from a remote client, which it previously missed by about half a second.
+
+**Measure on a warm cache.** The first request to each route after any deploy regenerates the shell and reports an inflated TTFB (0.5–1.0s here). Hit each route once and discard it, or you will misread a cold cache as a regression.
 
 > `sin1` (Singapore) is the alternative — ~30ms from Thailand — but it leaves a Singapore↔Seoul hop to the database on every query. `icn1` is the better trade, because the database round trips outnumber the single client round trip. Moving the *Supabase* project instead would mean recreating it, which is far more work for the same result.
 
@@ -349,7 +363,7 @@ All nine are set locally in `.env.local` and on Vercel, except `SITE_URL`, which
 |---|---|
 | Site | https://tft-compstat.vercel.app |
 | Supabase project | `ulpapntggzqipodxtwzb` — `ap-northeast-2`, Seoul |
-| Vercel function region | `iad1` — see [Regions and latency](#regions-and-latency) |
+| Vercel function region | `icn1` — Seoul, same AWS region as Supabase (see [Regions and latency](#regions-and-latency)) |
 | Tracked account | `BurdenInMyHand#6969` on `sg2` |
 | Set | 18 "Enchanted Wilds" — 36 traits, 74 champions, 771 items |
 | Cron | daily, 04:17 UTC |
