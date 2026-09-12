@@ -189,6 +189,10 @@ Approved task by task rather than as a whole phase.
   - `schemas.ts` / `validate.ts`: `gem`, the four stats and unit `priority`, plus three new cross-checks (priority needs items, is unique, and runs 1-2-3 with no gap). Percent → fraction conversion lives here.
   - UI: `GemBadge` + `PriorityChip` in `comp-details.tsx`, new `comp-stats.tsx`, rebuilt `CompRow`, and the same badges on `/comps/[slug]`.
   - ★★★ moved to emerald via a new `--color-star-3` token, globally rather than per-page (architecture §9).
+- [x] **Task 3 — Champion tier list grouped by cost** (approved 2026-09-12)
+  - `ChampionTierEntry` carries its `tier`; `src/lib/curated/champion-groups.ts` regroups the tiers into cost rows (4 tests), `CostRow` is the shelf, and `ChampionTierBoard` gains a `Segmented` "Group by" with **Cost** as the default.
+  - Ordering is inherited from the query's `.order("tier").order("position")` rather than re-sorted, so the author's ranking *within* a tier survives into the cost row.
+  - Tooltip gains the tier rating. **Ability is not available** — `champions` stores no ability data, so it would need a new `sync-static` source; flagged rather than faked.
 - [ ] Further tasks — not yet specified.
 
 **Verified — Task 1 (2026-09-12):**
@@ -204,6 +208,12 @@ Approved task by task rather than as a whole phase.
 - **PostgREST returns `numeric` as a JSON number** (checked directly: `avg_place` 4.32 / `top4_rate` 0.564 / `pick_rate` 0.021, all `typeof number`). `toStats()` in `queries.ts` is therefore a guard, not a fix — kept because a string arriving there would print "NaN%" on the page rather than fail anywhere visible.
 - **Rendered, with `next start`:** `/comps` shows the Gem badge, `Avg 4.32 · Top 4 56.4% · Pick 2.1%`, `1st`/`2nd` chips and emerald ★★★; `/comps/[slug]` shows the badge beside the title, the full stats including `Lv 8`, and the priority chips on the item builds.
 - **Layout (headless Edge at 960px and 400px):** no route scrolls horizontally, and nothing crosses the viewport edge on any of the six. Two defects were found by screenshot and fixed: the comp name truncated to "Defender Cassi…" once the Gem badge shared its column (the name row now wraps and the column is `sm:w-64`), and a fourth stat wrapped onto a ragged second line (the list now shows three, the guide page all four).
+
+**Verified — Task 3 (2026-09-12):**
+- **Checks:** `pnpm check` (229 tests, up from 225) and `pnpm build` are green. `/tiers/champions` stays **Static** (revalidate 1d, expire 1w) — the regrouping is client-side over props from the same cached read.
+- **Both groupings, driven in headless Edge at 960px and 400px:** cost view renders `1-cost=5 | 2-cost=5 | 3-cost=4 | 4-cost=6 | 5-cost=4`, tier view `S=4 | A=6 | B=7 | C=7`. Both total 24, which is what proves the regrouping is lossless. Filtering to 5-cost leaves one row of 4 and drops the emptied rows rather than showing four em dashes.
+- **Ordering confirmed on screen:** the 4-cost row reads Sivir(S) · Ahri(S) · Aphelios(A) · Ezreal(A) · Morgana(A) · Sett(B), and 5-cost reads Ashe(S) · Kennen(S) · Maokai(A) · Lux(B) — descending, with the YAML's own order kept inside each tier.
+- **Layout:** no horizontal overflow and nothing past the viewport edge at either width, in all three states (cost, tier, filtered). At 400px the 4-cost row wraps to a second line with the cost label still pinned left.
 
 ---
 

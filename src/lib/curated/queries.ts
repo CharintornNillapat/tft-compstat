@@ -34,6 +34,8 @@ export type ChampionTierEntry = {
   apiName: string;
   name: string;
   cost: number;
+  /** Its rating. Carried on the entry so the board can regroup by cost. */
+  tier: TierRank;
   iconUrl: string | null;
   /** Trait display names. */
   traits: string[];
@@ -154,6 +156,7 @@ export async function getChampionTierList(): Promise<ChampionTierList | null> {
               apiName: champion.api_name,
               name: champion.name,
               cost: champion.cost,
+              tier,
               iconUrl: champion.icon_url,
               traits: champion.traits.map((apiName) => traits.get(apiName)?.name ?? apiName),
               note,

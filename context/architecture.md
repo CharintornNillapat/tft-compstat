@@ -671,8 +671,14 @@ note talks about mechanics and numbers, not just units. A brief with no buffs, n
   - Optimized for a half-width 1080p window (~960px) that also degrades to phone width.
 - **Key components:**
   - `ChampionIcon`: cost border, star pips, mini item icons.
+  - `/tiers/champions` groups **by cost (default) or by tier**, via `Segmented`. Cost answers "what should I buy at this stage?", the question in front of you while the shop is open; tier answers the one the page is named after, and the curated data is tier-first, so neither view could be dropped.
+    - The cost rows are a **pure regrouping** of the same entries (`groupChampionsByCost` in `src/lib/curated/champion-groups.ts`), so the cost filter, tooltip and note dots behave identically in both.
+    - Rows are strongest-first **by inheritance, not by a comparator**: `getChampionTierList()` already returns S→C with each tier in its YAML `position` order, so bucketing stably preserves both. Re-sorting would discard the author's hand-written ranking within a tier.
+    - In cost rows each icon carries a corner `TierBadge`. Left-to-right order is otherwise the only signal that a row is ranked, and that signal disappears the moment a row wraps.
+    - A cost outside 1–5 gets its own trailing row rather than being dropped; the DB check should make it unreachable, but a champion silently vanishing is a worse failure than an odd extra row.
+    - The tooltip shows name, cost, **tier**, traits and the note. Not the ability: `champions` stores only `api_name, cost, icon_url, is_shop_unit, name, set_id, traits`, so abilities would need a new `sync-static` source.
   - `TraitBadge`: style color and count.
-  - `TierRow`: tier label plus a wrapping icon row.
+  - `TierRow`: tier label plus a wrapping icon row. `CostRow` is its twin for the cost view — same label-column/`min-h-11`/em-dash-when-empty shape, so the two groupings of one board read as one layout. Its label is a *tinted* plate rather than `TierBadge`'s solid one: "1-cost" is five times the width of "S", and five saturated blocks down the left edge would outweigh the icons they label.
   - `HexBoard`: 4×7 pointy-top hexes, front row (0) at the top, odd rows shifted right by half a hex.
     - Positions are percentages of an aspect-ratio box, so it scales from 400px to about 512px wide.
     - Each unit shows a cost-colored rim, a gold outer rim when it's a carry, star pips and up to 3 item icons, with details on hover.
