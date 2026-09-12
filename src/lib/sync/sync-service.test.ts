@@ -134,7 +134,9 @@ describe("a steady-state sync", () => {
 
     const result = await syncPlayer(ME, "manual", { db, client });
 
-    expect(result).toEqual({ status: "ok", newMatches: 0, calls: 2 });
+    // toMatchObject, not toEqual: the result also carries `nextAllowedAt`, a
+    // timestamp this test has no reason to pin.
+    expect(result).toMatchObject({ status: "ok", newMatches: 0, calls: 2 });
     expect(seen).toHaveLength(2); // ids + league, no match details
     expect(seen.some((url) => url.includes(`/matches/${MATCH_ID}`))).toBe(false);
     expect(statusOf(writes)).toBe("ok");
@@ -272,5 +274,23 @@ describe("isStale", () => {
 
   it("does nothing without a sync_state row", () => {
     expect(isStale(undefined, now)).toBe(false);
+  });
+});
+
+describe("every sync result carries a cooldown", () => {
+  it("tells the caller when the next sync is allowed, so the UI needn't wait for a re-render", async () => {
+    const { db } = makeDb({ storedMatchIds: [MATCH_ID] });
+    const before = Date.now();
+    const result = await syncPlayer(ME, "manual", {
+      db,
+      client: makeClient([json([MATCH_ID]), json(LEAGUE)]).client,
+    });
+
+    // The refresh button seeds its countdown from this rather than from a prop,
+    // which is what makes a "you're up to date" refresh start the cooldown.
+    expect(result.status).toBe("ok");
+    const nextAllowedAt = Date.parse(result.status === "ok" ? result.nextAllowedAt : "");
+    expect(nextAllowedAt).toBeGreaterThanOrEqual(before);
+    expect(nextAllowedAt).toBeLessThanOrEqual(Date.now() + 121_000);
   });
 });

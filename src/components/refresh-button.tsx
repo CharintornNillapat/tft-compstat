@@ -29,8 +29,12 @@ function describe(result: SyncResult): string {
 export function RefreshButton({ nextAllowedAt }: { nextAllowedAt: string | null }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  // Seeded from the action's own result, so the countdown starts the moment the
+  // sync returns instead of waiting for the re-render to bring a new prop down.
+  const [cooldownAt, setCooldownAt] = useState<string | null>(null);
   const now = useNow();
-  const countdown = now === null ? null : formatCountdown(nextAllowedAt, now);
+  const latest = cooldownAt ?? nextAllowedAt;
+  const countdown = now === null ? null : formatCountdown(latest, now);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -39,7 +43,9 @@ export function RefreshButton({ nextAllowedAt }: { nextAllowedAt: string | null 
         disabled={pending || countdown !== null}
         onClick={() =>
           startTransition(async () => {
-            setMessage(describe(await refreshMyMatches()));
+            const result = await refreshMyMatches();
+            setCooldownAt(result.nextAllowedAt);
+            setMessage(describe(result));
           })
         }
         className="rounded border border-line bg-panel px-2 py-1 text-[13px] hover:border-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"

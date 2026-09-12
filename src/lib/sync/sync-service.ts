@@ -35,11 +35,16 @@ export const STALE_AFTER_MS = 10 * 60 * 1000;
 
 export type SyncTrigger = "cron" | "manual" | "stale-read";
 
+/**
+ * Every variant carries `nextAllowedAt` so the refresh button can start its
+ * countdown from the action's own return value, rather than waiting for the page
+ * to re-render and tell it when the cooldown ends.
+ */
 export type SyncResult =
   | { status: "skipped"; reason: "locked-or-cooling"; nextAllowedAt: string | null }
-  | { status: "ok"; newMatches: number; calls: number }
-  | { status: "rate_limited"; retryAfterS: number; newMatches: number; calls: number }
-  | { status: "error"; message: string; newMatches: number; calls: number };
+  | { status: "ok"; newMatches: number; calls: number; nextAllowedAt: string }
+  | { status: "rate_limited"; retryAfterS: number; newMatches: number; calls: number; nextAllowedAt: string }
+  | { status: "error"; message: string; newMatches: number; calls: number; nextAllowedAt: string };
 
 /** Static reference data, read once per sync so derivation stays pure. */
 export async function loadStaticLookup(db: Db): Promise<StaticLookup> {
@@ -170,31 +175,26 @@ export async function syncPlayer(
     }
 
     const now = Date.now();
+    const nextAllowedAt = new Date(now + COOLDOWN_S * 1000).toISOString();
     await finish({
       status: "ok",
       last_success_at: new Date(now).toISOString(),
-      next_allowed_at: new Date(now + COOLDOWN_S * 1000).toISOString(),
+      next_allowed_at: nextAllowedAt,
       last_error: null,
     });
-    return { status: "ok", newMatches, calls: client.calls };
+    return { status: "ok", newMatches, calls: client.calls, nextAllowedAt };
   } catch (error) {
     if (error instanceof RateLimited) {
-      await finish({
-        status: "rate_limited",
-        next_allowed_at: new Date(Date.now() + error.retryAfterS * 1000).toISOString(),
-        last_error: error.message,
-      });
-      return { status: "rate_limited", retryAfterS: error.retryAfterS, newMatches, calls: client.calls };
+      const nextAllowedAt = new Date(Date.now() + error.retryAfterS * 1000).toISOString();
+      await finish({ status: "rate_limited", next_allowed_at: nextAllowedAt, last_error: error.message });
+      return { status: "rate_limited", retryAfterS: error.retryAfterS, newMatches, calls: client.calls, nextAllowedAt };
     }
 
     const message = error instanceof AuthError ? "Riot key invalid/expired" : (error as Error).message;
-    await finish({
-      status: "error",
-      // Still cool down: a failing key shouldn't be retried on every page view.
-      next_allowed_at: new Date(Date.now() + COOLDOWN_S * 1000).toISOString(),
-      last_error: message.slice(0, 500),
-    });
-    return { status: "error", message, newMatches, calls: client.calls };
+    // Still cool down: a failing key shouldn't be retried on every page view.
+    const nextAllowedAt = new Date(Date.now() + COOLDOWN_S * 1000).toISOString();
+    await finish({ status: "error", next_allowed_at: nextAllowedAt, last_error: message.slice(0, 500) });
+    return { status: "error", message, newMatches, calls: client.calls, nextAllowedAt };
   }
 }
 
