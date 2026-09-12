@@ -59,7 +59,7 @@ Migrations are named `supabase/migrations/<timestamp>_name.sql` (the Supabase CL
 
 ## Seeding a new patch or comp
 
-Two independent jobs. Static game data comes from Riot/CommunityDragon; curated content comes from YAML in this repo.
+Two independent jobs. Static game data comes from Riot/CommunityDragon; curated content comes from YAML in this repo. The tier-list YAML can be written by hand or generated — see step 3.
 
 ### 1. Static game data — `pnpm sync:static`
 
@@ -103,6 +103,45 @@ data/curated/18/champion-tiers.yaml:13:33  tiers.S[2]: unknown set 18 champion "
 Comps are also checked for: unique hexes, at most 3 items per unit, at least one carry, no emblem for a trait the unit already has, and no flex unit already on the board. Each comp is written through the transactional `seed_comp` RPC, so a rejected comp leaves the previous version intact.
 
 The seed schemas live in `src/lib/curated/schemas.ts`; the YAML shape is documented in [architecture §7](context/architecture.md).
+
+### 3. Tier lists from the live meta — `pnpm sync:meta`
+
+Optional, and only for the two tier-list files. It reads MetaTFT's public ranked stats and
+rewrites `data/curated/<setId>/{champion,item}-tiers.yaml` so you don't type 140-odd
+ratings by hand. Contract and caveats: architecture §7.1.
+
+```bash
+pnpm sync:meta --dry-run          # fetch, rate, validate, print what would change; writes nothing
+pnpm sync:meta                    # write the two files
+pnpm sync:meta --seed             # write, then run pnpm seed:curated
+pnpm sync:meta --rank CHALLENGER --days 7
+pnpm sync:meta --min-games 2000   # raise the sample floor (default 500)
+pnpm sync:meta --item-kinds completed,emblem,artifact,radiant
+```
+
+**Read the dry run before you let it write.** It prints each tier with its average
+placements, every name it could not resolve, and a per-entry diff against the file on
+disk (`+` added, `-` removed, `~` moved tier).
+
+Tiers are **percentile bands** of the ranking — `S` the top 15%, `A` the next 30%, `B` the
+next 35%, `C` the rest — so a tier is relative to its own list, and the generated header
+records where the bands actually fell. Champions and items are banded separately.
+
+What it guarantees:
+- Nothing is written unless the generated text passes `validateTierList`, the same check
+  `pnpm seed:curated` runs. A failure prints `file:line:col` and leaves both files alone.
+- An `api_name` it cannot resolve unambiguously is **skipped and reported**, never guessed.
+  A name it skips usually means the patch added something: run `pnpm sync:static`.
+- Your `notes:` are carried across runs, and `current:` is preserved.
+- It writes only when the ratings change, so a no-op run leaves git clean.
+
+The files it writes say `# GENERATED` at the top. Hand edits to them are lost on the next
+sync — except `notes:`, which is the intended place for your own judgement. If you would
+rather write the ratings yourself, just don't run this script; nothing else depends on it.
+
+> **What the numbers are.** A unit's average placement is the average of the boards it
+> appeared on, not a measurement of the unit: a 5-cost that shows up in games already won
+> reads better than it plays. Treat a synced list as a first draft.
 
 ### Cache revalidation
 
@@ -334,6 +373,7 @@ TTFB is unchanged exactly as predicted — the static shell never depended on th
 | `pnpm db:push` / `db:types` | Apply migrations / regenerate types |
 | `pnpm sync:static` | CommunityDragon → static tables |
 | `pnpm seed:curated` | YAML → tier lists and comps |
+| `pnpm sync:meta` | MetaTFT ranked stats → the two tier-list YAML files |
 | `pnpm riot:setup` | Riot ID → puuid; probe routing; seed `riot_accounts` + `sync_state` |
 | `pnpm riot:sync` | One sync locally |
 | `pnpm riot:backfill` | Deeper history |

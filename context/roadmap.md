@@ -193,7 +193,61 @@ Approved task by task rather than as a whole phase.
   - `ChampionTierEntry` carries its `tier`; `src/lib/curated/champion-groups.ts` regroups the tiers into cost rows (4 tests), `CostRow` is the shelf, and `ChampionTierBoard` gains a `Segmented` "Group by" with **Cost** as the default.
   - Ordering is inherited from the query's `.order("tier").order("position")` rather than re-sorted, so the author's ranking *within* a tier survives into the cost row.
   - Tooltip gains the tier rating. **Ability is not available** — `champions` stores no ability data, so it would need a new `sync-static` source; flagged rather than faked.
+- [x] **Task 4 — Automated meta sync (`pnpm sync:meta`)** (requested 2026-09-12)
+  - `scripts/sync-meta.ts` + pure `src/lib/curated/meta-sync.ts` (24 tests): MetaTFT's public
+    ranked stat API → `data/curated/18/{champion,item}-tiers.yaml`. Contract in architecture §7.1.
+  - The feed reports `api_name`s and an eight-bucket placement histogram, so average placement is
+    **computed**, not scraped, and **Playwright is not used** — it would add a dependency and a
+    failure mode to read JSON. (It is also not installed in this repo, despite the task saying so.)
+  - Bands: **percentile** — `S` top 15%, `A` next 30%, `B` next 35%, `C` the rest, cut from
+    the ranking by average placement; best average placement first inside a tier.
+  - Guardrails: names resolved against `champions`/`items` (ambiguous near misses refused, not
+    guessed); the generated text validated by `validateTierList` before either file is written;
+    `notes:` and `current:` carried across runs; writes only when the ratings actually change.
+  - `scripts/lib/references.ts` extracted so `seed-curated` and `sync-meta` share one static read.
+  - Flags: `--dry-run`, `--seed`, `--set`, `--rank`, `--days`, `--min-games`, `--item-kinds`.
 - [ ] Further tasks — not yet specified.
+
+**Verified — Task 4 (2026-09-12):**
+- **Checks:** `pnpm check` (253 tests, up from 229) and `pnpm build` are green; every route keeps the shape it had.
+- **Live dry run** against MetaTFT ranked Diamond+, patch 18.2, ~604k games over 3 days:
+  - Champions: **55 of 55** eligible shop units rated — `S 9 · A 2 · B 13 · C 31`. The 6 unresolved feed rows are `TFT18_*` alternate forms and summons (Akali, Gromp, Kog'Maw, Master Yi, Nidalee Cougar, Sprykin summon), correctly reported and skipped rather than aliased onto the real champions.
+  - Items: **89 of 89** rated across `completed + emblem + artifact` — `S 30 · A 34 · B 17 · C 8`. The single unresolved name, `DA_Artifact_Hullcrusher`, is an artifact our `items` table predates; the run says so and points at `pnpm sync:static`.
+- **The validation guardrail was proved by fault injection,** not by assertion: with resolution deliberately short-circuited so an unknown name reaches the YAML, the run aborted with `data/curated/18/item-tiers.yaml:104:7  tiers.C[4]: unknown item "DA_Artifact_Hullcrusher"`, wrote nothing and exited 1.
+- **Input guards** all abort with exit 1: `--rank BOGUS` (the feed answers an unknown rank with an empty result rather than an error, so this is a real trap), `--set 17` against a set-18 feed, an unknown `--item-kinds`, a non-numeric `--min-games`.
+- **A real write was run and then reverted** (`git checkout` on the two files), so the sample lists are still what is committed: adopting the generated ratings is a separate, deliberate call. The generated file keeps the schema exactly — quoted `patch`, `slug: champions-18.2`, block lists one entry per line — and all three hand-written `notes:` survived the round trip.
+- **Idempotency, and a bug it caught.** The first version compared whole file text, so it rewrote both files on every run: the provenance header carries a sample size that grows minute to minute. Now a sync compares the ratings only (`tierListFingerprint`), and a re-run reports "no change" for the champion list. The item list still rewrites, correctly — two items near a band boundary swap places inside a tier as games come in, which is the display order changing.
+
+**Both findings from the first pass are now resolved (2026-09-12):**
+1. **Percentile bands adopted** — the lopsided `A 2 of 55` was the absolute cutoffs meeting two
+   differently-shaped distributions. `tierCuts` + `assignTiers` replace them (architecture §7.1).
+2. **`--item-kinds` stays `completed,emblem,artifact`** — confirmed as the standard filter, so the
+   item list is 89 entries rather than the sample's 22. `/tiers/items` groups by kind and renders it.
+
+**Verified — percentile bands and first real adoption (2026-09-12):**
+- **Checks:** `pnpm check` (260 tests, up from 253) and `pnpm build` are green.
+- **The shape is the whole point, and it landed on both lists at once.** Against the same live feed
+  (MetaTFT ranked Diamond+, patch 18.2, ~628k games over 3 days):
+
+  | list | rated | absolute cutoffs (before) | percentile bands (after) |
+  |---|---|---|---|
+  | champions | 55 | `S 9 · A 2 · B 13 · C 31` | `S 8 · A 17 · B 19 · C 11` |
+  | items | 89 | `S 30 · A 34 · B 17 · C 8` | `S 13 · A 27 · B 31 · C 18` |
+
+  Both are exactly `15 / 30 / 35 / 20` of their own list, which is what the cumulative rounding in
+  `tierCuts` guarantees — asserted for every size from 0 to 200, not just these two.
+- **Where the bands actually fell** is now in the generated header, because with percentiles the
+  numeric boundary moves run to run: champions `S 8 to 4.04, A 17 to 4.56, B 19 to 4.72, C 11 to 5.43`.
+  The same eight champions no longer read as "under 4.15" — they read as "the best eight of 55".
+- **Ties never split a band** (`assignTiers` extends over them). Without it the `api_name` tiebreak
+  in `rankRows` would decide a rating whenever two rows share an average.
+- **Adopted for real, not reverted this time:** `pnpm sync:meta --seed` wrote both files, seeded
+  `champions-18.2` (55 entries) and `items-18.2` (89 entries), pruned the 3 item entries that left
+  the list, and revalidated the live site. All three hand-written `notes:` survived the round trip.
+- **Still unresolved, and correctly reported rather than guessed:** the 6 `TFT18_*` alternate forms
+  and summons on the champion feed, and `DA_Artifact_Hullcrusher`, an artifact our `items` table
+  predates. A `pnpm sync:static` would pick the artifact up; it was not run, since it is a separate
+  change to the static tables.
 
 **Verified — Task 1 (2026-09-12):**
 - **Checks:** `pnpm check` (217 tests, up from 209) and `pnpm build` are green. `/` stays **Partial Prerender** (revalidate 1d, expire 1w), with the brief in the prerendered shell alongside `TopComps`.

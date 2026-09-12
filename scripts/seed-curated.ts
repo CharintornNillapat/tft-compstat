@@ -26,14 +26,14 @@ import {
   formatIssue,
   validateComp,
   validateTierList,
-  type ReferenceIndex,
   type SeedComp,
   type SeedIssue,
   type SeedTierList,
 } from "@/lib/curated/validate";
 import { COMP_STYLE_LABELS } from "@/lib/static/game";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { chunks, must, selectAll } from "./lib/db";
+import { chunks, must } from "./lib/db";
+import { loadReferences } from "./lib/references";
 import { revalidateSite } from "./lib/revalidate";
 
 const CURATED_DIR = "data/curated";
@@ -90,28 +90,6 @@ async function findCuratedFiles(): Promise<{ tierFiles: TierFile[]; compFiles: C
     }
   }
   return { tierFiles, compFiles };
-}
-
-async function loadReferences() {
-  const db = getSupabaseAdmin();
-  const [sets, champions, items, traits] = await Promise.all([
-    selectAll((from, to) => db.from("tft_sets").select("id").order("id").range(from, to), "tft_sets"),
-    selectAll(
-      (from, to) => db.from("champions").select("api_name, name, set_id, traits").order("api_name").range(from, to),
-      "champions",
-    ),
-    selectAll(
-      (from, to) => db.from("items").select("api_name, name, grants_trait").order("api_name").range(from, to),
-      "items",
-    ),
-    selectAll((from, to) => db.from("traits").select("api_name, name").order("api_name").range(from, to), "traits"),
-  ]);
-  const index: ReferenceIndex = {
-    champions: new Map(champions.map((c) => [c.api_name, { name: c.name, setId: c.set_id, traits: c.traits }])),
-    items: new Map(items.map((i) => [i.api_name, { name: i.name, grantsTrait: i.grants_trait }])),
-    traits: new Map(traits.map((t) => [t.api_name, { name: t.name }])),
-  };
-  return { setIds: new Set(sets.map((s) => s.id)), index };
 }
 
 async function writeTierList(list: SeedTierList) {

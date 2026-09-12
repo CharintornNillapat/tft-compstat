@@ -74,12 +74,14 @@ data/curated/<setId>/
 scripts/
   sync-static.ts             CommunityDragon → tft_sets/champions/traits/items (+ revalidate "static")
   seed-curated.ts            YAML → tier_lists/tier_entries/comps/comp_units (+ revalidate)
+  sync-meta.ts               MetaTFT ranked stats → the two tier-list YAML files (§7.1)
   riot-setup.ts              Riot ID → puuid; probes routing/league (§5.1); seeds riot_accounts + sync_state;
                              `--fixture` saves an anonymized real match for the derivation tests
   riot-sync.ts               one sync locally, through SyncService (lock, cooldown, budget)
   riot-backfill.ts           deeper history, run locally, same limiter; bypasses the lock on purpose
   rederive.ts                recompute player_matches from matches.raw (0 API calls)
   lib/{db,revalidate}.ts     paging/chunking helpers; POST /api/revalidate client
+  lib/references.ts          the static tables curated scripts check api names against (one read)
 supabase/migrations/         SQL (schema, RLS, RPCs)
 src/app/
   page.tsx                   Overview (glance panel)
@@ -106,6 +108,7 @@ src/lib/
   stats/{types,row,filter,summary,comps,champions,rank}.ts  pure functions
   stats/queries.ts           uncached reads for /me and / (anon client)
   curated/{schemas,validate,queries}.ts
+  curated/meta-sync.ts       pure: placement histogram → tier bands → tier-list YAML text (§7.1)
   curated/traits.ts          computeActiveTraits (pure, client-safe)
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
 ```
@@ -617,6 +620,93 @@ note talks about mechanics and numbers, not just units. A brief with no buffs, n
    - Tier lists whose YAML was removed stay in the DB as history.
 5. Write each comp with the `seed_comp` RPC (§4.9). It's one transaction per comp, so swapping two units' hexes is fine. Then unpublish every published comp whose slug no longer has a file.
 6. `POST /api/revalidate` with the tags that were written (`tiers`, `comps`). The script skips this with a warning when `SITE_URL` is unset. The site must already know a tag: a deploy that predates `comps` answers 400, and the script exits 1 after writing the data.
+
+---
+
+### 7.1 Automated tier lists (`pnpm sync:meta`, Phase 6 Task 4)
+
+The two tier-list YAML files can be **generated** from an external meta feed instead
+of being written by hand. They stay curated content in the §0 sense — the repo file
+is still the source of truth, still Zod-validated, still seeded by the same script,
+and still reviewed in a git diff before it goes anywhere. What changes is who types
+the ratings.
+
+This does **not** contradict §0's "no global win-rate aggregation": we are not
+measuring anything. We read a number someone else publishes and write it into a file,
+the same way the curated comp stats are copied off a stats site by hand today.
+
+**Source.** MetaTFT's public stat API, `https://api-hc.metatft.com/tft-stat-api/{units,items}`,
+with `queue=1100` (ranked), `patch=current`, `rank` and `days`. Two properties are
+what make it usable without scraping:
+- It reports **`api_name`s** (`DA_18_Ashe`, `DA_InfinityEdge`), not display names, so
+  there is nothing to transliterate in the happy path.
+- It reports an **eight-bucket placement histogram**, not a rounded average, so
+  average placement is computed here and the sample size is known.
+
+A browser automation path (Playwright) was considered and is not used: the feed is
+JSON, so a headless browser would add a dependency and a failure mode for nothing.
+
+**Tier bands** (`meta-sync.ts`, pure and tested). Rows are sorted by average
+placement, best first, and that *ranking* is cut into **percentile bands**: `S` the
+top 15%, `A` the next 30%, `B` the next 35%, `C` the rest. Entries inside a tier stay
+best average placement first, which is the display order §7 already defines, and ties
+break on `api_name` so the same feed always writes the same bytes.
+
+Percentiles rather than absolute cutoffs because the two lists have different shapes:
+champions bunch inside a fifth of a placement around 4.5 while items spread twice as
+wide, so one pair of fixed cutoffs cannot rate both. Measured on the same feed, fixed
+cutoffs gave champions `S 9 · A 2 · B 13 · C 31` — a histogram slice, not a tier list —
+against items' `S 30 · A 34 · B 17 · C 8`. The bands give both `15 / 30 / 35 / 20`.
+
+Two details keep that honest:
+- The shares are accumulated **before** rounding (`tierCuts`), so rounding error cannot
+  compound across four bands: the cuts stay ordered and the last is exactly the row
+  count, which is what puts every rated row in exactly one tier at any list size.
+- A band is **extended over a tie** rather than splitting it (`assignTiers`). Two rows
+  with the same average must not land in different tiers, since with the `api_name`
+  tiebreak that would read as alphabetical order deciding a rating.
+
+The trade is that a tier is now **relative to its list**: a C-tier unit is in the bottom
+fifth of what is played, not bad in the abstract, and every list has an S tier even on a
+flat patch. The generated header therefore records where the bands actually fell — each
+tier's size and worst average placement — since that boundary moves from run to run and
+cannot be worked out from the shares.
+
+**What is rated.** Champions: shop units of the folder's set — the Riftbeasts and
+summons of §11 are rated by the feed but belong on no tier list. Items: `completed`,
+`emblem` and `artifact` by default (`--item-kinds` to change it, confirmed as the
+standard filter 2026-09-12); components and consumables have an average placement
+without being tier-list material, and radiants split each item into a thin second
+sample. That default rates 89 items, against the 22 the hand-written sample listed —
+`/tiers/items` groups by kind, so the longer list is what the page is built for. Rows under `--min-games` (default 500) are
+reported and skipped rather than rated on noise.
+
+**Guardrails.**
+- Names are resolved against `champions` / `items` first. An exact match wins; a near
+  miss goes through the same `suggestApiNames` that powers the seed's "Did you mean …?",
+  and is accepted **only when it is unambiguous**. Anything else is reported and skipped.
+- The generated text is run through `validateTierList` — the same function
+  `seed:curated` runs — *before* either file is written. Any issue aborts the whole run
+  with `file:line:col` and leaves both files untouched.
+- The feed labels its own set and patch. A set that disagrees with `--set`, a set with
+  no static data, or the two feeds disagreeing with each other all abort.
+
+**What a sync preserves.** `notes:` (the hover notes) are carried across runs and
+re-attached to entries that are still listed; notes for an entry that dropped out are
+removed, since §7 rejects a note that is in no tier. `current:` is preserved too, so a
+list that was not the site's current one does not silently become it.
+
+**When a sync writes.** Only when the *ratings* change — the tiers, their order, the
+patch, `current`, or the notes. The provenance header carries a sample size that grows
+between any two runs, so comparing file text would rewrite both files every run and
+bury a real tier change in daily noise (`tierListFingerprint`).
+
+**The honest caveat, recorded because the numbers look more authoritative than they are.**
+A unit's average placement is the average of the *boards it appeared on*, not a measure
+of the unit. A 5-cost that mostly appears in games somebody had already won reads better
+than it plays, and a unit that is only ever played as a bad-spot pivot reads worse. The
+bands are a starting point for a human pass, which is exactly why `notes:` survives a
+sync and why the generated `summary:` names its source and sample on the page.
 
 ---
 
