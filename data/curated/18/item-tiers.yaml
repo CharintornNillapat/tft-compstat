@@ -3,23 +3,23 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 629,392 games on patch 18.2, set 18. Feed updated 2026-09-12T13:55:54.324Z.
+# Sample: 630,400 games on patch 18.2, set 18. Feed updated 2026-09-12T14:01:20.850Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 13 to 4.07, A 27 to 4.19, B 31 to 4.40, C 18 to 5.15.
+# Where they fell, as size and worst average placement: S 13 to 4.07, A 27 to 4.19, B 31 to 4.41, C 18 to 5.15.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: items-18.2
 kind: item
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 629,392 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 630,400 games over the last 3 days."
 tiers:
   S:
     - DA_TacticiansShield
     - DA_Artifact_SilvermereDawn
     - DA_Bloodthirster
     - DA_BrambleVest
-    - DA_18_EmblemJuggernaut
     - DA_HandOfJustice
+    - DA_18_EmblemJuggernaut
     - DA_ThiefsGloves
     - DA_SteraksGage
     - DA_BlueBuff
@@ -52,15 +52,15 @@ tiers:
     - DA_NashorsTooth
     - DA_SpearOfShojin
     - DA_TacticiansCape
-    - DA_Artifact_LichBane
     - DA_Morellonomicon
     - DA_Artifact_GoldCollector
+    - DA_Artifact_LichBane
   B:
     - DA_LastWhisper
     - DA_InfinityEdge
     - DA_KrakensFury
-    - DA_Artifact_EternalPact
     - DA_DragonsClaw
+    - DA_Artifact_EternalPact
     - DA_VoidStaff
     - DA_18_EmblemBrawler
     - DA_WarmogsArmor
@@ -74,13 +74,13 @@ tiers:
     - DA_Artifact_SeekersArmguard
     - DA_Artifact_LudensTempest
     - DA_Artifact_LightshieldCrest
-    - DA_18_EmblemBlossom
     - DA_18_EmblemPrimal
+    - DA_18_EmblemBlossom
     - DA_18_EmblemSlayer
     - DA_18_EmblemFloraFatalis
     - DA_JeweledGauntlet
-    - DA_Artifact_InfinityForce
     - DA_Artifact_Mittens
+    - DA_Artifact_InfinityForce
     - DA_Artifact_HorizonFocus
     - DA_GargoyleStoneplate
     - DA_Artifact_RapidFireCannon
@@ -102,8 +102,8 @@ tiers:
     - DA_Artifact_MogulsMail
     - DA_Artifact_GamblersBlade
     - DA_18_EmblemBlackthorn
-    - DA_Artifact_ForbiddenIdol
     - DA_Artifact_AegisOfDusk
+    - DA_Artifact_ForbiddenIdol
     - DA_Artifact_StatikkShiv
     - DA_18_EmblemCoven
 notes:
