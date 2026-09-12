@@ -1,6 +1,6 @@
 # TFT CompStat — Architecture
 
-> **Status:** Approved design (2026-09-11). Phases 1–4 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §5, §6, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Status:** Approved design (2026-09-11). Phases 1–5 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §5, §6, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
 > **Companion doc:** [`roadmap.md`](./roadmap.md)
 
 ## 0. Product scope & confirmed decisions
@@ -87,17 +87,23 @@ src/app/
   me/page.tsx                Personal dashboard
   api/cron/sync/route.ts, api/revalidate/route.ts
 src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx), TierRow, CostFilter, ToggleGroup, HoverTip,
-                             HexBoard, CompList, CompGuide, GuideMarkdown, PlacementPill, StatTile, Sparkline
+                             HexBoard, CompList, CompGuide, GuideMarkdown, CarryMark (comp-details.tsx),
+                             PlacementPill, StatTile, Sparkline, PlacementHistogram, Segmented, Skeleton, SyncNotice,
+                             MeDashboard, MeMatchHistory, MeFavoriteComps, CarryCell (me-comp-cell.tsx),
+                             Shortcuts, and the pure helpers placement-styles.ts, sparkline-geometry.ts, shortcut-match.ts
 src/lib/
   env.ts                     Zod-validated env
   cache-tags.ts              the cache tags /api/revalidate accepts
   supabase/{server,admin,types,result}.ts   admin = service role, `import 'server-only'`; result = `must()`
-  static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds)
+  static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds, queue ids)
   static/cdragon.ts          pure CommunityDragon → rows transform
+  static/names.ts            NameBook: api name → display name/icon/cost (pure, client-safe) + pickNames
+  static/lookup.ts           getStaticNames(): the whole NameBook, `use cache` + cacheTag("static")
   riot/{routing,client,limiter,headers,errors,schemas,endpoints}.ts
-  sync/{sync-service,derive,comp-signature,patches,actions}.ts
+  sync/{sync-service,derive,comp-signature,patches,actions,notice}.ts
   sync/__fixtures__/match.json   a real Set 18 match, puuids anonymized
-  stats/{summary,comps,champions}.ts pure functions
+  stats/{types,row,filter,summary,comps,champions,rank}.ts  pure functions
+  stats/queries.ts           uncached reads for /me and / (anon client)
   curated/{schemas,validate,queries}.ts
   curated/traits.ts          computeActiveTraits (pure, client-safe)
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
@@ -478,11 +484,40 @@ Changing the algorithm means bumping `derived_version` and running `scripts/rede
 ```ts
 type StatsFilter   = { lastN: 10 | 20 | 50; queues: 'ranked' | 'all'; currentSetOnly: boolean };
 type PlayerSummary = { games: number; avgPlacement: number; top4Rate: number; winRate: number;
-                       avgLevel: number; placementDist: number[/*8*/]; recent: number[/*placements, newest first*/] };
+                       avgLevel: number; placementDist: PlacementDist; recent: number[/*newest first*/] };
 type CompStat      = { compKey: string; label: string; games: number; avgPlacement: number; top4Rate: number };
 type UnitStat      = { apiName: string; games: number; avgPlacement: number };   // also used for items
 ```
 Computing on read is sub-millisecond over 20–50 rows and never goes stale. Raw data is the only thing cached.
+
+**Implementation notes (Phase 5).**
+- **`MatchRow`** (`stats/types.ts`) is a trimmed projection of `player_matches`: `gold_left`,
+  `damage_to_players`, `time_eliminated_s`, `last_round`, `puuid` and `derived_version` are dropped
+  because nothing renders them. It keeps the client payload small **and** decouples the stats
+  modules from the generated Supabase types, so every test builds its input as a plain object.
+  `toMatchRow` re-narrows the `traits`/`units` jsonb the same way `derive.ts` casts it on the way in.
+- **`PlacementDist` is a fixed-length 8-tuple**, not `number[]`: under `noUncheckedIndexedAccess`
+  that makes `dist[0]` a `number` rather than `number | undefined` at every call site.
+- **Filter order: predicates, then `lastN`.** `selectMatches` applies the queue and set predicates
+  first, so "last 50, ranked" means up to 50 *ranked* games, not the ranked subset of the last 50.
+  `PlayerSummary.games` carries the real count, and the UI prints that rather than the number asked
+  for. `currentSet` is passed in from `tft_sets.is_active`, never derived as `max(set_number)` —
+  right after a set rollover with no games played the max is the *old* set, and "current set only"
+  would quietly show last set's games.
+- **Champions and items count once per match** (`topChampions`/`topItems`), deduplicated per row.
+  Two Deathblades, or the same champion fielded twice, count once — mirroring `computeActiveTraits`'
+  once-per-trait rule. That is what makes `games` mean "matches where I fielded X" and leaves
+  `avgPlacement` well defined.
+- **Labels** come from `signatureLabel` (§6.2) through `labelNames(book)`, so a match row and a
+  curated comp are named by the same code. Trait *display* names come from `matchTraits`, because
+  `player_matches.traits[].name` is an api name and `TraitHex` wants a display name.
+- **Where the filter runs:** `/me` fetches ≤50 rows once on the server and hands plain props to a
+  client component, which re-runs these same pure functions on every toggle. Switching 10/20/50 or
+  ranked/all therefore costs no round trip. Driving it from `searchParams` instead would make every
+  toggle a full RSC navigation for a subset of data the browser already holds.
+- **Name resolution:** `getStaticNames()` caches the whole api-name dictionary under the `static`
+  tag, and `pickNames` trims it to what the fetched rows reference before it crosses to the client —
+  measured at 135 names rather than the 881 rows in the full tables.
 
 ### 6.4 Patch labels (`matches.patch`)
 Set 18 broke the old approach: `game_version` no longer carries a number (§6.1). `patch` is therefore derived from `game_datetime` against a table of TFT patch release dates in `src/lib/sync/patches.ts`, the same labels the curated YAML uses:
@@ -576,7 +611,11 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - It calls `revalidateTag(tag, { expire: 0 })`. That's the Next 16 form for callers outside a Server Action, and the next visit renders fresh data instead of serving the pre-seed copy once more. The one-argument form is deprecated.
   - The page (a Server Component) fetches data. Interactive parts are client components that get plain props: `ChampionTierBoard` (cost filter state) and `ItemTierBoard`.
   - Both boards share one tooltip (`useHoverTip`/`HoverTip`). It opens on mouse hover, focus or tap, stays inside the viewport, and closes on leave, blur, Escape, scroll or a tap elsewhere.
-- **`/me` and `/`** are dynamic but read only from Supabase. Each view is one query to `player_matches` plus the latest `rank_snapshots` and `sync_state`. Riot is never called during render.
+- **`/me` and `/`** read only from Supabase; Riot is never called during render. Both are **Partial Prerender**: a static shell plus streamed islands (Phase 5).
+  - **Player reads stay uncached** (`src/lib/stats/queries.ts`), which is the §6.3 principle applied to Next's cache as well as Supabase's. Two concrete reasons, not just principle: the header renders a live cooldown countdown from `sync_state.next_allowed_at`, which a cached read would serve wrong by construction; and `after()` stale-on-read writes new matches *after* the response has flushed, with no clean revalidation hook from inside `after()`, so a cached read would serve pre-sync data for a whole `cacheLife` window. Each view is one index-covered query over ≤50 rows — caching would buy ~30ms and cost correctness. `CACHE_TAGS` is therefore unchanged.
+  - The stats path uses the **anon** client throughout: `player_matches`, `riot_accounts` and `rank_snapshots` are all anon-readable (§4.6). Only the sync badge needs the service role, which is why `/me` splits into two islands — `MeHeader` (service role, `sync_state`, paints first because it answers "am I looking at fresh data?") and `Dashboard` (anon, the 50-row query). One island would make the faster, more important half wait on the slower one.
+  - `/` splits along the same caching boundary: `TopComps` reuses the cached `getComps()` that `/comps` already reads — a hit under the same `comps` tag, so no new query and no new tag — and prerenders into the shell, while `OverviewGlance` is uncached and streams in. `OverviewGlance` returns a **fragment of two `<section>`s** rather than a wrapper, because Suspense creates no DOM box of its own and a wrapper would collapse the grid's three columns into two; its fallback renders two skeletons for the same reason.
+  - **`refreshMyMatches` calls `refresh()`**, unconditionally. `refresh()` (Next 16, Server-Action-only) re-runs a route's *uncached* server content, which is exactly what a sync changes. The Phase 4 code called `revalidatePath("/me")` and only when `newMatches > 0`, which was wrong twice over: a "you're up to date" refresh never re-rendered, so the sync badge and cooldown countdown kept showing pre-sync values; and what `revalidatePath` invalidates is the prerendered shell, the one part that didn't change. Every `SyncResult` variant also carries `nextAllowedAt` now, so `RefreshButton` starts its countdown from the action's return value instead of waiting for the re-render.
 - Icons come from CommunityDragon URLs via `next/image`.
   - `remotePatterns` allows only `https://raw.communitydragon.org/*/game/assets/**` with no query string.
   - `minimumCacheTTL` is 31 days, because a version-pinned URL's content never changes.
@@ -593,9 +632,10 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - Placement pills: 1st gold, 2–4 teal, 5–8 muted.
   - Trait styles: bronze, silver, gold, prismatic, plus orange for unique (1-unit) traits. Active trait icons are black on a hexagon in the style color; inactive ones are gray.
   - Star goals: ★ bronze, ★★ silver, ★★★ gold.
+  - Carry marker: `--color-carry` (near-white), placed **outside the cost ramp on purpose**. Phase 3 used the gold accent, which read as the 5-cost cost border and left a 5-cost carry indistinguishable from an ordinary 5-cost. A `CarryMark` crosshair glyph carries the same meaning as a *shape*, so it survives colour-vision deficiency.
 - **Layout:**
   - A single top nav: Overview · Comps · Champions · Items · Me.
-  - Keyboard shortcuts `1–5` switch pages and `/` focuses search.
+  - Keyboard shortcuts `1–5` switch pages and `/` focuses search (`Shortcuts` in the root layout; `NAV_ITEMS` is exported from `nav-tabs.tsx` so routes and shortcuts can't drift). The decision lives in the pure `shortcut-match.ts`, because that's where shortcuts actually go wrong: they stay inert while focus is in an input, textarea, select or contenteditable, and never fire with Ctrl/Alt/Meta held. `/` only calls `preventDefault()` once it has found a search box, so on pages without one the browser's quick-find still works. Links carry `aria-keyshortcuts`.
   - Optimized for a half-width 1080p window (~960px) that also degrades to phone width.
 - **Key components:**
   - `ChampionIcon`: cost border, star pips, mini item icons.
@@ -607,7 +647,11 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
   - `/comps` rows: tier, name, style and difficulty; carries (with items), a divider, then the rest of the board; active traits as icon + count.
     - The whole row links to the guide, and units and traits keep their own tooltips.
     - Filters: tier and style toggles (only those present), plus search across comp, unit, item and trait names.
-  - `PlacementPill`, `StatTile`, `Sparkline`.
+  - `PlacementPill` (always prints the digit, so colour is never the only channel), `StatTile`, `Sparkline`, `PlacementHistogram`, `Segmented` (single-select; `ToggleGroup` stays multi-select, and they share exported button classes so the two can't drift).
+    - **Charts are inline SVG** (§2). The geometry lives in pure modules — `sparkline-geometry.ts`, `placement-styles.ts` — so it is unit-testable in the node-only suite, which has no DOM. `sparklineGeometry`'s `domain` is **required rather than derived**, which removes the divide-by-zero case: a run of identical placements sits at that value's height instead of an ambiguous mid-height.
+    - `Sparkline` draws the line as stretched SVG but positions its dots as HTML, because an SVG circle inside `preserveAspectRatio="none"` stretches into an ellipse at the ~3× horizontal scale this renders at.
+    - **Direction:** the sparkline and its pill row both run oldest→newest, left to right, so time flows the way a reader expects; `PlayerSummary.recent` is newest-first per §6.3, so callers reverse it. Match history stays newest-first — a list is not a timeline.
+    - `PlacementHistogram`'s text list is the axis *and* the accessible representation, so its bars are `aria-hidden` rather than duplicated content.
 - **States:** skeletons while loading, empty states ("No ranked games this set"), and a sync status badge ("synced 3m ago", "cooldown 1:12", "key expired").
 
 ---

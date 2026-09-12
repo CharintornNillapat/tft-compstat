@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–4 complete and deployed (2026-09-12); Phase 5 is next. Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists, four curated comps and the match cache syncing daily.
+> **Status:** All five phases complete and deployed (2026-09-12). Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists, four curated comps, the match cache syncing daily and the personal dashboard.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -19,7 +19,7 @@
 | 2 | Static game data + tier lists | ✅ Done (2026-09-11) |
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
-| 5 | Personal dashboard & polish | 🟨 In progress |
+| 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
 
 ---
 
@@ -96,7 +96,7 @@
 - **Traits:** `computeActiveTraits` matches the Draven board checked by hand (Elderwood 3, Brawler/Executioner/Inferno/Juggernaut 2, four uniques, Sprykin and Vanguard inactive). Live, Defender Cassiopeia shows Defender 4, which only counts because the Defender Emblem is on Cassiopeia.
 - **Live pages:** `/comps` lists all four comps in tier then `order` then name; `/comps/draven-fast-9` and `/comps/defender-cassiopeia` render the board, traits, item builds, early and flex units and the guide markdown. 3★ goals show gold pips. Icons load from CommunityDragon.
 - **UI:** headless Edge at 960px and at a true 398px viewport: no horizontal overflow (scroll width = viewport, nothing past the edge).
-- **Known nit:** the carry's gold rim reads much like the 5-cost cost border, so a 5-cost carry (Draven) is less obvious than a 3-cost one (Cassiopeia). Left for the Phase 5 polish pass.
+- **Known nit (fixed in Phase 5):** the carry's gold rim read much like the 5-cost cost border, so a 5-cost carry (Draven) was less obvious than a 3-cost one (Cassiopeia). Now a near-white `--color-carry` rim outside the cost ramp, plus a `CarryMark` glyph so shape carries the meaning too.
 
 ---
 
@@ -140,23 +140,34 @@
 ## Phase 5 — Personal dashboard & polish
 **Goal:** A glanceable personal stats view plus overall polish for second-monitor use.
 
-- [ ] `src/lib/stats/*`: summary, placement distribution, favorite comps, top champions/items, with `StatsFilter` (last 10/20/50, ranked/all, current set) + tests
-- [ ] `/me` has five parts:
-  - header: Riot ID, rank/LP, sync badge, refresh with a cooldown countdown
-  - stat tiles
+- [x] `src/lib/stats/*`: `types`, `row`, `filter`, `summary`, `comps`, `champions`, `rank` + `queries`, with `StatsFilter` (last 10/20/50, ranked/all, current set) and 49 tests
+  - Two decisions are recorded in architecture §6.3: filter predicates run **before** `lastN`, so "last 50 ranked" means up to 50 ranked games rather than the ranked subset of 50; and champions and items are counted **once per match**, mirroring `computeActiveTraits`' once-per-trait rule, which is what makes `avgPlacement` well defined.
+- [x] `/me` has five parts:
+  - header: Riot ID, rank/LP with an LP delta, sync badge, refresh with a cooldown countdown
+  - stat tiles (avg placement, top 4, wins, avg level)
   - placement sparkline + histogram
   - match history rows: placement, comp label, carry + items, traits, level, time ago
   - favorite comps table
-- [ ] `/` overview glance panel: rank, last 10 placements, top S-tier comps
-- [ ] Polish: keyboard shortcuts, skeletons, empty/error states (key expired, rate limited), contrast check, Lighthouse pass
-  - Make the board's carry marker distinct from the 5-cost border (both read as gold today).
-- [ ] Optional: match games to curated comps ("your results on curated comps")
-- [ ] Optional admin UI:
+- [x] `/` overview glance panel: rank, last 10 placements, top S-tier comps
+- [x] Polish: keyboard shortcuts, skeletons, empty/error states (key expired, rate limited), no horizontal overflow at 960px or 400px
+  - [x] Board carry marker made distinct from the 5-cost border: a new `--color-carry` token outside the cost ramp, plus a `CarryMark` glyph so **shape** carries the meaning too (architecture §9).
+  - [x] Fixed a Phase 4 bug found while wiring the refresh: `refreshMyMatches` only re-rendered when new matches landed, so a "you're up to date" refresh left the sync badge and cooldown countdown stale. Now an unconditional `refresh()`, and every `SyncResult` carries `nextAllowedAt` (architecture §8).
+  - [x] `PalettePreview` removed from `/`, as Phase 1 said it should be.
+- [ ] Optional, **deliberately out of scope** (agreed 2026-09-12): match games to curated comps ("your results on curated comps")
+- [ ] Optional admin UI, **deliberately out of scope**; realistically its own phase:
   - single-user Supabase Auth with an email allowlist
   - Server Actions to edit tiers and comps
   - `scripts/export-curated.ts` to dump the DB back to YAML, so git stays the source of truth
 
 **Done when:** `/me` loads from cache in under ~1s, the stats match a hand calculation on fixture data, and the site is comfortable to use as a half-width second-monitor window.
+
+**Verified (2026-09-12):**
+- **Checks:** `pnpm check` (209 tests, up from 134) and `pnpm build` are green. `/me` stayed Partial Prerender through the rewrite, and `/` moved from Static to Partial Prerender, with the cached top comps still in the prerendered shell (revalidate 1d, expire 1w).
+- **Stats correctness:** `summary.test.ts` hand-calculates eight games (avg 4.00, top-4 0.625, wins 0.25, avg level 7.75) and asserts the histogram sums to the game count. `row.test.ts` runs the real Set 18 fixture through `derivePlayerMatch` → `toMatchRow`, so the whole mapper chain is proved against real data, including the Riftbeast units and the carry-less bust-out case.
+- **Live data, against the real cache with `next start`:** `/me` returns 200 in **0.95s** showing Gold II, every section populated and no raw api names on screen. `/` returns 200 in 1.07s showing Gold II · 75 LP · 21W 18L · 54%, a 10-game sparkline and both S-tier comps.
+- **Payload:** `pickNames` ships **135** api names rather than the 881 rows in the full static tables, which is what keeps the client-side filter affordable.
+- **Keyboard (headless Edge):** all five nav shortcuts navigate, `/` focuses the comps search, and typing `1` into that box does **not** navigate away.
+- **Layout (headless Edge at 960px and 400px):** no page scrolls horizontally (`scrollWidth === clientWidth` on all six routes at both widths) and nothing escapes a scroll container. The favorite-comps table is wider than a 400px phone, but inside its own `overflow-x-auto`, which is the intended exception.
 
 ---
 
