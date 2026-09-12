@@ -3,12 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/** The five routes, and the single source of truth for the 1-5 shortcuts. */
+/**
+ * The six routes, and the single source of truth for the number shortcuts — the
+ * position in this list *is* the key, so reordering it rebinds them.
+ *
+ * `/bis` sits with the other two reference pages rather than at the end, which is
+ * what moved `Me` from 5 to 6.
+ */
 export const NAV_ITEMS = [
   { href: "/", label: "Overview" },
   { href: "/comps", label: "Comps" },
   { href: "/tiers/champions", label: "Champions" },
   { href: "/tiers/items", label: "Items" },
+  { href: "/bis", label: "BIS" },
   { href: "/me", label: "Me" },
 ] as const;
 

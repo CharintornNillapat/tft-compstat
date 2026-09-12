@@ -237,7 +237,48 @@ Approved task by task rather than as a whole phase.
   - The brief that requested this named Statikk Shiv and a Bruiser/Sprykin pairing; neither exists
     in Set 18 (`TFT_Item_StatikkShiv` maps to Void Staff), so the boards use the real Set 18 names.
     **The S/A/B bands are a starting point, not measured data** — the file says so at the top.
+- [x] **Task 7 — Best-in-slot items page (`/bis`)** (requested 2026-09-12)
+  - **Derived, not hand-written.** MetaTFT's `unit_detail` turned out to publish every item
+    build a champion was played with, each carrying the same eight-bucket placement histogram
+    §7.1 already reads — so `pnpm sync:bis` **computes** best-in-slot from placements.
+    Contract in architecture §7.4; every rule is pure in `src/lib/curated/bis-sync.ts` (17 tests).
+  - `data/curated/18/champion-bis.yaml`: **46 champions** of 64, generated. The other 18 had no
+    3-item build clearing 200 games and get no row rather than a guess — mostly the eight Lux
+    trait variants and the 1-costs that rarely hold a full build.
+  - `src/lib/curated/bis.ts` + `/bis`: the file is read at build time via `readNewestCuratedFile()`
+    and every api name resolved against the static tables (11 tests), so the page is **Static**.
+    `BisBoard` is a client component only for the cost/role filters and the shared `HoverTip`.
+  - Nav gained a sixth tab between Items and Me. The number shortcuts come from `NAV_ITEMS.length`,
+    so **`6` now works and `Me` moved from `5` to `6`** — `shortcut-match.test.ts` pins the order.
+  - **Not delivered as specced:** the tooltip shows name, emblem trait and recipe but **not item
+    stats or description** — `items` stores no such text, so it would need a new `sync-static`
+    source. Flagged rather than faked, as in Task 3's ability note.
 - [ ] Further tasks — not yet specified.
+
+**Verified — Task 7 (2026-09-12):**
+- **Checks:** `pnpm check` (333 tests, up from 304) and `pnpm build` are green. `/bis` builds
+  **Static** at revalidate 1d / expire 1w; every other route keeps the shape it had.
+- **Two defects the first real run exposed, both fixed before the file was kept:**
+  1. **Artifacts dominated every build** (Akali's "BIS" came out as Lich Bane + two artifacts),
+     because a rare item is held by boards that were already winning. Builds are now completed
+     items only — which also fixed the roles, since artifacts have no components to read.
+  2. **`patch:` read "16.18"**, the game-data version from `tft_sets.patch` rather than the TFT
+     patch label (architecture §4.8). It now comes from the feed's own `games[0].patch`, and
+     reads `18.2`. Summing games per label was tried first and picked `18.1` — the patch that
+     had been out longest, not the one being played.
+  - A third, milder one: the role tie-break sent Camille (Edge of Night + Infinity Edge +
+    Quicksilver — 2 offensive, 2 defensive) to "Utility / Bruiser". Damage now wins a tie.
+- **Roles on the live data:** AD Carry 19 · Main Tank 14 · AP Carry 11 · Utility / Bruiser 2.
+- **Interaction (headless Edge over CDP):** hovering the first item opens the tooltip with
+  "Edge of Night · B.F. Sword + Chain Vest"; keyboard focus opens it and Escape closes it;
+  the Main Tank role filter cuts 46 rows to 14, all of them Main Tank.
+- **Layout (960px and 400px):** `scrollWidth === clientWidth` at both, and **nothing escapes a
+  scroll container**. At 390px two elements sit past the edge — the `Me` tab and its `li`, inside
+  the nav's own `overflow-x-auto`, which is the sixth tab using the documented exception.
+- **Icons:** 322 images on the page, **322 loaded, 0 failed** (checked after scrolling the full
+  page — the blanks in a first screenshot were lazy-loading, not a data gap).
+- **Not seeded, and not scheduled.** `sync:bis` is a local script like `sync:meta`; the file is
+  read at build time, so publishing a refresh means redeploying.
 
 **Verified — Task 6 (2026-09-12):**
 - **Checks:** `pnpm check` (304 tests, up from 292 — 12 new for `validateOpeners`) and `pnpm build`

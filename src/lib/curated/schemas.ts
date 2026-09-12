@@ -33,6 +33,14 @@ export const META_NOTES_FILE = "meta-notes.yaml";
  */
 export const OPENERS_FILE = "openers.yaml";
 
+/**
+ * Champion item builds shown at `/bis`: `data/curated/<setId>/champion-bis.yaml`.
+ * Read at build time like the two files above. Its builds are **generated** by
+ * `pnpm sync:bis` from measured placements (§7.4); only `notes` is written by hand,
+ * and the sync carries those across runs.
+ */
+export const CHAMPION_BIS_FILE = "champion-bis.yaml";
+
 const apiName = z
   .string({ error: "must be an api_name string" })
   .regex(/^[A-Za-z0-9_]+$/, "must be an api_name like DA_18_Ashe");
@@ -232,3 +240,55 @@ export const openersFileSchema = z.strictObject({
 });
 
 export type OpenersFile = z.infer<typeof openersFileSchema>;
+
+/**
+ * What a champion's items are *for*. Derived by `sync:bis` from the component
+ * composition of the primary build (a build of two Chain Vests and a Negatron
+ * Cloak is a tank's), so it is a label on the data rather than an opinion — but
+ * it stays in the file so it can be corrected by hand.
+ */
+export const BIS_ROLES = ["AP Carry", "AD Carry", "Main Tank", "Utility / Bruiser"] as const;
+export type BisRole = (typeof BIS_ROLES)[number];
+
+/** A full build is three items. Anything else is a half-built board, not a BIS. */
+export const BIS_PRIMARY_ITEMS = 3;
+export const BIS_SECONDARY_ITEMS = { min: 2, max: 3 } as const;
+
+export const championBisSchema = z.strictObject({
+  api_name: apiName,
+  role: z.enum(BIS_ROLES, {
+    error: (issue) =>
+      issue.code === "invalid_value" ? `must be one of ${BIS_ROLES.map((r) => `"${r}"`).join(", ")}` : undefined,
+  }),
+  /** The gold-standard build, best average placement first when the sync writes it. */
+  primary_bis: z
+    .array(apiName, { error: `must be a list of ${BIS_PRIMARY_ITEMS} item api_names` })
+    .length(BIS_PRIMARY_ITEMS, `must hold exactly ${BIS_PRIMARY_ITEMS} items — a BIS is a full build`),
+  /** Flex and situational items, best first. Never repeats a primary item. */
+  secondary_bis: z
+    .array(apiName, { error: "must be a list of 2-3 item api_names" })
+    .min(BIS_SECONDARY_ITEMS.min, `needs at least ${BIS_SECONDARY_ITEMS.min} alternatives`)
+    .max(BIS_SECONDARY_ITEMS.max, `holds at most ${BIS_SECONDARY_ITEMS.max} alternatives`),
+  /** Hand-written guidance. `sync:bis` carries it across runs rather than clearing it. */
+  notes: z.string().trim().min(1, "must not be empty").max(120, "must be at most 120 characters").optional(),
+  /** Average placement of the primary build, when it came from measured games. */
+  avg_place: z
+    .number({ error: "must be a number from 1 to 8, like 3.42" })
+    .min(1, "must be at least 1")
+    .max(8, "must be at most 8")
+    .optional(),
+  /** How many games that build was seen in — the reader's reason to trust the row. */
+  games: z.int({ error: "must be a whole number of games" }).min(0, "cannot be negative").optional(),
+});
+
+export const championBisFileSchema = z.strictObject({
+  patch,
+  title: z.string().trim().min(1).optional(),
+  /** Where the builds came from, printed under the page title. */
+  source: z.string().trim().min(1).optional(),
+  champions: z
+    .array(championBisSchema, { error: "must be a list of champion builds" })
+    .min(1, "needs at least one champion; an empty file would render an empty page"),
+});
+
+export type ChampionBisFile = z.infer<typeof championBisFileSchema>;

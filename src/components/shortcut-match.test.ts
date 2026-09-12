@@ -6,14 +6,28 @@ const press = (key: string, over: Partial<ShortcutContext> = {}) =>
   shortcutAction({ key, hasModifier: false, inEditable: false, ...over });
 
 describe("shortcutAction", () => {
-  it("maps 1-5 to the five nav routes, in order", () => {
-    expect(NAV_ITEMS).toHaveLength(5);
-    expect(["1", "2", "3", "4", "5"].map((k) => press(k))).toEqual([
+  it("maps 1-6 to the six nav routes, in order", () => {
+    expect(NAV_ITEMS).toHaveLength(6);
+    expect(["1", "2", "3", "4", "5", "6"].map((k) => press(k))).toEqual([
       { type: "navigate", index: 0 },
       { type: "navigate", index: 1 },
       { type: "navigate", index: 2 },
       { type: "navigate", index: 3 },
       { type: "navigate", index: 4 },
+      { type: "navigate", index: 5 },
+    ]);
+  });
+
+  it("keeps the keys pinned to the nav order, so a new tab rebinds them", () => {
+    // Adding /bis in front of /me moved Me from 5 to 6; this is the assertion that
+    // catches the next such move rather than letting it pass silently.
+    expect(NAV_ITEMS.map((item) => item.href)).toEqual([
+      "/",
+      "/comps",
+      "/tiers/champions",
+      "/tiers/items",
+      "/bis",
+      "/me",
     ]);
   });
 
@@ -23,7 +37,7 @@ describe("shortcutAction", () => {
 
   it("ignores digits with no route behind them", () => {
     expect(press("0")).toBeNull();
-    expect(press("6")).toBeNull();
+    expect(press("7")).toBeNull();
     expect(press("9")).toBeNull();
   });
 

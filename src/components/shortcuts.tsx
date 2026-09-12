@@ -6,7 +6,7 @@ import { NAV_ITEMS } from "./nav-tabs";
 import { shortcutAction } from "./shortcut-match";
 
 /**
- * Keyboard shortcuts for a second-monitor window (architecture §9): `1`–`5` switch
+ * Keyboard shortcuts for a second-monitor window (architecture §9): `1`–`6` switch
  * pages, `/` focuses the search box. Renders nothing.
  *
  * `useRouter` doesn't suspend, unlike the `usePathname` in `NavTabs`, so this needs

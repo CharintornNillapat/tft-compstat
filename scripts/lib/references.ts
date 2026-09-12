@@ -23,12 +23,16 @@ export type References = {
   itemKinds: Map<string, ItemKind>;
   /** Shop cost by `api_name`. `sync-meta` needs it to tell a reroll comp from a fast 8. */
   costs: Map<string, number>;
+  /** Recipe by item `api_name`. `sync-bis` reads a build's role off its components. */
+  components: Map<string, string[]>;
+  /** Game-data version by set id, for a generated file that has no patch of its own. */
+  setPatches: Map<number, string>;
 };
 
 export async function loadReferences(): Promise<References> {
   const db = getSupabaseAdmin();
   const [sets, champions, items, traits] = await Promise.all([
-    selectAll((from, to) => db.from("tft_sets").select("id").order("id").range(from, to), "tft_sets"),
+    selectAll((from, to) => db.from("tft_sets").select("id, patch").order("id").range(from, to), "tft_sets"),
     selectAll(
       (from, to) =>
         db
@@ -39,7 +43,8 @@ export async function loadReferences(): Promise<References> {
       "champions",
     ),
     selectAll(
-      (from, to) => db.from("items").select("api_name, name, grants_trait, kind").order("api_name").range(from, to),
+      (from, to) =>
+        db.from("items").select("api_name, name, grants_trait, kind, components").order("api_name").range(from, to),
       "items",
     ),
     selectAll((from, to) => db.from("traits").select("api_name, name").order("api_name").range(from, to), "traits"),
@@ -56,5 +61,7 @@ export async function loadReferences(): Promise<References> {
     shopUnits: new Set(champions.filter((c) => c.is_shop_unit).map((c) => c.api_name)),
     itemKinds: new Map(items.map((i) => [i.api_name, i.kind])),
     costs: new Map(champions.map((c) => [c.api_name, c.cost])),
+    components: new Map(items.map((i) => [i.api_name, i.components])),
+    setPatches: new Map(sets.flatMap((s) => (s.patch ? [[s.id, s.patch] as const] : []))),
   };
 }
