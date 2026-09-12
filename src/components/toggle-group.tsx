@@ -1,6 +1,11 @@
-const BUTTON = "h-7 min-w-7 rounded border px-2 font-semibold whitespace-nowrap transition-colors";
-const ON = "border-accent/60 bg-accent/10 text-fg";
-const OFF = "border-line text-muted hover:text-fg";
+/** Shared with `Segmented`, so the two kinds of toggle can never drift apart visually. */
+export const TOGGLE_BUTTON = "h-7 min-w-7 rounded border px-2 font-semibold whitespace-nowrap transition-colors";
+export const TOGGLE_ON = "border-accent/60 bg-accent/10 text-fg";
+export const TOGGLE_OFF = "border-line text-muted hover:text-fg";
+
+const BUTTON = TOGGLE_BUTTON;
+const ON = TOGGLE_ON;
+const OFF = TOGGLE_OFF;
 
 /** Multi-select toggles plus "All". An empty selection means every option. */
 export function ToggleGroup<T extends string>({
