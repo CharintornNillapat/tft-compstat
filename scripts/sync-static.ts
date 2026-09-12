@@ -32,8 +32,8 @@ async function getJson(url: string): Promise<unknown> {
 
 /**
  * Shop-unit ids from Riot's Data Dragon, preferring the release that matches the
- * CommunityDragon data. Undefined when unavailable: the transform then keeps every
- * unit with a cost and traits, and warns.
+ * CommunityDragon data. Undefined when unavailable: every playable unit is then
+ * marked as a shop unit, and the transform warns.
  */
 async function fetchPlayableIds(patch: string): Promise<Set<string> | undefined> {
   try {
@@ -58,9 +58,13 @@ function countBy<T, K extends string | number>(rows: readonly T[], key: (row: T)
 }
 
 function printSummary({ set, traits, champions, items, warnings }: StaticSnapshot) {
+  const nonShop = champions.filter((c) => c.is_shop_unit === false);
   console.log(`\nSet ${set.id} · ${set.name} (${set.mutator}), game data ${set.patch}`);
   console.log(`  traits     ${traits.length}`);
   console.log(`  champions  ${champions.length}  (cost ${countBy(champions, (c) => c.cost, CHAMPION_COSTS)})`);
+  if (nonShop.length) {
+    console.log(`    non-shop ${nonShop.length}  (${nonShop.map((c) => `${c.name} ${c.cost}`).join(" · ")})`);
+  }
   console.log(`  items      ${items.length}  (${countBy(items, (i) => i.kind, ITEM_KINDS)})`);
   if (warnings.length) console.log(`  warnings:\n${warnings.map((w) => `    - ${w}`).join("\n")}`);
 }

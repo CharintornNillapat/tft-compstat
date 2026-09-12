@@ -1,6 +1,8 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–3 complete (2026-09-12). Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists and four curated comps.
+> **Status:** Phases 1–3 complete; Phase 4 is code-complete and verified locally, pending an env change and a deploy (2026-09-12). Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists and four curated comps.
+>
+> ⚠ **Before the Phase 4 deploy:** set `RIOT_PLATFORM=sg2` in `.env.local` **and** in the Vercel project. The old `th2` host no longer resolves, so the cron would fail on every run.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -18,7 +20,7 @@
 | 1 | Foundation & skeleton | ✅ Done (2026-09-11) |
 | 2 | Static game data + tier lists | ✅ Done (2026-09-11) |
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
-| 4 | Riot API service & match cache | ⬜ Not started |
+| 4 | Riot API service & match cache | 🟨 Code complete, awaiting deploy |
 | 5 | Personal dashboard & polish | ⬜ Not started |
 
 ---
@@ -82,7 +84,7 @@
 - [x] `/comps/[slug]`: `HexBoard`, carry item builds, early units, flex units, guide markdown
 - [x] Write 4 comps for Set 18 patch 18.2 in `data/curated/18/comps/`: Draven Fast 9 (S), Ashe Fast 9 (S), Flora Malphite (A), Defender Cassiopeia (B)
   - Tiers from the TFT Academy 18.2 comp tier list; boards, carries and items from the BunnyMuffins and EmblemComp build guides (Sep 2026). Filler slots, hexes and star goals are a starting point, and each file says so. **Review them before trusting the ratings.**
-  - No comp uses a Riftbeast unit, because `champions` doesn't have them (architecture §11).
+  - No comp uses a Riftbeast unit. At the time `champions` didn't have them; Phase 4's pre-requisite fixed that, so a later comp can field one.
 - [x] `pnpm db:push` (adds `seed_comp`), then `pnpm db:types`
 - [x] `pnpm seed:curated` to write the comps
 - [x] Committed and pushed to `main` (`7121b26`); Vercel deploy of that commit confirmed live
@@ -103,19 +105,30 @@
 ## Phase 4 — Riot API service & match cache
 **Goal:** A rate-limit-safe, cache-first sync of your recent matches into Supabase (architecture §5–§6).
 
-- [ ] `src/lib/riot/*`: routing table, typed client, dual-window limiter, header parser, error types (RateLimited/Auth/Server), Zod DTO subset
-- [ ] `scripts/riot-setup.ts`: Riot ID → puuid; seed `riot_accounts` + `sync_state`
-- [ ] `SyncService` per architecture §5.3 using `acquire_sync_lock`; per-match commit
-- [ ] `derive.ts` + `comp-signature.ts` (v1) + `scripts/rederive.ts`
-- [ ] Triggers: `/api/cron/sync` + `vercel.json` daily cron; `refreshMyMatches()` Server Action; `after()` stale-on-read
-- [ ] `scripts/riot-backfill.ts`
-- [ ] Vitest: limiter windows, header parsing, 429 path (mocked fetch), derivation from a real match fixture
+- [x] **Pre-requisite — non-shop units (architecture §11).** `champions.is_shop_unit` (migration `20260912120000_champion_shop_flag.sql`); Data Dragon's shop list sets the flag instead of filtering rows. `pnpm sync:static` took Set 18 from 64 to 74 champions, adding the ten Riftbeasts with their costs, so derivation can resolve every `character_id`.
+- [x] `src/lib/riot/*`: routing table, typed client, dual-window limiter, header parser, error types (RateLimited/Auth/Server/NotFound/BudgetExceeded), Zod DTO subset
+- [x] `scripts/riot-setup.ts`: Riot ID → puuid; seed `riot_accounts` + `sync_state`. It also probes the routing questions §11 left open and, with `--fixture`, saves an anonymized real match for the tests.
+- [x] `SyncService` per architecture §5.3 using `acquire_sync_lock`; per-match commit
+- [x] `derive.ts` + `comp-signature.ts` (v1) + `patches.ts` + `scripts/rederive.ts`
+  - `patches.ts` is new: Set 18's `game_version` is the literal `"TFT Unreal Version ?.?.?.?"`, so `matches.patch` is derived from `game_datetime` instead (architecture §6.4).
+- [x] Triggers: `/api/cron/sync` + `vercel.json` daily cron; `refreshMyMatches()` Server Action; `after()` stale-on-read on `/me`, with a sync-status panel to drive them
+- [x] `scripts/riot-backfill.ts`, plus `scripts/riot-sync.ts` to run one sync locally
+- [x] Vitest: limiter windows, header parsing, 429 path (mocked fetch), derivation from a real match fixture, and the sync algorithm against a fake DB (134 tests in total)
 
 **Done when:**
-- The first sync stores 20 matches using ≤24 calls.
-- An immediate second sync is refused by cooldown.
-- A sync with no new games uses exactly 2 calls.
-- A simulated 429 leaves `status='rate_limited'` with partial data intact.
+- [x] The first sync stores 20 matches using ≤24 calls. → **20 matches, 22 calls, 14.6s.**
+- [x] An immediate second sync is refused by cooldown. → **skipped in 0.3s, zero Riot calls.**
+- [x] A sync with no new games uses exactly 2 calls. → **`{ok, newMatches: 0, calls: 2}` in 1.5s.**
+- [x] A simulated 429 leaves `status='rate_limited'` with partial data intact. → **verified against real Postgres:** `status='rate_limited'`, `lock_until` null, cooldown = the 42s `Retry-After`, headers stored in `last_rate_limit`, all 20 matches untouched.
+
+**Verified (2026-09-12):**
+- **Pre-requisite:** the Riftbeast fix was load-bearing, not housekeeping — the sampled lobby fielded five non-shop units, three on the tracked player's own board. Across that lobby all 44 units, 39 items and 31 traits resolved against the static tables, with zero unknowns.
+- **Routing (§5.1), all verified live rather than from docs:** `th2` is dead and the account is on **`sg2`**; `sg2 → sea` for match-v1; `tft/league/v1/by-puuid` works, so §11's fallback isn't needed. A wrong-shard match host answers `200 []` rather than 404, so `riot-setup.ts` probes all four regions instead of taking the first that responds.
+- **Set 18 data (§6.1):** ids are `DA_…`; `tft_set_number` 18; `game_version` carries no number; trait styles come from `tier_current` indexed into the stored breakpoints, because Riot reports `style: 3` for unique traits as well as gold.
+- **Stored data:** 20 matches and 20 `player_matches`. Patch labels split correctly at the 18.2 release date (19 × `18.1`, 1 × `18.2`). Four rows have no carry — 8th-place bust-outs with no items, handled rather than crashing.
+- **Access (§4.6):** as `anon`, `player_matches` and `riot_accounts` read fine, while `matches` and `sync_state` are denied with `42501`.
+- **Rate-limit headroom:** a full 20-match sync used 3 of 100 calls in the 120s window.
+- **Checks:** `pnpm check` (134 tests) and `pnpm build` are green. `/me` builds as Partial Prerender: the shell prerenders and the sync panel streams in.
 
 ---
 
@@ -146,4 +159,5 @@
 - [x] A Supabase account and a new project (free tier), ref `ulpapntggzqipodxtwzb`
 - [x] A Vercel account linked to the GitHub repo
 - [x] A Riot developer account. A **Personal API Key** is recommended; a dev key works but expires every 24h.
-- [x] Your Riot ID and platform: `BurdenInMyHand#6969`, `th2`
+  - Phase 4 ran on a development key. The daily cron will fail every day it has expired, showing "Riot key invalid/expired" on `/me` while still serving cached data. Apply for a Personal key to fix that for good.
+- [x] Your Riot ID and platform: `BurdenInMyHand#6969`, **`sg2`** (was `th2`; Riot consolidated the shard — verified 2026-09-12, architecture §11)

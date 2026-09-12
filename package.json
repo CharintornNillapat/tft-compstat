@@ -13,7 +13,11 @@
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/types.ts",
     "sync:static": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/sync-static.ts",
-    "seed:curated": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/seed-curated.ts"
+    "seed:curated": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/seed-curated.ts",
+    "riot:setup": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/riot-setup.ts",
+    "riot:sync": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/riot-sync.ts",
+    "riot:backfill": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/riot-backfill.ts",
+    "rederive": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/rederive.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

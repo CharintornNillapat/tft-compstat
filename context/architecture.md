@@ -73,8 +73,10 @@ data/curated/<setId>/
 scripts/
   sync-static.ts             CommunityDragon → tft_sets/champions/traits/items (+ revalidate "static")
   seed-curated.ts            YAML → tier_lists/tier_entries/comps/comp_units (+ revalidate)
-  riot-setup.ts              Riot ID → puuid; insert riot_accounts + sync_state
-  riot-backfill.ts           deeper history, run locally, same limiter
+  riot-setup.ts              Riot ID → puuid; probes routing/league (§5.1); seeds riot_accounts + sync_state;
+                             `--fixture` saves an anonymized real match for the derivation tests
+  riot-sync.ts               one sync locally, through SyncService (lock, cooldown, budget)
+  riot-backfill.ts           deeper history, run locally, same limiter; bypasses the lock on purpose
   rederive.ts                recompute player_matches from matches.raw (0 API calls)
   lib/{db,revalidate}.ts     paging/chunking helpers; POST /api/revalidate client
 supabase/migrations/         SQL (schema, RLS, RPCs)
@@ -92,8 +94,9 @@ src/lib/
   supabase/{server,admin,types,result}.ts   admin = service role, `import 'server-only'`; result = `must()`
   static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds)
   static/cdragon.ts          pure CommunityDragon → rows transform
-  riot/{routing,client,limiter,errors,schemas,endpoints}.ts
-  sync/{sync-service,derive,comp-signature}.ts
+  riot/{routing,client,limiter,headers,errors,schemas,endpoints}.ts
+  sync/{sync-service,derive,comp-signature,patches,actions}.ts
+  sync/__fixtures__/match.json   a real Set 18 match, puuids anonymized
   stats/{summary,comps,champions}.ts pure functions
   curated/{schemas,validate,queries}.ts
   curated/traits.ts          computeActiveTraits (pure, client-safe)
@@ -132,12 +135,13 @@ create table traits (
 );
 
 create table champions (
-  api_name  text primary key,                    -- 'TFTxx_Jinx' = Riot units[].character_id
-  set_id    smallint not null references tft_sets(id),
-  name      text not null,
-  cost      smallint not null check (cost between 1 and 5),  -- playable units only; summons filtered out
-  traits    text[] not null default '{}',        -- trait api_names
-  icon_url  text
+  api_name     text primary key,                 -- 'TFTxx_Jinx' = Riot units[].character_id
+  set_id       smallint not null references tft_sets(id),
+  name         text not null,
+  cost         smallint not null check (cost between 1 and 5),  -- playable units only; summons filtered out
+  traits       text[] not null default '{}',     -- trait api_names
+  icon_url     text,
+  is_shop_unit boolean not null default true     -- false = playable but unbuyable (Riftbeasts); §4.8
 );
 
 create table items (
@@ -326,8 +330,11 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 **Versions:** TFT patch labels are per set since Set 17 (17.1 on 2026-04-15, 18.1 on 2026-08-26, 18.2 on 2026-09-10). The client data version is separate (16.18 = TFT 18.2). `tft_sets.patch` stores the data version. Curated YAML carries the TFT label shown on the site.
 
 **Champions**
-- A shop unit has a cost of 1–5 and at least one trait, **and** appears in Riot's Data Dragon `tft-champion.json`, preferring the release matching the data version. The Data Dragon check removes summons that CommunityDragon lists with a cost and traits (the Set 18 Riftbeast monsters, Elder Dragon).
-- If Data Dragon lists no units for the set, the sync keeps every cost-and-traits unit and warns.
+- A **playable** unit has a cost of 1–5 and at least one trait. That test alone excludes the junk: legacy `TFT_*` summons carry no traits, and the anvils have cost 8 or 11.
+- Riot's Data Dragon `tft-champion.json` (preferring the release matching the data version) then sets **`is_shop_unit`**, rather than filtering. Units it omits are stored with `is_shop_unit = false`: in Set 18 those are exactly the ten Riftbeast units, all of which carry the `Riftbeast` trait — Pebbles (`DA_18_Sentry`), Cinderling, Gromp, Murkwolf, Scuttlecrab, Krug, Mama Beak (`DA_CrimsonRaptor18`), Sentinel, Brambleback and Elder Dragon.
+  - Why a flag and not a filter (Phase 4): these are real board units that meta comps field, so curated comps must be able to reference them and match derivation must resolve their `character_id` to a cost. The flag keeps shop and non-shop distinguishable instead of discarding the distinction.
+  - Migration `20260912120000_champion_shop_flag.sql`. Set 18 went from 64 to 74 champions.
+- If Data Dragon lists no units for the set, every unit is marked as a shop unit and the sync warns. Unreachable Data Dragon does the same, silently.
 - Element variants such as the nine Set 18 Lux forms stay as separate rows, because match data names them.
 - Champion `traits` in CommunityDragon are display names. They're mapped to trait api names within the set. When a name is shared (Set 17 has 8 "Stargazer" variants), the shortest api name wins and the sync warns.
 - `icon_url` uses `tileIcon` (128px face crop), falling back to `squareIcon`, then `icon`.
@@ -387,7 +394,12 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 | Match detail | `/tft/match/v1/matches/{matchId}` | match region | only **new** IDs |
 | Rank/LP | `/tft/league/v1/by-puuid/{puuid}` | platform | 1/sync |
 
-`routing.ts` derives both regions from `RIOT_PLATFORM` alone. For example `na1/br1/la1/la2 → americas`, `euw1/eun1/tr1/ru → europe`, `kr/jp1 → asia`, `oc1/ph2/sg2/th2/tw2/vn2 → sea` (match) and `asia` (account). **TODO (Phase 4):** check this table against Riot's current docs.
+`routing.ts` derives both regions from `RIOT_PLATFORM` alone: `na1/br1/la1/la2 → americas`, `euw1/eun1/me1/tr1/ru → europe`, `kr/jp1 → asia`, `oc1/ph2/sg2/th2/tw2/vn2 → sea` (match) and `asia` (account, which has no `sea` host).
+
+**Verified live 2026-09-12** (`pnpm riot:setup`), because Riot's own docs disagree about the SEA shards:
+- **The account is on `sg2`, not `th2`.** `/riot/account/v1/region/by-game/tft/by-puuid` reports `sg2`, and `th2.api.riotgames.com` does not resolve at all — Riot has consolidated the shard. `RIOT_PLATFORM` is therefore `sg2`.
+- `sg2 → sea` for match-v1 is confirmed: `sea` returns the 20 ids, and `americas`/`europe`/`asia` each answer **`200 []`**. A wrong-shard host does not 404, so "the host answered" proves nothing — only a non-empty result identifies the real shard, and `riot-setup.ts` probes all four accordingly.
+- `tft/summoner/v1` and `tft/league/v1/by-puuid` both work on the `sg2` platform host, so the summoner-id fallback §11 held in reserve is not needed.
 
 ### 5.2 Rate-limit safety (defense in depth)
 | Layer | Mechanism | Guarantee |
@@ -445,6 +457,14 @@ ParticipantDto = { puuid: string; placement: number; level: number; last_round: 
 ```
 - Unit cost comes from a join to `champions.cost`. The API's `rarity` codes aren't used.
 - Augments aren't reliably present in the TFT match API, so nothing depends on them.
+- `queue_id` is accepted as either `queue_id` or `queueId`, since Riot has shipped both spellings.
+
+**Verified against a real Set 18 match** (`SG2_173695822`, 2026-09-12) — the §11 questions:
+- `tft_set_number` is `18`, and `queue_id` `1100` with `tft_game_type: "standard"`, as expected.
+- **`game_version` is the literal string `"TFT Unreal Version ?.?.?.?"`** — the Unreal move stripped the numbers, so `matches.patch` **cannot** be derived from it. It's derived from `game_datetime` against the patch release dates instead (§6.4).
+- **`units[].character_id` and `itemNames[]` use the `DA_…` names**, matching the `champions` and `items` rows. Across the whole lobby: 44 distinct units, 39 items and 31 traits, **all resolved, none unknown**; every item name was `DA_*` and none was `TFT_Item_*`.
+- That lobby fielded **five Riftbeast units** (three on the tracked player's own board), so the §11 pre-requisite was load-bearing: without it, derivation could not have costed them.
+- **Trait styles: use `tier_current`, not Riot's `style`.** `tier_total` equalled the stored `breakpoints` length for all 11 traits sampled, and `tier_current` indexes those breakpoints exactly (Hunter at 3 units → `tier_current: 2` → `breakpoints[1]` = silver). Riot's `style` is ambiguous — it reported `3` for the *unique* traits (`tier_total: 1`), while `3` is gold in its usual 1/2/3/4 scheme, and no gold or prismatic trait appeared to disambiguate. Reading the style from our own breakpoints also means a match's traits and a curated comp's traits can never disagree, since `computeActiveTraits` uses the same table. Riot's code is kept only as a fallback for a trait missing from `traits`.
 
 ### 6.2 Comp signature v1 (`comp-signature.ts`, pure, versioned)
 1. Active traits are those with `style ≥ 1`, excluding unique traits (`tier_total = 1`). Sort by `style` desc, then `num_units` desc. The top 2 become `primary_traits`.
@@ -463,6 +483,17 @@ type CompStat      = { compKey: string; label: string; games: number; avgPlaceme
 type UnitStat      = { apiName: string; games: number; avgPlacement: number };   // also used for items
 ```
 Computing on read is sub-millisecond over 20–50 rows and never goes stale. Raw data is the only thing cached.
+
+### 6.4 Patch labels (`matches.patch`)
+Set 18 broke the old approach: `game_version` no longer carries a number (§6.1). `patch` is therefore derived from `game_datetime` against a table of TFT patch release dates in `src/lib/sync/patches.ts`, the same labels the curated YAML uses:
+
+| Set | Patch | Released |
+|---|---|---|
+| 17 | 17.1 | 2026-04-15 |
+| 18 | 18.1 | 2026-08-26 |
+| 18 | 18.2 | 2026-09-10 |
+
+The match's own `tft_set_number` picks the set, then the latest release at or before `game_datetime` gives the label. A match older or newer than anything known falls back to `"<set>.?"`, which is honest rather than wrong and is easy to grep for. **The table needs a line per patch**; a missed one mislabels matches but breaks nothing, and `scripts/rederive.ts` fixes them from `matches.raw` with 0 API calls.
 
 ---
 
@@ -604,17 +635,14 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
 ---
 
 ## 11. Open items to verify during implementation
-- [ ] Riot platform → region routing table (§5.1), checked against current Riot docs (Phase 4).
-- [ ] Confirm `th2` is still your account's live platform. Riot has been consolidating SEA shards. In Phase 4, `riot-setup.ts` should ask Riot's account-region lookup (`/riot/account/v1/region/by-game/tft/by-puuid/{puuid}`) instead of trusting `RIOT_PLATFORM`.
+- [x] Riot platform → region routing table (§5.1), verified live 2026-09-12 rather than from docs, which contradict each other on the SEA shards.
+- [x] **`th2` is dead; the account is on `sg2`** (verified 2026-09-12). Riot's account-region lookup reports `sg2` and the `th2` host does not resolve. `RIOT_PLATFORM` must be `sg2` in `.env.local` and on Vercel. `riot-setup.ts` asks Riot rather than trusting the env, and says so when the two disagree.
 - [x] After `supabase link`: regenerate `types.ts` with `pnpm db:types`. The hand-written version was overwritten before the first commit, so no diff was possible. `pnpm check` and `pnpm build` pass against the generated types.
-- [ ] `tft/league/v1/by-puuid` availability for your platform. The fallback is the summoner-id-based entries endpoint (Phase 4).
+- [x] `tft/league/v1/by-puuid` works on `sg2` (verified 2026-09-12: GOLD II, 75 LP). The summoner-id fallback isn't needed.
 - [x] CommunityDragon icon path conversion (`.tex` → `.png` URL rule) and the current-set key (Phase 2). Resolved in §4.8: lowercase the path, `.tex` → `.png`, and pin it to the version directory; the set is the newest standard `TFTSet<N>`, with a `--set` override.
-- [ ] Confirm Vercel Hobby function duration and cron limits at deploy time (Phase 1/4).
-- [ ] Set 18 moved TFT to Unreal Engine and to `DA_…` unit and item names. In Phase 4, check against a real match:
-  - Do `units[].character_id` and `itemNames[]` use the `DA_…` or the `TFT_Item_…` item names?
-  - What does `tft_set_number` report (expected 18)?
-  - What does `game_version` look like? It decides how `matches.patch` maps to TFT's "18.2" labels, versus the data version 16.18.
-- [ ] Map Riot's match-API trait `style` (0–4) onto the stored style names (bronze/silver/gold/prismatic/unique) in Phase 4.
+- [ ] Confirm Vercel Hobby function duration and cron limits at deploy time (Phase 1/4). `/api/cron/sync` sets `maxDuration = 60`; a full 20-match sync took 14.6s locally, so the margin is wide. Hobby runs cron once a day, which the schedule matches.
+- [x] Set 18's Unreal move, checked against a real match 2026-09-12 (details in §6.1): ids are `DA_…` and all resolve; `tft_set_number` is 18; **`game_version` is now the useless literal `"TFT Unreal Version ?.?.?.?"`**, so `patch` comes from `game_datetime` instead (§6.4).
+- [x] Riot's match-API trait `style` is **not** used: the style comes from `tier_current` indexed into the stored `breakpoints` (verified 2026-09-12, §6.1).
 - [x] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` or a transactional RPC. Resolved with the `seed_comp` RPC (§4.9); the constraint is unchanged.
-- [ ] **Riftbeast units are missing from `champions`.** `sync-static` filters units that Data Dragon doesn't list in the shop (§4.8), which drops the Set 18 Riftbeast monsters: Pebbles (`DA_18_Sentry`), Cinderling, Scuttlecrab, Krug, Sentinel, Brambleback and Elder Dragon. They are real board units — several 18.2 meta comps field them, and Riftbeast Reroll and Dragon Princess carry them — so curated comps can't reference them today, and Phase 4 won't resolve their `character_id` to a cost. Decide whether to keep the filter (and find another summon filter) before Phase 4 derivation.
-- [ ] Data Dragon's `tft-champion.json` is the shop-unit filter (§4.8). If Riot stops publishing TFT data there after the Unreal move, the sync falls back to cost + traits and warns. Summons would then need another filter.
+- [x] **Riftbeast units were missing from `champions`** (resolved 2026-09-12, Phase 4 pre-requisite). Data Dragon's shop list became `is_shop_unit` instead of a filter (§4.8), so all ten are stored with their real costs. The live diff found two the earlier note had missed, Gromp (`DA_Gromp18_AP`) and Mama Beak (`DA_CrimsonRaptor18`).
+- [x] Data Dragon's `tft-champion.json` now only sets `is_shop_unit` (§4.8), so if Riot stops publishing TFT data there the sync degrades to marking everything buyable rather than dropping rows. The cost-and-traits test is what keeps summons out, and it holds on its own for Set 18.

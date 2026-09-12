@@ -19,6 +19,7 @@ export type Database = {
           api_name: string
           cost: number
           icon_url: string | null
+          is_shop_unit: boolean
           name: string
           set_id: number
           traits: string[]
@@ -27,6 +28,7 @@ export type Database = {
           api_name: string
           cost: number
           icon_url?: string | null
+          is_shop_unit?: boolean
           name: string
           set_id: number
           traits?: string[]
@@ -35,6 +37,7 @@ export type Database = {
           api_name?: string
           cost?: number
           icon_url?: string | null
+          is_shop_unit?: boolean
           name?: string
           set_id?: number
           traits?: string[]
