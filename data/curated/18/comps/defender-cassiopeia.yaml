@@ -12,16 +12,23 @@ style: reroll_3
 difficulty: 2
 patch: "18.2"
 summary: 3-cost reroll. A 3-star Cassiopeia with a Defender Emblem, shielded by Rammus and Fiddlesticks.
+# SAMPLE numbers. These are author-supplied, not measured by this site — rates are
+# written as a percent here and stored as a fraction.
+gem: true
+avg_place: 4.32
+top4_rate: 56.4
+pick_rate: 2.1
+level_recommended: 8
 early_units: [DA_18_Camille, DA_18_Elise, DA_18_Caitlyn]
 flex_units: [DA_18_Shen, DA_18_Caitlyn]
 board:
-  - { unit: DA_18_Cassiopeia, row: 3, col: 4, star: 3, carry: true, items: [DA_18_EmblemDefender, DA_HextechGunblade, DA_RabadonsDeathcap] }
+  - { unit: DA_18_Cassiopeia, row: 3, col: 4, star: 3, carry: true, priority: 1, items: [DA_18_EmblemDefender, DA_HextechGunblade, DA_RabadonsDeathcap] }
   - { unit: DA_18_Morgana, row: 3, col: 1 }
   - { unit: DA_18_Soraka, row: 3, col: 5 }
   - { unit: DA_18_Camille, row: 0, col: 1 }
   - { unit: DA_18_Elise, row: 0, col: 2 }
   - { unit: DA_18_Lillia, row: 0, col: 4 }
-  - { unit: DA_18_Rammus, row: 0, col: 5, star: 3, items: [DA_BrambleVest, DA_DragonsClaw, DA_WarmogsArmor] }
+  - { unit: DA_18_Rammus, row: 0, col: 5, star: 3, priority: 2, items: [DA_BrambleVest, DA_DragonsClaw, DA_WarmogsArmor] }
   - { unit: DA_Fiddlesticks18, row: 0, col: 6 }
 guide: |
   **Early:** Play Coven from the opener (Camille, Elise, Caitlyn), or commit when an early Cassiopeia shows up.

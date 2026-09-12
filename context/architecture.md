@@ -546,10 +546,15 @@ patch: "18.2"                 # TFT patch label, quoted
 order: 1                      # optional: order within its tier on /comps (then by name); default 0
 published: true               # optional: false hides it but keeps the row; default true
 summary: One-line pitch.      # optional, shown in the list
+gem: true                     # optional: sleeper pick -> "Gem" badge; default false
+avg_place: 4.32               # optional, 1-8
+top4_rate: 56.4               # optional PERCENT, stored as the fraction 0.564
+pick_rate: 2.1                # optional PERCENT, stored as 0.021
+level_recommended: 8          # optional, 1-10
 early_units: [DA_18_Sivir]    # optional; may overlap the board
 flex_units: [DA_18_Shen]      # optional; swaps, so not units already on the board
 board:                        # ≥1 unit; row 0 (front) to 3 (back), col 0-6; star 1-3 (default 2)
-  - { unit: DA_Draven18, row: 3, col: 0, carry: true, items: [DA_GuinsoosRageblade, DA_KrakensFury, DA_Deathblade] }
+  - { unit: DA_Draven18, row: 3, col: 0, carry: true, priority: 1, items: [DA_GuinsoosRageblade, DA_KrakensFury, DA_Deathblade] }
   - { unit: DA_18_Maokai, row: 0, col: 3, star: 1, items: [DA_GargoyleStoneplate] }
 guide: |                      # optional markdown; raw HTML is not rendered
   **Early:** ... **Mid:** ... **Positioning:** ...
@@ -561,6 +566,9 @@ guide: |                      # optional markdown; raw HTML is not rendered
 - Each unit and each hex appears at most once on the board. A unit holds at most 3 items, and at least one unit is a carry.
 - An emblem can't go to a unit that already has its trait, from the champion itself or from an earlier emblem.
 - Early and flex lists have no duplicates, and flex units aren't already on the board.
+- `priority` (item priority, 1 first) only goes to a unit that actually holds items, no two units share one, and the priorities used run 1, 2, 3 with no gap — a lone "3" is a typo for "2" far more often than a deliberate third-of-one. A partial unique index on `(comp_id, carry_priority)` keeps that true for anything else that writes the table.
+
+**Curated stats are author-supplied, never measured.** §0 rules out global aggregation, so `avg_place`, `top4_rate`, `pick_rate` and `level_recommended` are whatever the file says and are all nullable; a comp that states none renders no stats rather than a row of dashes. Rates are authored as a **percent** (62.5) because that is how a stats site prints it, and stored as a **fraction** (0.625) to match `winRate`/`top4Rate` in `src/lib/stats`; `validate.ts` converts and rounds to what `numeric(4,3)` and `numeric(3,2)` can hold.
 
 ```yaml
 # data/curated/<setId>/champion-tiers.yaml   (item lists: item-tiers.yaml, kind: item)
@@ -653,7 +661,8 @@ note talks about mechanics and numbers, not just units. A brief with no buffs, n
   - Tier badges: S rose, A orange, B amber, C lime.
   - Placement pills: 1st gold, 2–4 teal, 5–8 muted.
   - Trait styles: bronze, silver, gold, prismatic, plus orange for unique (1-unit) traits. Active trait icons are black on a hexagon in the style color; inactive ones are gray.
-  - Star goals: ★ bronze, ★★ silver, ★★★ gold.
+  - Star goals: ★ bronze, ★★ silver, ★★★ **emerald** (`--color-star-3`). Not a third metal: ★★★ marks a reroll target — the comp's win condition — and the old gold sat directly on top of the gold 5-cost border, the same collision `--color-carry` was created to avoid.
+  - Gem badge: `--color-gem` (warm amber), kept clear of `tier-b` and `cost-5`, which sit inches away on a comp row. The word "Gem" and a ◆ glyph both carry the meaning, so the colour is reinforcement rather than the only channel.
   - Carry marker: `--color-carry` (near-white), placed **outside the cost ramp on purpose**. Phase 3 used the gold accent, which read as the 5-cost cost border and left a 5-cost carry indistinguishable from an ordinary 5-cost. A `CarryMark` crosshair glyph carries the same meaning as a *shape*, so it survives colour-vision deficiency.
   - Patch brief: `--color-buff` (green) and `--color-nerf` (red), their own tokens for the same reason as `--color-carry` — the page's LP delta already spends `place-top4` and `tier-s` on "up" and "down", and a second meaning on the same colours would be ambiguous where they sit inches apart. Each badge also carries a ▲/▼ glyph, so **shape** says buff-or-nerf too.
 - **Layout:**
@@ -667,7 +676,12 @@ note talks about mechanics and numbers, not just units. A brief with no buffs, n
   - `HexBoard`: 4×7 pointy-top hexes, front row (0) at the top, odd rows shifted right by half a hex.
     - Positions are percentages of an aspect-ratio box, so it scales from 400px to about 512px wide.
     - Each unit shows a cost-colored rim, a gold outer rim when it's a carry, star pips and up to 3 item icons, with details on hover.
-  - `/comps` rows: tier, name, style and difficulty; carries (with items), a divider, then the rest of the board; active traits as icon + count.
+  - `/comps` rows: tier, name (+ Gem badge), style and difficulty, then the curated stats; carries (with items), a divider, then the rest of the board; active traits as icon + count.
+    - Units are ordered carries → stated item priority → cost → name, so "1st" reads first in both the lineup and the guide's item builds.
+    - `PriorityChip` ("1st"/"2nd"/"3rd") and the ★★★ pips are pinned over the portrait's top corners rather than stacked above it, so a lineup mixing units with and without them stays one height.
+    - The name row **wraps** instead of shrinking: a long name plus the Gem badge pushes the badge to a second line rather than eating into the name and truncating it.
+    - `CompStatsRow` takes a `fields` list because the name column only fits three stats before the fourth wraps onto a ragged line — the list shows avg/top-4/pick and leaves the recommended level to the guide page.
+    - The Gem tooltip is a third body on the list's one shared `HoverTip` (`"gem" in item`), not a second tooltip instance.
     - The whole row links to the guide, and units and traits keep their own tooltips.
     - Filters: tier and style toggles (only those present), plus search across comp, unit, item and trait names.
   - `PlacementPill` (always prints the digit, so colour is never the only channel), `StatTile`, `Sparkline`, `PlacementHistogram`, `Segmented` (single-select; `ToggleGroup` stays multi-select, and they share exported button classes so the two can't drift).

@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import type { CompChampion, CompDetail } from "@/lib/curated/queries";
 import { COMP_STYLE_LABELS, DIFFICULTY_LABELS } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
-import { StarPips } from "./comp-details";
+import { GEM_TOOLTIP, GemBadge, PriorityChip, StarPips } from "./comp-details";
+import { CompStatsRow } from "./comp-stats";
 import { GuideMarkdown } from "./guide-markdown";
 import { HexBoard } from "./hex-board";
 import { ItemIcon } from "./item-icon";
@@ -16,15 +17,20 @@ const updated = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "
 /** A comp's page body: board, traits, item builds, early and flex units, and the guide. */
 export function CompGuide({ comp }: { comp: CompDetail }) {
   const difficulty = comp.difficulty ? DIFFICULTY_LABELS[comp.difficulty] : null;
+  // `comp.units` already arrives carries-then-priority-then-cost from the query, so
+  // "1st" leads this list without a second sort here.
   const itemHolders = comp.units.filter((unit) => unit.items.length > 0);
 
   return (
     <>
       <PageHeader
         title={
-          <span className="flex items-center gap-2">
+          <span className="flex flex-wrap items-center gap-2">
             <TierBadge tier={comp.tier} className="size-6 text-xs" />
             {comp.name}
+            {/* A plain title here, not the list's tooltip: this page has no shared
+                HoverTip instance, and one badge does not earn a client component. */}
+            {comp.isGem ? <GemBadge title={GEM_TOOLTIP} /> : null}
           </span>
         }
         description={
@@ -40,7 +46,8 @@ export function CompGuide({ comp }: { comp: CompDetail }) {
           ← All comps
         </Link>
       </PageHeader>
-      {comp.summary ? <p className="mb-3 text-fg">{comp.summary}</p> : null}
+      {comp.summary ? <p className="mb-2 text-fg">{comp.summary}</p> : null}
+      <CompStatsRow stats={comp} className="mb-3 text-xs" />
 
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem]">
         <Panel title="Board">
@@ -57,7 +64,12 @@ export function CompGuide({ comp }: { comp: CompDetail }) {
             {itemHolders.map((unit) => (
               <li key={unit.apiName} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2 first:pt-0 last:pb-0">
                 <div className="flex w-40 items-center gap-2">
-                  <ChampionIcon name={unit.name} cost={unit.cost} iconUrl={unit.iconUrl} alt="" />
+                  <span className="relative shrink-0">
+                    <ChampionIcon name={unit.name} cost={unit.cost} iconUrl={unit.iconUrl} alt="" />
+                    {unit.carryPriority ? (
+                      <PriorityChip priority={unit.carryPriority} className="absolute -top-1 -left-1" />
+                    ) : null}
+                  </span>
                   <div className="min-w-0">
                     <p className="truncate font-medium">{unit.name}</p>
                     <p className="flex items-center gap-1.5 text-xs text-muted">

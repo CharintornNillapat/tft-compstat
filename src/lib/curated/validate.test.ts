@@ -240,6 +240,11 @@ describe("validateComp: valid files", () => {
       guide: "**Early:** play Sett.",
       sortOrder: 0,
       isPublished: true,
+      isGem: false,
+      avgPlace: null,
+      top4Rate: null,
+      pickRate: null,
+      levelRecommended: null,
       earlyUnits: ["DA_18_Sett", "DA_18_Sivir"],
       flexUnits: ["DA_18_KhaZix"],
       units: [
@@ -249,10 +254,19 @@ describe("validateComp: valid files", () => {
           col: 0,
           star: 2,
           isCarry: true,
+          carryPriority: null,
           items: ["DA_InfinityEdge", "DA_LastWhisper", "DA_18_EmblemBrawler"],
         },
-        { apiName: "DA_18_Sett", row: 0, col: 3, star: 2, isCarry: false, items: ["DA_WarmogsArmor"] },
-        { apiName: "DA_18_Sivir", row: 3, col: 1, star: 1, isCarry: false, items: [] },
+        {
+          apiName: "DA_18_Sett",
+          row: 0,
+          col: 3,
+          star: 2,
+          isCarry: false,
+          carryPriority: null,
+          items: ["DA_WarmogsArmor"],
+        },
+        { apiName: "DA_18_Sivir", row: 3, col: 1, star: 1, isCarry: false, carryPriority: null, items: [] },
       ],
     });
   });
@@ -351,5 +365,90 @@ describe("helpers", () => {
 
   it("suggests nothing for unrelated input", () => {
     expect(suggestApiNames("Zzzzzzzz", index.champions)).toEqual([]);
+  });
+});
+
+describe("validateComp: gem flag, curated stats and item priority", () => {
+  /** The sample comp plus extra top-level keys, one per argument. */
+  const withStats = (...lines: string[]) =>
+    compVariant("summary: Sample comp.", ["summary: Sample comp.", ...lines].join("\n"));
+
+  it("reads the gem flag, the level and the stats, converting percent to a fraction", () => {
+    const { comp, issues } = validateCompText(
+      withStats("gem: true", "avg_place: 4.32", "top4_rate: 56.4", "pick_rate: 2.1", "level_recommended: 8"),
+    );
+    expect(issues).toEqual([]);
+    expect(comp).toMatchObject({
+      isGem: true,
+      avgPlace: 4.32,
+      top4Rate: 0.564,
+      pickRate: 0.021,
+      levelRecommended: 8,
+    });
+  });
+
+  it("defaults to no gem and no stats", () => {
+    expect(validateCompText(compYaml).comp).toMatchObject({
+      isGem: false,
+      avgPlace: null,
+      top4Rate: null,
+      pickRate: null,
+      levelRecommended: null,
+    });
+  });
+
+  it("rounds to what the numeric columns can actually store", () => {
+    // numeric(3,2) and numeric(4,3): rounding here keeps the seed summary honest.
+    const { comp } = validateCompText(withStats("avg_place: 4.327", "top4_rate: 56.47"));
+    expect(comp).toMatchObject({ avgPlace: 4.33, top4Rate: 0.565 });
+  });
+
+  it("rejects an out-of-range rate or placement, naming the unit", () => {
+    expect(validateCompText(withStats("top4_rate: 156")).issues[0]?.message).toMatch(/percentage/);
+    expect(validateCompText(withStats("avg_place: 9")).issues[0]?.message).toBe("must be at most 8");
+  });
+
+  it("reads item priority and orders the units by it", () => {
+    const { comp, issues } = validateCompText(
+      withStats().replace("carry: true,", "carry: true, priority: 1,").replace(
+        "unit: DA_18_Sett, row: 0, col: 3,",
+        "unit: DA_18_Sett, row: 0, col: 3, priority: 2,",
+      ),
+    );
+    expect(issues).toEqual([]);
+    expect(comp?.units.map((unit) => [unit.apiName, unit.carryPriority])).toEqual([
+      ["DA_18_Ashe", 1],
+      ["DA_18_Sett", 2],
+      ["DA_18_Sivir", null],
+    ]);
+  });
+
+  it("rejects a priority on a unit that holds no items", () => {
+    const { comp, issues } = validateCompText(
+      compVariant("unit: DA_18_Sivir, row: 3, col: 1, star: 1", "unit: DA_18_Sivir, row: 3, col: 1, star: 1, priority: 1"),
+    );
+    expect(comp).toBeUndefined();
+    expect(issues[0]).toMatchObject({
+      path: "board[2].priority",
+      message: "DA_18_Sivir holds no items, so it has no item priority",
+    });
+  });
+
+  it("rejects two units claiming the same priority", () => {
+    const { issues } = validateCompText(
+      compVariant("carry: true,", "carry: true, priority: 1,").replace(
+        "unit: DA_18_Sett, row: 0, col: 3,",
+        "unit: DA_18_Sett, row: 0, col: 3, priority: 1,",
+      ),
+    );
+    expect(issues[0]).toMatchObject({ path: "board[1].priority", message: "priority 1 is already DA_18_Ashe" });
+  });
+
+  it("rejects a gap in the priorities, which is nearly always a typo for the one below", () => {
+    const { issues } = validateCompText(compVariant("carry: true,", "carry: true, priority: 2,"));
+    expect(issues[0]).toMatchObject({
+      path: "board",
+      message: "priority 2 is used but 1 is not; priorities run 1, 2, 3 in order",
+    });
   });
 });

@@ -7,7 +7,9 @@ import { TraitBreakpoints, TraitHex } from "./trait-badge";
 const STAR_TEXT: Record<number, string> = {
   1: "text-trait-bronze",
   2: "text-trait-silver",
-  3: "text-trait-gold",
+  // Emerald, not a third metal (architecture §9): 3-star is a reroll target rather
+  // than one more rung, and gold stars sat right on top of the gold 5-cost border.
+  3: "text-star-3",
 };
 
 /** ★★ in the star level's color (bronze, silver, gold). */
@@ -83,6 +85,40 @@ export function CarryMark({ className = "" }: { className?: string }) {
         <circle cx="6" cy="6" r="2.5" />
         <path d="M6 0.5v2M6 9.5v2M0.5 6h2M9.5 6h2" strokeLinecap="round" />
       </svg>
+    </span>
+  );
+}
+
+/**
+ * A comp that wins more than it is played. The word "Gem" and the ◆ glyph both carry
+ * the meaning, so the amber is reinforcement rather than the only channel.
+ */
+export function GemBadge({ className = "", title }: { className?: string; title?: string }) {
+  return (
+    <span
+      title={title}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border border-gem/40 bg-gem/10 px-1.5 py-px text-[10px] font-semibold tracking-wide text-gem uppercase ${className}`}
+    >
+      <span aria-hidden>◆</span>
+      Gem
+    </span>
+  );
+}
+
+/** What a Gem badge means, for its tooltip and its accessible name alike. */
+export const GEM_TOOLTIP = "This comp has a low pick rate but a high top 4 rate.";
+
+const ORDINALS: Record<number, string> = { 1: "1st", 2: "2nd", 3: "3rd" };
+
+/** Item priority chip pinned above an itemized unit: who gets the components first. */
+export function PriorityChip({ priority, className = "" }: { priority: number; className?: string }) {
+  return (
+    <span
+      role="img"
+      aria-label={`Item priority ${ORDINALS[priority] ?? priority}`}
+      className={`rounded-sm bg-surface/90 px-1 text-[9px] leading-[1.3] font-bold text-carry ring-1 ring-carry/50 ${className}`}
+    >
+      {ORDINALS[priority] ?? priority}
     </span>
   );
 }

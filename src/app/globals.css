@@ -28,6 +28,10 @@
   --color-tier-b: #fbbf24;
   --color-tier-c: #a3e635;
 
+  /* Star goal. 3-star is emerald rather than a third metal: it marks a reroll target,
+     the comp's win condition, and gold stars sat directly on the gold 5-cost border. */
+  --color-star-3: #34d399;
+
   /* Carry marker. Outside the cost ramp on purpose: the old gold rim read as the
      5-cost border, so a 5-cost carry looked like an ordinary 5-cost. */
   --color-carry: #fafafa;
@@ -42,6 +46,10 @@
   --color-place-win: #facc15;
   --color-place-top4: #2dd4bf;
   --color-place-bot4: #71717a;
+
+  /* Gem (sleeper) badge: low pick rate, high top-4 rate. Warm amber, kept clear of
+     tier-b (#fbbf24) and cost-5 (#f59e0b), which sit near it on a comp row. */
+  --color-gem: #fcd34d;
 
   /* Trait activation tiers */
   --color-trait-bronze: #b87333;

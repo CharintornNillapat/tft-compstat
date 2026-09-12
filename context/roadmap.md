@@ -184,14 +184,26 @@ Approved task by task rather than as a whole phase.
   - `src/lib/curated/meta-brief.ts`: pure `parseMetaBrief` (8 tests) + `getMetaBrief()` on `'use cache'` with `cacheLife("max")` and no tag, since only a new build can change the file.
   - `src/app/meta-brief.tsx`: full-width second row of the `/` grid, green ▲ / red ▼ badges on new `--color-buff` / `--color-nerf` tokens, optional tip line.
   - Entries are capped at 48 chars and 6 per list, which is what keeps them one-line badges rather than a paragraph.
+- [x] **Task 2 — Horizontal comp card, Gem badge, curated stats and item priority** (approved 2026-09-12)
+  - Migration `20260912160000_comp_gem_and_stats.sql`: `comps.is_gem/avg_place/top4_rate/pick_rate/level_recommended`, `comp_units.carry_priority`, a partial unique index on `(comp_id, carry_priority)`, and `seed_comp` replaced to carry them. Columns on existing tables, so table-level grants and the existing RLS policies apply unchanged.
+  - `schemas.ts` / `validate.ts`: `gem`, the four stats and unit `priority`, plus three new cross-checks (priority needs items, is unique, and runs 1-2-3 with no gap). Percent → fraction conversion lives here.
+  - UI: `GemBadge` + `PriorityChip` in `comp-details.tsx`, new `comp-stats.tsx`, rebuilt `CompRow`, and the same badges on `/comps/[slug]`.
+  - ★★★ moved to emerald via a new `--color-star-3` token, globally rather than per-page (architecture §9).
 - [ ] Further tasks — not yet specified.
 
-**Verified (2026-09-12):**
+**Verified — Task 1 (2026-09-12):**
 - **Checks:** `pnpm check` (217 tests, up from 209) and `pnpm build` are green. `/` stays **Partial Prerender** (revalidate 1d, expire 1w), with the brief in the prerendered shell alongside `TopComps`.
 - **Tracing, and a warning worth recording:** the first version joined `process.cwd()` with a path built at runtime. Turbopack warned "Dynamic filesystem access causes tracing of the whole project" and traced the entire repo into the server bundle. Joining from the **literal** `data/curated` prefix instead cleared the warning and cut the page trace to 128 files, with `data/curated/18/meta-notes.yaml` included — so the `outputFileTracingIncludes` entry added alongside it turned out to be redundant and was dropped (checked in `.next/server/app/page.js.nft.json` with and without it).
 - **`yaml` moved to `dependencies`.** Turbopack bundles it into the server chunk rather than tracing the package, so it is now a runtime dependency of the site, not just of the seed scripts.
 - **Rendered, against the real cache with `next start`:** `/` returns 200 in 1.3s with "Patch 18.2 brief", 4 buff badges, 3 nerf badges and the tip line, all in the static shell (they appear ahead of the streamed rank island in the HTML).
 - **Layout (headless Edge over CDP at 960px and 400px):** no route scrolls horizontally (`scrollWidth === clientWidth` on all five). The brief measures 928px inside 960 and 368px inside 400, and none of its 7 badges reach the viewport edge. The only element whose `scrollWidth` exceeds its `clientWidth` on `/` is the pre-existing 3px sparkline wrapper in `overview-glance.tsx`, outside the card.
+
+**Verified — Task 2 (2026-09-12):**
+- **Checks:** `pnpm check` (225 tests, up from 217) and `pnpm build` are green. `/comps` stays Static and `/comps/[slug]` Partial Prerender, both at revalidate 1d / expire 1w.
+- **Round trip against the live DB:** migration pushed, types regenerated, `pnpm seed:curated` wrote `defender-cassiopeia: gem, avg 4.32, top4 56.4%, pick 2.1%, lv 8` and `draven-fast-9: avg 4.05, top4 61.8%, pick 14.7%, lv 9`. The seed summary prints the stats back as percentages, which is what proves the percent→fraction conversion both ways.
+- **PostgREST returns `numeric` as a JSON number** (checked directly: `avg_place` 4.32 / `top4_rate` 0.564 / `pick_rate` 0.021, all `typeof number`). `toStats()` in `queries.ts` is therefore a guard, not a fix — kept because a string arriving there would print "NaN%" on the page rather than fail anywhere visible.
+- **Rendered, with `next start`:** `/comps` shows the Gem badge, `Avg 4.32 · Top 4 56.4% · Pick 2.1%`, `1st`/`2nd` chips and emerald ★★★; `/comps/[slug]` shows the badge beside the title, the full stats including `Lv 8`, and the priority chips on the item builds.
+- **Layout (headless Edge at 960px and 400px):** no route scrolls horizontally, and nothing crosses the viewport edge on any of the six. Two defects were found by screenshot and fixed: the comp name truncated to "Defender Cassi…" once the Gem badge shared its column (the name row now wraps and the column is `sm:w-64`), and a fourth stat wrapped onto a ragged second line (the list now shows three, the guide page all four).
 
 ---
 

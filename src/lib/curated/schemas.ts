@@ -40,6 +40,19 @@ const patch = z
   })
   .regex(/^\d+\.\d+[a-z]?$/, 'must look like "18.1"');
 
+/** Item priority runs 1-3: past third, "priority" stops meaning anything. */
+export const MAX_CARRY_PRIORITY = 3;
+
+/**
+ * A percentage, 0-100. Percent rather than a fraction because that is how a stats
+ * site prints it and how an author will copy it; `validate.ts` divides by 100 so the
+ * stored value matches the fractions `src/lib/stats` uses everywhere else.
+ */
+const percent = z
+  .number({ error: "must be a percentage from 0 to 100, like 62.5 (not 0.625)" })
+  .min(0, "must be at least 0")
+  .max(100, "must be at most 100 — this is a percentage, so 62.5 rather than 0.625");
+
 /** A whole number in `[min, max]`, with one message for every way to miss. */
 const intIn = (min: number, max: number, message: string) =>
   z.int({ error: message }).min(min, message).max(max, message);
@@ -77,6 +90,8 @@ const boardUnitSchema = z.strictObject({
   /** Star level to aim for. */
   star: intIn(1, 3, "must be 1, 2 or 3").default(2),
   carry: z.boolean().default(false),
+  /** Item priority: 1 is built first. Checked against the unit's items in validate.ts. */
+  priority: intIn(1, MAX_CARRY_PRIORITY, `must be 1, 2 or ${MAX_CARRY_PRIORITY}`).optional(),
   items: z.array(apiName).max(MAX_UNIT_ITEMS, `a unit holds at most ${MAX_UNIT_ITEMS} items`).default([]),
 });
 
@@ -95,6 +110,22 @@ export const compFileSchema = z.strictObject({
   order: intIn(-999, 999, "must be a whole number from -999 to 999").default(0),
   /** false hides the comp but keeps its row. */
   published: z.boolean().default(true),
+  /** Sleeper pick: low pick rate, high top-4 rate. Shown as the "Gem" badge. */
+  gem: z.boolean().default(false),
+  /**
+   * Author-supplied stats, all optional (architecture §0 rules out measuring these
+   * ourselves). Rates are written here as a **percent** — 62.5, the way a stats site
+   * shows it — and stored as a fraction; validate.ts converts.
+   */
+  avg_place: z
+    .number({ error: "must be a number from 1 to 8, like 4.35" })
+    .min(1, "must be at least 1")
+    .max(8, "must be at most 8")
+    .optional(),
+  top4_rate: percent.optional(),
+  pick_rate: percent.optional(),
+  /** The level to aim for on the comp's power spike. */
+  level_recommended: intIn(1, 10, "must be a level from 1 to 10").optional(),
   early_units: apiNameList.default([]),
   flex_units: apiNameList.default([]),
   board: z.array(boardUnitSchema, { error: "must be a list of units" }).min(1, "needs at least one unit"),

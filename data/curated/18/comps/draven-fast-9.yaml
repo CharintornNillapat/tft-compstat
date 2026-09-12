@@ -13,15 +13,20 @@ difficulty: 3
 patch: "18.2"
 order: 1
 summary: High-roll fast 9. Play an AD opener, hit level 9 by 5-2, and cap with Draven behind Maokai and a 5-cost frontline.
+# SAMPLE numbers: a popular meta comp, so no gem badge. Rates are percent here.
+avg_place: 4.05
+top4_rate: 61.8
+pick_rate: 14.7
+level_recommended: 9
 early_units: [DA_18_Sivir, DA_Nidalee18_AP, DA_18_Aphelios]
 board:
-  - { unit: DA_Draven18, row: 3, col: 0, carry: true, items: [DA_GuinsoosRageblade, DA_KrakensFury, DA_Deathblade] }
+  - { unit: DA_Draven18, row: 3, col: 0, carry: true, priority: 1, items: [DA_GuinsoosRageblade, DA_KrakensFury, DA_Deathblade] }
   - { unit: DA_18_Ezreal, row: 3, col: 1 }
   - { unit: DA_18_Ivern, row: 3, col: 5, star: 1 }
   - { unit: DA_18_Kennen, row: 1, col: 3, star: 1 }
   - { unit: DA_18_GnarSmall, row: 0, col: 1, star: 1 }
   - { unit: DA_Amumu18, row: 0, col: 2 }
-  - { unit: DA_18_Maokai, row: 0, col: 3, star: 1, items: [DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor] }
+  - { unit: DA_18_Maokai, row: 0, col: 3, star: 1, priority: 2, items: [DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor] }
   - { unit: DA_Taric18, row: 0, col: 4, star: 1 }
   - { unit: DA_18_Alistar, row: 0, col: 5 }
 guide: |

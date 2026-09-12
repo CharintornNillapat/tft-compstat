@@ -14,7 +14,8 @@ import {
   type TierRank,
 } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
-import { StarPips, TraitDetails, UnitDetails } from "./comp-details";
+import { GEM_TOOLTIP, GemBadge, PriorityChip, StarPips, TraitDetails, UnitDetails } from "./comp-details";
+import { CompStatsRow } from "./comp-stats";
 import { EmptyState } from "./empty-state";
 import { HoverTip, useHoverTip } from "./hover-tip";
 import { ItemIcon } from "./item-icon";
@@ -22,14 +23,19 @@ import { TierBadge } from "./tier-row";
 import { TraitHex } from "./trait-badge";
 import { ToggleGroup } from "./toggle-group";
 
-type Tip = ReturnType<typeof useHoverTip<CompUnit | TraitCount>>;
+/** The third tooltip body is the Gem badge's; it carries no data of its own. */
+type GemTip = { gem: true };
+type TipItem = CompUnit | TraitCount | GemTip;
+type Tip = ReturnType<typeof useHoverTip<TipItem>>;
+
+const GEM_TIP: GemTip = { gem: true };
 
 /** Dense comp rows with tier/style filters and search; units and traits show details on hover. */
 export function CompList({ comps }: { comps: CompSummary[] }) {
   const [tiers, setTiers] = useState<ReadonlySet<TierRank>>(() => new Set());
   const [styles, setStyles] = useState<ReadonlySet<CompStyle>>(() => new Set());
   const [query, setQuery] = useState("");
-  const tip = useHoverTip<CompUnit | TraitCount>();
+  const tip = useHoverTip<TipItem>();
 
   const tierOptions = TIER_RANKS.filter((tier) => comps.some((comp) => comp.tier === tier)).map((tier) => ({
     value: tier,
@@ -72,7 +78,9 @@ export function CompList({ comps }: { comps: CompSummary[] }) {
 
       {tip.active ? (
         <HoverTip id={tip.id} anchor={tip.active.anchor}>
-          {"breakpoints" in tip.active.item ? (
+          {"gem" in tip.active.item ? (
+            <p className="max-w-56">{GEM_TOOLTIP}</p>
+          ) : "breakpoints" in tip.active.item ? (
             <TraitDetails trait={tip.active.item} />
           ) : (
             <UnitDetails unit={tip.active.item} />
@@ -90,19 +98,37 @@ function CompRow({ comp, tip }: { comp: CompSummary; tip: Tip }) {
 
   return (
     <li className="relative flex flex-wrap items-center gap-x-4 gap-y-2 px-2.5 py-2 transition-colors hover:bg-raised/40">
-      <div className="flex w-full min-w-0 items-center gap-2.5 sm:w-48 sm:shrink-0">
+      <div className="flex w-full min-w-0 items-start gap-2.5 sm:w-64 sm:shrink-0">
         <TierBadge tier={comp.tier} className="size-8 shrink-0 text-sm" />
-        <div className="min-w-0">
-          <h2 className="truncate font-semibold">
-            {/* Stretched link: the whole row opens the guide; units and traits sit above it. */}
-            <Link href={`/comps/${comp.slug}`} className="after:absolute after:inset-0 hover:text-accent">
+        <div className="min-w-0 flex-1">
+          {/* Wraps rather than shrinks: a long name plus the badge pushes the badge to
+              the next line instead of eating into the name and truncating it. */}
+          <h2 className="flex min-w-0 flex-wrap items-center gap-x-1.5 font-semibold">
+            {/* Stretched link: the whole row opens the guide; units, traits and the
+                gem badge sit above it so their tooltips still work. */}
+            <Link
+              href={`/comps/${comp.slug}`}
+              className="max-w-full truncate after:absolute after:inset-0 hover:text-accent"
+            >
               {comp.name}
             </Link>
+            {comp.isGem ? (
+              <button
+                type="button"
+                {...tip.triggerProps(GEM_TIP)}
+                aria-label={GEM_TOOLTIP}
+                className="pointer-events-auto relative shrink-0 rounded-full"
+              >
+                <GemBadge />
+              </button>
+            ) : null}
           </h2>
           <p className="truncate text-xs text-muted">
             {COMP_STYLE_LABELS[comp.style]}
             {difficulty ? ` · ${difficulty}` : ""}
           </p>
+          {/* No level here: a fourth stat wraps this column onto a ragged second line. */}
+          <CompStatsRow stats={comp} fields={["avg", "top4", "pick"]} className="mt-1" />
         </div>
       </div>
 
@@ -144,10 +170,15 @@ function UnitChip({ unit, tip }: { unit: CompUnit; tip: Tip }) {
         aria-label={unit.name}
         className="pointer-events-auto flex flex-col items-center gap-0.5 rounded p-0.5 hover:bg-raised"
       >
+        {/* The chip and the pips are pinned over the portrait's top corners rather than
+            stacked above it, so a row of units with and without them stays one height. */}
         <span className="relative">
           <ChampionIcon name={unit.name} cost={unit.cost} iconUrl={unit.iconUrl} size={36} alt="" />
+          {unit.carryPriority ? (
+            <PriorityChip priority={unit.carryPriority} className="absolute -top-1 -left-1" />
+          ) : null}
           {unit.star === 3 ? (
-            <StarPips star={3} className="absolute inset-x-0 -top-1 text-center text-[9px]" />
+            <StarPips star={3} className="absolute -top-1 right-0 text-[9px]" />
           ) : null}
         </span>
         {unit.items.length ? (

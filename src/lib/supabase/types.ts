@@ -54,6 +54,7 @@ export type Database = {
       }
       comp_units: {
         Row: {
+          carry_priority: number | null
           champion_api_name: string
           comp_id: string
           hex_col: number
@@ -63,6 +64,7 @@ export type Database = {
           star_goal: number
         }
         Insert: {
+          carry_priority?: number | null
           champion_api_name: string
           comp_id: string
           hex_col: number
@@ -72,6 +74,7 @@ export type Database = {
           star_goal?: number
         }
         Update: {
+          carry_priority?: number | null
           champion_api_name?: string
           comp_id?: string
           hex_col?: number
@@ -99,54 +102,69 @@ export type Database = {
       }
       comps: {
         Row: {
+          avg_place: number | null
           difficulty: number | null
           early_units: string[]
           flex_units: string[]
           guide_md: string | null
           id: string
+          is_gem: boolean
           is_published: boolean
+          level_recommended: number | null
           name: string
           patch: string
+          pick_rate: number | null
           set_id: number
           slug: string
           sort_order: number
           style: Database["public"]["Enums"]["comp_style"]
           summary: string | null
           tier: Database["public"]["Enums"]["tier_rank"]
+          top4_rate: number | null
           updated_at: string
         }
         Insert: {
+          avg_place?: number | null
           difficulty?: number | null
           early_units?: string[]
           flex_units?: string[]
           guide_md?: string | null
           id?: string
+          is_gem?: boolean
           is_published?: boolean
+          level_recommended?: number | null
           name: string
           patch: string
+          pick_rate?: number | null
           set_id: number
           slug: string
           sort_order?: number
           style: Database["public"]["Enums"]["comp_style"]
           summary?: string | null
           tier: Database["public"]["Enums"]["tier_rank"]
+          top4_rate?: number | null
           updated_at?: string
         }
         Update: {
+          avg_place?: number | null
           difficulty?: number | null
           early_units?: string[]
           flex_units?: string[]
           guide_md?: string | null
           id?: string
+          is_gem?: boolean
           is_published?: boolean
+          level_recommended?: number | null
           name?: string
           patch?: string
+          pick_rate?: number | null
           set_id?: number
           slug?: string
           sort_order?: number
           style?: Database["public"]["Enums"]["comp_style"]
           summary?: string | null
           tier?: Database["public"]["Enums"]["tier_rank"]
+          top4_rate?: number | null
           updated_at?: string
         }
         Relationships: [

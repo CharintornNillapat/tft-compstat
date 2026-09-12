@@ -61,6 +61,33 @@ export type ItemTierList = TierListMeta & { groups: { kind: ItemKind; tiers: Tie
 
 type Db = ReturnType<typeof getSupabase>;
 
+/**
+ * `numeric` columns → numbers, with null for anything that isn't one.
+ *
+ * PostgREST does send these as JSON numbers (checked against the live DB), so this is
+ * a guard rather than a fix. The parameter is `unknown` because a `numeric` arriving
+ * as a string is a plausible driver change, and the failure it would cause is silent:
+ * `("0.564" * 100).toFixed(1)` is fine in JS, but a string that isn't numeric would
+ * print "NaN%" on the page instead of throwing anywhere anyone would see it.
+ */
+function toStats(row: {
+  avg_place: unknown;
+  top4_rate: unknown;
+  pick_rate: unknown;
+  level_recommended: unknown;
+}): CompStats {
+  const num = (value: unknown) => {
+    const parsed = typeof value === "string" ? Number(value) : value;
+    return typeof parsed === "number" && Number.isFinite(parsed) ? parsed : null;
+  };
+  return {
+    avgPlace: num(row.avg_place),
+    top4Rate: num(row.top4_rate),
+    pickRate: num(row.pick_rate),
+    levelRecommended: num(row.level_recommended),
+  };
+}
+
 async function loadCurrentList(db: Db, kind: TierListKind) {
   const list = must(
     await db
@@ -209,13 +236,28 @@ export type CompUnit = CompChampion & {
   col: number;
   star: number;
   isCarry: boolean;
+  /** Item priority, 1 first; null when the comp states none. */
+  carryPriority: number | null;
   items: CompItem[];
 };
 
-export type CompSummary = {
+/**
+ * Curated, author-supplied figures — this site measures nothing global (architecture
+ * §0). `top4Rate` and `pickRate` are fractions, like everything in `src/lib/stats`.
+ */
+export type CompStats = {
+  avgPlace: number | null;
+  top4Rate: number | null;
+  pickRate: number | null;
+  levelRecommended: number | null;
+};
+
+export type CompSummary = CompStats & {
   slug: string;
   name: string;
   tier: TierRank;
+  /** Sleeper pick: low pick rate, high top-4 rate. Curated, not measured. */
+  isGem: boolean;
   style: CompStyle;
   difficulty: number | null;
   summary: string | null;
@@ -238,7 +280,7 @@ export type CompDetail = Omit<CompSummary, "traits"> & {
 };
 
 // One literal, so supabase-js can infer the row type (the `!inner` join lets the list filter on the set).
-const COMP_COLUMNS = `slug, name, tier, style, difficulty, summary, patch, guide_md, updated_at, early_units, flex_units, set:tft_sets!inner(name, is_active), units:comp_units(champion_api_name, hex_row, hex_col, star_goal, is_carry, items)`;
+const COMP_COLUMNS = `slug, name, tier, style, difficulty, summary, patch, guide_md, updated_at, early_units, flex_units, is_gem, avg_place, top4_rate, pick_rate, level_recommended, set:tft_sets!inner(name, is_active), units:comp_units(champion_api_name, hex_row, hex_col, star_goal, is_carry, items, carry_priority)`;
 
 async function loadComps(db: Db, filter: { slug: string } | { activeSet: true }) {
   let query = db.from("comps").select(COMP_COLUMNS).eq("is_published", true);
@@ -299,6 +341,7 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
             col: unit.hex_col,
             star: unit.star_goal,
             isCarry: unit.is_carry,
+            carryPriority: unit.carry_priority,
             items: unit.items.map((apiName) => {
               const item = items.get(apiName);
               return { apiName, name: item?.name ?? apiName, iconUrl: item?.icon_url ?? null };
@@ -306,7 +349,14 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
           },
         ];
       })
-      .sort((a, b) => Number(b.isCarry) - Number(a.isCarry) || b.cost - a.cost || a.name.localeCompare(b.name));
+      // Stated item priority wins over the cost fallback: "1st" should read first.
+      .sort(
+        (a, b) =>
+          Number(b.isCarry) - Number(a.isCarry) ||
+          (a.carryPriority ?? Infinity) - (b.carryPriority ?? Infinity) ||
+          b.cost - a.cost ||
+          a.name.localeCompare(b.name),
+      );
 
     const boardTraits = computeActiveTraits(
       row.units.map((unit) => ({
@@ -327,6 +377,8 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
         summary: row.summary,
         patch: row.patch,
         updatedAt: row.updated_at,
+        isGem: row.is_gem,
+        ...toStats(row),
         units,
         traits: boardTraits.filter(isActive),
       } satisfies CompSummary,

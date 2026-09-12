@@ -1,6 +1,6 @@
 import { isNode, LineCounter, parseDocument } from "yaml";
 import { TIER_RANKS, type CompStyle, type TierRank } from "@/lib/static/game";
-import { compFileSchema, TIER_LIST_FILES, tierListFileSchema, type TierListKind } from "./schemas";
+import { compFileSchema, MAX_CARRY_PRIORITY, TIER_LIST_FILES, tierListFileSchema, type TierListKind } from "./schemas";
 
 /**
  * Curated YAML → validated, DB-ready tier lists and comps (architecture §7 steps 1–3).
@@ -42,6 +42,8 @@ export type SeedCompUnit = {
   col: number;
   star: number;
   isCarry: boolean;
+  /** Item priority, 1 first. Null when the file states none. */
+  carryPriority: number | null;
   items: string[];
 };
 
@@ -58,6 +60,12 @@ export type SeedComp = {
   guide: string | null;
   sortOrder: number;
   isPublished: boolean;
+  isGem: boolean;
+  /** Author-supplied, all optional. Rates are **fractions** here; the YAML is percent. */
+  avgPlace: number | null;
+  top4Rate: number | null;
+  pickRate: number | null;
+  levelRecommended: number | null;
   earlyUnits: string[];
   flexUnits: string[];
   units: SeedCompUnit[];
@@ -113,6 +121,13 @@ export function parseYaml(file: string, text: string) {
 
   return { data: syntaxIssues.length ? undefined : (doc.toJS() as unknown), issue, syntaxIssues };
 }
+
+/** Percent → fraction at the DB's numeric(4,3): 62.5 → 0.625. */
+const toFraction = (percent: number | undefined) =>
+  percent === undefined ? null : Math.round((percent / 100) * 1000) / 1000;
+
+/** The DB stores numeric(3,2), so round here too and keep seed output honest. */
+const round2 = (value: number | undefined) => (value === undefined ? null : Math.round(value * 100) / 100);
 
 function levenshtein(a: string, b: string): number {
   let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
@@ -271,6 +286,10 @@ export function checkTierListSet(lists: readonly SeedTierList[]): SeedIssue[] {
  * unit and item exists, units and hexes are unique on the board, at least one unit
  * is a carry, no emblem goes to a unit that already has its trait, and flex units
  * are swaps rather than units already on the board.
+ *
+ * Item priorities are checked too: only a unit that actually holds items can have one,
+ * no two units share a priority, and the priorities used run 1, 2, 3 with no gap — a
+ * lone "3" is a typo for "2" far more often than it is a deliberate third-of-one.
  */
 export function validateComp(input: {
   /** Repo-relative path, used in issues. */
@@ -328,6 +347,25 @@ export function validateComp(input: {
     issues.push(yaml.issue(["board"], "needs at least one carry: mark its main damage dealer with carry: true"));
   }
 
+  const priorityAt = new Map<number, string>();
+  data.board.forEach((unit, i) => {
+    if (unit.priority === undefined) return;
+    const path = ["board", i, "priority"];
+    if (unit.items.length === 0) {
+      issues.push(yaml.issue(path, `${unit.unit} holds no items, so it has no item priority`));
+      return;
+    }
+    const taken = priorityAt.get(unit.priority);
+    if (taken) issues.push(yaml.issue(path, `priority ${unit.priority} is already ${taken}`));
+    else priorityAt.set(unit.priority, unit.unit);
+  });
+  for (let priority = 1; priority <= MAX_CARRY_PRIORITY; priority++) {
+    if (priorityAt.has(priority) || !priorityAt.has(priority + 1)) continue;
+    issues.push(
+      yaml.issue(["board"], `priority ${priority + 1} is used but ${priority} is not; priorities run 1, 2, 3 in order`),
+    );
+  }
+
   for (const key of ["early_units", "flex_units"] as const) {
     const listedAt = new Map<string, string>();
     data[key].forEach((apiName, i) => {
@@ -362,6 +400,11 @@ export function validateComp(input: {
       guide: data.guide ?? null,
       sortOrder: data.order,
       isPublished: data.published,
+      isGem: data.gem,
+      avgPlace: round2(data.avg_place),
+      top4Rate: toFraction(data.top4_rate),
+      pickRate: toFraction(data.pick_rate),
+      levelRecommended: data.level_recommended ?? null,
       earlyUnits: data.early_units,
       flexUnits: data.flex_units,
       units: data.board.map((unit) => ({
@@ -370,6 +413,7 @@ export function validateComp(input: {
         col: unit.col,
         star: unit.star,
         isCarry: unit.carry,
+        carryPriority: unit.priority ?? null,
         items: unit.items,
       })),
     },

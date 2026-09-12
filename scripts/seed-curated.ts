@@ -43,6 +43,19 @@ type CompFile = { file: string; setId: number };
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
+/** Gem flag and curated stats in the run summary, so a seed shows what it stored. */
+function compExtras(comp: SeedComp): string {
+  const pct = (fraction: number | null) => (fraction === null ? null : `${(fraction * 100).toFixed(1)}%`);
+  const parts = [
+    comp.isGem ? "gem" : null,
+    comp.avgPlace === null ? null : `avg ${comp.avgPlace.toFixed(2)}`,
+    pct(comp.top4Rate) && `top4 ${pct(comp.top4Rate)}`,
+    pct(comp.pickRate) && `pick ${pct(comp.pickRate)}`,
+    comp.levelRecommended === null ? null : `lv ${comp.levelRecommended}`,
+  ].filter(Boolean);
+  return parts.length ? `, ${parts.join(", ")}` : "";
+}
+
 async function findCuratedFiles(): Promise<{ tierFiles: TierFile[]; compFiles: CompFile[] }> {
   const tierFiles: TierFile[] = [];
   const compFiles: CompFile[] = [];
@@ -177,6 +190,11 @@ async function writeComp(comp: SeedComp) {
         flex_units: comp.flexUnits,
         is_published: comp.isPublished,
         sort_order: comp.sortOrder,
+        is_gem: comp.isGem,
+        avg_place: comp.avgPlace,
+        top4_rate: comp.top4Rate,
+        pick_rate: comp.pickRate,
+        level_recommended: comp.levelRecommended,
       },
       p_units: comp.units.map((unit) => ({
         champion_api_name: unit.apiName,
@@ -185,6 +203,7 @@ async function writeComp(comp: SeedComp) {
         star_goal: unit.star,
         is_carry: unit.isCarry,
         items: unit.items,
+        carry_priority: unit.carryPriority,
       })),
     }),
     `comps ${comp.slug}`,
@@ -252,7 +271,7 @@ async function main() {
   for (const comp of comps) {
     const hidden = comp.isPublished ? "" : ", unpublished";
     console.log(
-      `${comp.file}: ${comp.tier} ${COMP_STYLE_LABELS[comp.style]}, ${plural(comp.units.length, "unit")}${hidden}`,
+      `${comp.file}: ${comp.tier} ${COMP_STYLE_LABELS[comp.style]}, ${plural(comp.units.length, "unit")}${compExtras(comp)}${hidden}`,
     );
   }
   if (values["dry-run"]) {
