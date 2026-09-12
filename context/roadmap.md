@@ -1,8 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–3 complete; Phase 4 is code-complete and verified locally, pending an env change and a deploy (2026-09-12). Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists and four curated comps.
->
-> ⚠ **Before the Phase 4 deploy:** set `RIOT_PLATFORM=sg2` in `.env.local` **and** in the Vercel project. The old `th2` host no longer resolves, so the cron would fail on every run.
+> **Status:** Phases 1–4 complete and deployed (2026-09-12); Phase 5 is next. Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists, four curated comps and the match cache syncing daily.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,8 +18,8 @@
 | 1 | Foundation & skeleton | ✅ Done (2026-09-11) |
 | 2 | Static game data + tier lists | ✅ Done (2026-09-11) |
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
-| 4 | Riot API service & match cache | 🟨 Code complete, awaiting deploy |
-| 5 | Personal dashboard & polish | ⬜ Not started |
+| 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
+| 5 | Personal dashboard & polish | 🟨 In progress |
 
 ---
 
@@ -129,6 +127,13 @@
 - **Access (§4.6):** as `anon`, `player_matches` and `riot_accounts` read fine, while `matches` and `sync_state` are denied with `42501`.
 - **Rate-limit headroom:** a full 20-match sync used 3 of 100 calls in the 120s window.
 - **Checks:** `pnpm check` (134 tests) and `pnpm build` are green. `/me` builds as Partial Prerender: the shell prerenders and the sync panel streams in.
+
+**Deployed (2026-09-12, commit `600d2b3`):**
+- **Cron authorization:** `/api/cron/sync` returns **401** with no header, with a wrong token, and with the right secret under the wrong scheme (`Basic`). Only `Authorization: Bearer $CRON_SECRET` is accepted — the comparison is `timingSafeEqual` over the whole header.
+- **A real authorized run:** `{ok, newMatches: 0, calls: 3}` in 4.6s (ids + league + summoner; the cron trigger is the only one that refreshes the summoner). This is what proves the `sg2` env change landed on Vercel — the dead `th2` host would have failed the call, not returned `ok`.
+- **Cooldown in production:** a call inside the window returned `{skipped, reason: "locked-or-cooling", nextAllowedAt}`, so the gate holds across Vercel instances and not just locally.
+- **`/me` serves cached data:** renders `BurdenInMyHand#6969 · sg2`, status "Synced", 20 cached matches, with no Riot call during render. The static shell arrives first and the sync panel streams in, as Partial Prerender intends.
+- **Vercel Hobby limits (§11):** the deploy accepted the daily `vercel.json` cron and `maxDuration = 60`. A full sync took 14.6s locally and a no-op run 4.6s in production, so the margin is wide.
 
 ---
 

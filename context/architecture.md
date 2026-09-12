@@ -1,6 +1,6 @@
 # TFT CompStat — Architecture
 
-> **Status:** Approved design (2026-09-11). Phases 1–3 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
+> **Status:** Approved design (2026-09-11). Phases 1–4 are implemented and deployed (2026-09-12). Their decisions are recorded below (§4.7–§4.9, §5, §6, §7, §8, §9). This is the source of truth for implementation. Update it whenever a phase changes a decision.
 > **Companion doc:** [`roadmap.md`](./roadmap.md)
 
 ## 0. Product scope & confirmed decisions
@@ -640,7 +640,7 @@ notes: { DA_18_Ashe: "Best 5-cost carry this patch" }   # hover notes; keys must
 - [x] After `supabase link`: regenerate `types.ts` with `pnpm db:types`. The hand-written version was overwritten before the first commit, so no diff was possible. `pnpm check` and `pnpm build` pass against the generated types.
 - [x] `tft/league/v1/by-puuid` works on `sg2` (verified 2026-09-12: GOLD II, 75 LP). The summoner-id fallback isn't needed.
 - [x] CommunityDragon icon path conversion (`.tex` → `.png` URL rule) and the current-set key (Phase 2). Resolved in §4.8: lowercase the path, `.tex` → `.png`, and pin it to the version directory; the set is the newest standard `TFTSet<N>`, with a `--set` override.
-- [ ] Confirm Vercel Hobby function duration and cron limits at deploy time (Phase 1/4). `/api/cron/sync` sets `maxDuration = 60`; a full 20-match sync took 14.6s locally, so the margin is wide. Hobby runs cron once a day, which the schedule matches.
+- [x] Vercel Hobby function duration and cron limits (Phase 1/4), confirmed at the 2026-09-12 deploy. Hobby accepted the daily `vercel.json` schedule and `maxDuration = 60` on `/api/cron/sync`. A full 20-match sync took 14.6s locally and a no-op run 4.6s in production, so the margin is wide.
 - [x] Set 18's Unreal move, checked against a real match 2026-09-12 (details in §6.1): ids are `DA_…` and all resolve; `tft_set_number` is 18; **`game_version` is now the useless literal `"TFT Unreal Version ?.?.?.?"`**, so `patch` comes from `game_datetime` instead (§6.4).
 - [x] Riot's match-API trait `style` is **not** used: the style comes from `tier_current` indexed into the stored `breakpoints` (verified 2026-09-12, §6.1).
 - [x] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` or a transactional RPC. Resolved with the `seed_comp` RPC (§4.9); the constraint is unchanged.
