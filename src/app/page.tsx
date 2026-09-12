@@ -1,20 +1,31 @@
+import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
-import { Placeholder } from "@/components/placeholder";
+import { SkeletonPanel } from "@/components/skeleton";
+import { OverviewGlance } from "./overview-glance";
+import { TopComps } from "./top-comps";
 
+/**
+ * Glance panel for a second monitor (architecture §8). `TopComps` is a cached read
+ * and prerenders into the static shell; the player data is uncached and streams in.
+ */
 export default function OverviewPage() {
   return (
     <>
       <PageHeader title="Overview" description="Glance panel for a second monitor." />
       <div className="grid gap-3 md:grid-cols-3">
-        <Placeholder phase={5} title="Rank & LP">
-          Current rank, LP and recent LP movement from cached snapshots.
-        </Placeholder>
-        <Placeholder phase={5} title="Last 10 placements">
-          Placement pills and a sparkline from cached matches.
-        </Placeholder>
-        <Placeholder phase={3} title="Top comps">
-          S-tier curated comps for the current patch.
-        </Placeholder>
+        {/* Two boxes in the fallback, matching the two sections the glance renders,
+            so the grid doesn't reflow from two columns to three on hydration. */}
+        <Suspense
+          fallback={
+            <>
+              <SkeletonPanel lines={2} />
+              <SkeletonPanel lines={2} />
+            </>
+          }
+        >
+          <OverviewGlance />
+        </Suspense>
+        <TopComps />
       </div>
     </>
   );
