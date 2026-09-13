@@ -194,15 +194,20 @@ export const GEM_TOOLTIP = "This comp has a low pick rate but a high top 4 rate.
 
 const ORDINALS: Record<number, string> = { 1: "1st", 2: "2nd", 3: "3rd" };
 
+/** "1st", "2nd", "3rd" for an item priority; the bare number past that. */
+export function ordinal(priority: number): string {
+  return ORDINALS[priority] ?? String(priority);
+}
+
 /** Item priority chip pinned above an itemized unit: who gets the components first. */
 export function PriorityChip({ priority, className = "" }: { priority: number; className?: string }) {
   return (
     <span
       role="img"
-      aria-label={`Item priority ${ORDINALS[priority] ?? priority}`}
+      aria-label={`Item priority ${ordinal(priority)}`}
       className={`rounded-sm bg-surface/90 px-1 text-[9px] leading-[1.3] font-bold text-carry ring-1 ring-carry/50 ${className}`}
     >
-      {ORDINALS[priority] ?? priority}
+      {ordinal(priority)}
     </span>
   );
 }

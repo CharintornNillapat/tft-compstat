@@ -372,6 +372,32 @@ Approved task by task rather than as a whole phase.
   - **`/comps/riftbeast-pebbles`:** renders as "1-cost reroll".
   - **Routes:** `/tiers/champions`, `/bis`, `/comps/riftbeast-pebbles` and `/` all 200 with no error markup.
 
+- [x] **Task 13 — Comp page two-column layout and guide timeline** (approved 2026-09-13)
+  - **Problem:** under the board, Item builds, Best augments, Early game, Flex units and the Guide
+    each took a full-width card, leaving most of a wide window empty, with the guide last as prose.
+  - **Layout** (`CompGuide`, architecture §9): a 12-column grid from **`md`** — chosen over `lg` so
+    the ~960px half-width window gets both columns. Left `col-span-7`: Item builds, Best augments,
+    and one **Transition** card holding early item holders beside flex swaps. Right `col-span-5`:
+    Strategy guide. Either column spans all 12 when the other is empty; below `md` it stacks.
+  - **Guide:** `splitGuide` (`src/lib/curated/guide-sections.ts`, 8 tests) splits the markdown into its
+    labelled blocks; `GuideTimeline` renders each as a card with an accent stage chip on a rail
+    (filled dot for Early/Mid/Late/Levelling, hollow for reference). The Items block is omitted
+    while the Item builds panel shows the same items.
+  - **Item builds** (`CompItemBuilds`, client island for the shared tooltip): full rows for carries and
+    priority units with a "1st carry" / "2nd priority" tag and 32px item buttons; other holders
+    condensed into one row of chips. Condensing came from the first screenshots, where six lone
+    Thief's Gloves rows ran Hunter Sivir's left column ~540px past the guide.
+
+**Verified — Task 13 (2026-09-13):**
+- **Checks:** `pnpm check` (410 tests, up from 402) and `pnpm build` (fetch cache cleared) green;
+  every route keeps its shape and lifetime.
+- **Local `pnpm start`, headless Edge** (driven by `playwright-core`; the Playwright MCP's pinned
+  browser builds are not installed) on `draven-fast-9` (no augments, no flex), `riftbeast-pebbles`
+  (flex, no augments) and `hunter-sivir` (augments and flex) at 1280, 960 and 390px: all 200, no
+  horizontal overflow and no element past the viewport, CLS 0. Two columns at 1280 and 960, one at
+  390; chips Early/Mid/Late/Positioning/Tips on Draven and Early/Levelling/Positioning on the
+  generated two; item tooltip opens on hover.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

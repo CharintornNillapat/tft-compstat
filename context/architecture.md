@@ -100,7 +100,8 @@ src/app/
   me/page.tsx                Personal dashboard
   api/cron/sync/route.ts, api/revalidate/route.ts
 src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx), TierRow, CostFilter, ToggleGroup, HoverTip,
-                             HexBoard, CompList, CompGuide, CompTraitList, GuideMarkdown, CarryMark (comp-details.tsx),
+                             HexBoard, CompList, CompGuide, CompTraitList, CompItemBuilds, GuideTimeline, GuideMarkdown,
+                             CarryMark (comp-details.tsx),
                              PlaystyleBadge, DifficultyBadge, ContestedBadge (comp-badges.tsx),
                              AugmentBoard, RarityPill, AugmentFace, AugmentDetails (augment-parts.tsx),
                              PlacementPill, StatTile, Sparkline, PlacementHistogram, Segmented, Skeleton, SyncNotice,
@@ -135,6 +136,7 @@ src/lib/
   curated/trait-details.ts   trait tooltip data: tiers with text, member champions (pure, client-safe)
   curated/comp-badges.ts     Contested / difficulty / playstyle rules (pure, client-safe)
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
+  curated/guide-sections.ts  splitGuide: a comp guide's markdown → labelled stage sections + footnote (pure, client-safe, §9)
 ```
 
 ---
@@ -1108,6 +1110,12 @@ comps:                        # keyed by comp slug; a comp without an entry show
     - The data comes from inside the cached `getComps()` / `getComp()`: one `traits` read and one `champions.traits` overlap query, so there is no new cache tag. `getComps()` ships details for **active** traits only (`pickTraitDetails`), since those are the only ones the rows show.
     - The whole row links to the guide, and units and traits keep their own tooltips.
     - Filters: tier and style toggles (only those present), plus search across comp, unit, item and trait names.
+  - `/comps/[slug]` (`CompGuide`): header, stats, then Board | Traits as before. Below them a 12-column grid from **`md`** (not `lg`: the ~960px half-width window must get both columns), `items-start` so a short column does not stretch; below `md` everything stacks, builds first.
+    - **Left, `md:col-span-7`:** Item builds (`CompItemBuilds`, a client island for one shared `HoverTip`). Carries and units with a stated priority get a full row: portrait with its `PriorityChip`, name, star pips and a role tag — "1st carry" with `CarryMark`, or "2nd priority" for a non-carry such as a tank — then 32px item icons. **Every other holder shares one wrapping row of chips** (24px portrait, name, 22px items) under "Other item holders": the first screenshots of a generated comp gave six lone Thief's Gloves a row each, and the column ran ~540px past the guide beside it. Item icons are buttons whose names live in the tooltip, so tap and focus open it; Best augments (`AugmentFace` cards, three across only where a card still fits a long name: `sm` full width, `md` two, `xl` three); **Transition**, one card holding "Early item holders" (`early_units`, unfiltered: it is the opener, whatever its costs) and "Flex swaps" (`flex_units`), side by side from `sm` with a rule between, one half filling the card when the other is empty.
+    - **Right, `md:col-span-5`:** Strategy guide (`GuideTimeline`). `splitGuide` (`curated/guide-sections.ts`) splits the markdown on blank lines; a block opening with a short capitalised bold label — `**Early:**`, `**Items**:`, `**Items**, …` — starts a section and loses its label (the sentence left behind is capitalised), a list block joins the section above, loose paragraphs become one **Tips** section, and a closing all-italic block is the footnote. A sentence that merely opens in bold (`**Don't** …`) is prose, and a guide with no label at all renders as plain `GuideMarkdown`. Each section is a card with its label as a chip on a left rail.
+    - Chips all use **one accent tint** rather than a hue per stage, since every hue on this page already means something; the word names the stage and the rail dot gives its kind as a shape — **filled** for stages a game moves through (Early, Mid, Late, Levelling), **hollow** for reference (Positioning, Tips, anything else). Numbered dots were considered and dropped: "4" on Positioning implies an order it does not have.
+    - The guide's **Items** section is omitted while the Item builds panel is shown — the generated guide repeats the board's items word for word.
+    - Either column spans all 12 when the other is empty (no guide; or no items, augments, early or flex units).
   - `PlacementPill` (always prints the digit, so colour is never the only channel), `StatTile`, `Sparkline`, `PlacementHistogram`, `Segmented` (single-select; `ToggleGroup` stays multi-select, and they share exported button classes so the two can't drift).
     - **Charts are inline SVG** (§2). The geometry lives in pure modules — `sparkline-geometry.ts`, `placement-styles.ts` — so it is unit-testable in the node-only suite, which has no DOM. `sparklineGeometry`'s `domain` is **required rather than derived**, which removes the divide-by-zero case: a run of identical placements sits at that value's height instead of an ambiguous mid-height.
     - `Sparkline` draws the line as stretched SVG but positions its dots as HTML, because an SVG circle inside `preserveAspectRatio="none"` stretches into an ellipse at the ~3× horizontal scale this renders at.
