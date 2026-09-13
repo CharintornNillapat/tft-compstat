@@ -397,6 +397,16 @@ Approved task by task rather than as a whole phase.
   horizontal overflow and no element past the viewport, CLS 0. Two columns at 1280 and 960, one at
   390; chips Early/Mid/Late/Positioning/Tips on Draven and Early/Levelling/Positioning on the
   generated two; item tooltip opens on hover.
+- **Deployed (2026-09-13, commit `c475d4b`)**: `dpl_GaQUg6Ybdxz9Xis5Fecm6tzPKgsb` built first time
+  (no Supabase timeout), Ready and aliased to https://tft-compstat.vercel.app; the GitHub Vercel
+  status for `c475d4b` is success.
+  - **Same headless-Edge check against production**, same three comps at 1280, 960 and 390px: all
+    200, no horizontal overflow, CLS 0. Item builds at x 80 / 16 and the Strategy guide at x 740 / 564
+    on the same row at 1280 / 960; stacked under the Transition card at 390.
+  - **Variants:** Best augments only on `hunter-sivir`; one Transition half on Draven, two on the
+    others; Draven's guide chips Early/Mid/Late/Positioning/Tips, the generated two
+    Early/Levelling/Positioning with no Items section; the item tooltip reads "Infinity Edge".
+  - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items` and `/me` all 200.
 
 - [ ] Further tasks — not yet specified.
 
