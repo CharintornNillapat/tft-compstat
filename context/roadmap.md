@@ -293,6 +293,37 @@ Approved task by task rather than as a whole phase.
   - `/augments` (Static): tier and rarity filters, cards with icon, name, rarity pill and a
     description tooltip. The nav gained a seventh tab, so `Me` moved to `7`.
   - `/comps/[slug]` (still Partial Prerender): a "Best augments" panel.
+- [x] **Task 11 — Riftbeast boards and balanced comp augments** (approved 2026-09-13)
+  - **Riftbeasts were stripped from every generated board.** `buildComp` filtered units to
+    `is_shop_unit`, so "Riftbeast Pebbles" was written as Gnar carrying a Thief's Gloves. Boards,
+    openers and flex units now take any set unit (`selectBoardUnits` / `selectEarlyUnits` /
+    `selectFlexUnits`, pure in `comp-sync.ts`); tier lists still rate shop units only (§7.2).
+  - Two defects found on the way: the flex filter asked for a share ≥12% **and** <5%, so no
+    generated comp had flex units; and a unit with no positioning (Elder Dragon) took the first
+    *front* hex, before units that had positions. A three-starred Riftbeast carry no longer reads
+    as a reroll comp.
+  - **Augment picks** are balanced round-robin Silver → Gold → Prismatic (`pickCompAugments`). A
+    guide grading one rarity stays one rarity, and the panel says so (§7.5).
+  - **Fallback guide** (`pickFallbackGuide`): carries fielded *and* the title's trait is one the
+    comp is named for. "Active on the board" was tried first and handed "SIVIR > Hunter" to Fae
+    Rengar and Blossom Sett Sivir, so it was tightened before anything was written.
+
+**Verified — Task 11 (2026-09-13):**
+- **Checks:** `pnpm check` (402 tests, up from 386) and `pnpm build` (with `.next/cache/fetch-cache`
+  cleared first) are green; every route keeps its shape and lifetime.
+- **Data:** `pnpm sync:meta --seed` wrote 2 tier lists (8 item-tier moves kept), 24 comps and the
+  augment file; seeded 28 comps and revalidated `tiers, comps` on production.
+  - `riftbeast-pebbles`: 9 units, 8 of them Riftbeasts; Pebbles ★★★ (priority 1), Elder Dragon
+    (2) and Cinderling ★★★ (3) carry; `fast9`, not `reroll_1`. Riftbeasts appear on 11 comps;
+    26 of 28 comps now have flex units.
+  - Picks: **13 of 25 comps** (was 9). Sivir, Master Yi, Cassiopeia and Kayle guides give 2/2/2
+    across rarities; Draven, Ashe and Elder Dragon guides are Silver-only by their own grades.
+    `invoker-morgana-taric` and `juggernaut-sivir` now fit "ELDER DRAGON" because Elder Dragon is
+    on the board; `hunter-sivir` and `blossom-sett-sivir` adopt a guide by the fallback.
+  - Still none, and correctly: 9 comps no guide names, and 3 stub guides (2, 3 and 1 augments).
+- **Not deployed yet.** The seeded comps are live; the code, the panel note and `augment-tiers.yaml`
+  ship with the next deploy.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

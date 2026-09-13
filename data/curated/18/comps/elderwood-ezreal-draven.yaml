@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster elderwood-ezreal-draven, DIAMOND+.
-# Sample: 127,931 boards, avg 4.19, patch 18.2, set 18.
+# Sample: 134,935 boards, avg 4.19, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,11 +15,12 @@ style: fast9
 difficulty: 3
 patch: "18.2"
 order: 1
-summary: "Ends at level 9 with Draven carrying. MetaTFT DIAMOND+: 127,931 boards, avg 4.19, picked 17.8% of boards."
+summary: "Ends at level 9 with Draven carrying. MetaTFT DIAMOND+: 134,935 boards, avg 4.19, picked 18.2% of boards."
 avg_place: 4.19
-pick_rate: 17.85
+pick_rate: 18.18
 level_recommended: 9
 early_units: [ DA_18_Alistar, DA_18_Ornn, DA_18_Varus, DA_18_Xayah ]
+flex_units: [ DA_Sentinel18, DA_18_ElderDragon, DA_Lux18_Base, DA_18_Ashe ]
 board:
   - { unit: DA_Amumu18, row: 0, col: 4, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Maokai, row: 0, col: 3, carry: true, priority: 2, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
@@ -41,4 +42,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 127,931 boards, avg 4.19. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 134,935 boards, avg 4.19. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

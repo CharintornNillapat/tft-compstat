@@ -123,7 +123,11 @@ export function CompGuide({ comp, augments = null }: { comp: CompDetail; augment
           <p className="mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[11px] text-faint">
             <span>
               {augments.source ? <>Graded for this comp by the MetaTFT guide “{augments.source}”</> : "Graded for this comp by MetaTFT"}
-              , best first.
+              , by rarity, best first within each.
+              {/* Picks are balanced across rarities (§7.5), so one rarity means the guide grades no other. */}
+              {new Set(augments.augments.map((augment) => augment.rarity)).size === 1 ? (
+                <> This guide grades {augments.augments[0]!.rarity} augments only.</>
+              ) : null}
             </span>
             <Link href="/augments" className="text-muted hover:text-fg">
               All augments →

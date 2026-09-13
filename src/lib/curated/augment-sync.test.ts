@@ -8,7 +8,9 @@ import {
   guideCarries,
   guideConsensus,
   guideFitsBoard,
+  guideTrait,
   pickCompAugments,
+  pickFallbackGuide,
   resolveAugmentTiers,
   type AugmentEntry,
   type AugmentInfo,
@@ -165,6 +167,61 @@ describe("pickCompAugments", () => {
     expect(picks).toEqual(["DA_ItemsA", "DA_EconS", "DA_ExtraS", "DA_ScaleA", "DA_CombatB"]);
   });
 
+  describe("rarity balance", () => {
+    const rare = (apiName: string, rarity: AugmentEntry["rarity"], tier: AugmentEntry["tier"] = "A"): AugmentEntry => ({
+      ...entry(apiName, apiName, tier),
+      rarity,
+    });
+    const pool = new Map(
+      [
+        rare("S1", "Silver"),
+        rare("S2", "Silver"),
+        rare("S3", "Silver"),
+        rare("S4", "Silver"),
+        rare("S5", "Silver"),
+        rare("G1", "Gold"),
+        rare("G2", "Gold"),
+        rare("P1", "Prismatic"),
+        rare("P2", "Prismatic"),
+        rare("P3", "Prismatic"),
+      ].map((row) => [row.apiName, row]),
+    );
+    const grade = (ids: string[], tier = "S") => ids.map((id) => ({ id, tier }));
+
+    it("takes Silver, Gold and Prismatic in turn, so a Silver-heavy S row cannot fill every slot", () => {
+      // Ranked straight down this guide would pick S1-S5 and one Gold: the old all-Silver comp.
+      const picks = pickCompAugments(
+        [...grade(["S1", "S2", "S3", "S4", "S5"]), ...grade(["G1", "G2"], "A"), ...grade(["P1", "P2", "P3"], "B")],
+        pool,
+        new Map(),
+      );
+      expect(picks).toEqual(["S1", "S2", "G1", "G2", "P1", "P2"]);
+    });
+
+    it("lets the other rarities fill the slots of one that runs out", () => {
+      const picks = pickCompAugments([...grade(["S1", "S2", "S3", "S4"]), ...grade(["P1"], "A")], pool, new Map());
+      expect(picks).toEqual(["S1", "S2", "S3", "S4", "P1"]);
+    });
+
+    it("keeps a guide that grades only Silver single-rarity rather than padding it", () => {
+      const picks = pickCompAugments(grade(["S1", "S2", "S3", "S4", "S5"]), pool, new Map());
+      expect(picks).toEqual(["S1", "S2", "S3", "S4", "S5"]);
+    });
+
+    it("still ranks inside a rarity by the guide's grade and lift", () => {
+      const picks = pickCompAugments(
+        [...grade(["G1"], "B"), ...grade(["G2"], "S"), ...grade(["S1", "S2"], "A"), ...grade(["P1", "P2"], "A")],
+        pool,
+        new Map([
+          ["S1", 1],
+          ["S2", 3],
+        ]),
+      );
+      // S2 lifts further above the consensus than S1; G2 is graded S, G1 only B.
+      expect(picks).toEqual(["S2", "S1", "G2", "G1", "P1", "P2"]);
+    });
+  });
+
   it("returns null for a stub guide under the minimum", () => {
     expect(
       pickCompAugments(
@@ -226,6 +283,55 @@ describe("guideFitsBoard", () => {
     expect(guideFitsBoard("AHRI & Morgana > Blossom", ["Malphite", "Ahri"])).toBe(false);
     expect(guideFitsBoard("ZYRA & SORAKA > Executioner", board)).toBe(false);
     expect(guideFitsBoard(null, board)).toBe(false);
+  });
+});
+
+describe("guideTrait", () => {
+  it("reads the segment after the first >", () => {
+    expect(guideTrait("SIVIR > Hunter > Lvl 8 push")).toBe("hunter");
+    expect(guideTrait("CINDERLING / PEBBLES > Riftbeast > Lvl 8 push")).toBe("riftbeast");
+    expect(guideTrait("DRAVEN")).toBeUndefined();
+    expect(guideTrait(null)).toBeUndefined();
+  });
+});
+
+describe("pickFallbackGuide", () => {
+  const graded = (count: number) => Array.from({ length: count }, (_, i) => ({ id: `A${i}`, tier: "S" }));
+  const guides = [
+    { source: "SIVIR > Hunter > Lvl 8 push", augments: graded(96) },
+    // The same guide handed to a second cluster.
+    { source: "SIVIR > Hunter > Lvl 8 push", augments: graded(96) },
+    { source: "ELDER DRAGON > Legendaries > Lvl 9", augments: graded(27) },
+    { source: "CINDERLING / PEBBLES > Riftbeast > Lvl 8 push", augments: graded(3) },
+    { source: "AHRI & Morgana > Blossom > Lvl 8 push", augments: graded(69) },
+    { source: "AHRI > Blossom > Lvl 9", augments: graded(80) },
+  ];
+
+  it("adopts a guide whose carries are fielded and whose trait defines the comp", () => {
+    expect(pickFallbackGuide(guides, ["Sivir", "Ashe", "Vi"], ["Hunter", "Juggernaut"])?.source).toBe(
+      "SIVIR > Hunter > Lvl 8 push",
+    );
+    expect(pickFallbackGuide(guides, ["Pebbles", "Krug"], ["Riftbeast"])?.source).toBe(
+      "CINDERLING / PEBBLES > Riftbeast > Lvl 8 push",
+    );
+  });
+
+  it("refuses a carry match whose trait is not the one the comp is built on", () => {
+    // Fae Rengar fields Sivir and may even have Hunter active, but it is not the Hunter comp.
+    expect(pickFallbackGuide(guides, ["Sivir", "Vi"], ["Juggernaut"])).toBeUndefined();
+    expect(pickFallbackGuide(guides, ["Rengar", "Sivir", "Tristana"], ["Fae"])).toBeUndefined();
+  });
+
+  it("never adopts a guide whose title names no real trait", () => {
+    // "Legendaries" is a guide heading, not a trait, so no comp is defined by it.
+    expect(pickFallbackGuide(guides, ["Elder Dragon", "Sentinel"], ["Invoker", "Riftbeast"])).toBeUndefined();
+  });
+
+  it("prefers the guide naming more carries, then the one grading more augments", () => {
+    expect(pickFallbackGuide(guides, ["Ahri", "Morgana"], ["Blossom"])?.source).toBe(
+      "AHRI & Morgana > Blossom > Lvl 8 push",
+    );
+    expect(pickFallbackGuide(guides, ["Ahri"], ["Blossom"])?.source).toBe("AHRI > Blossom > Lvl 9");
   });
 });
 

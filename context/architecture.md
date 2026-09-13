@@ -806,13 +806,24 @@ which is the opposite of our rows (0 is the front line): `row = 3 - floor((cell-
 cells 22-28 and ranged carries in cells 1-7 in every comp checked.
 
 **How a comp is built.** All of it is the feed's own modal choice:
-- **Board:** the `level` most-played shop units, where `level` is the modal final
-  level. The share floor is deliberately low (5%): a cluster is fuzzy, so demanding a
-  unit appear on *most* boards leaves a level-8 comp with five units. A comp with fewer
-  than 6 writable units is skipped and said so — which is what catches the comps built
-  around Riftbeasts and other summons (§11), since none of them can be written down.
+- **Board:** the `level` most-played units **of the set, shop or not**, where `level` is
+  the modal final level. The share floor is deliberately low (5%): a cluster is fuzzy, so
+  demanding a unit appear on *most* boards leaves a level-8 comp with five units. A comp
+  with fewer than 6 writable units is skipped and said so.
+  - **Riftbeasts are written like any other unit** (fixed in Phase 6 Task 11). They are
+    stored with `is_shop_unit = false` (§4.8) and take a board slot: unit shares sum to
+    ~8.5 on a level-9 Riftbeast board, where eight of the nine are Riftbeasts and Pebbles
+    and Cinderling hold the items. The first version filtered boards to shop units, so
+    "Riftbeast Pebbles" was written as Gnar carrying one Thief's Gloves. The shop filter
+    now applies to the tier lists only (§7.1). The feed's `TFT18_*` alternate forms are not
+    in our tables and stay off; their share in a comp is at most ~1%, so no alias is needed.
+  - The rules are pure in `comp-sync.ts`: `selectBoardUnits`, `selectFlexUnits` (units off
+    the board on ≥12% of its boards — the first version asked for ≥12% *and* <5%, so no
+    generated comp had flex units) and `selectEarlyUnits`.
 - **Hex:** each unit's most-played cell, assigned greedily most-played unit first. Two
-  units wanting one hex is normal, so the loser falls through to its own next-best.
+  units wanting one hex is normal, so the loser falls through to its own next-best. A unit
+  the feed has **no** positions for (Elder Dragon, the Lux forms) is placed after every unit
+  that has some, on the first free back-row hex, so it cannot take a hex somebody played.
 - **Star and items:** the modal star level, and the best-sampled item build that is
   writable. A build is rejected *whole* rather than having an item stripped out of it,
   because a build minus its emblem is a build nobody played. Rejected: unknown items,
@@ -824,8 +835,9 @@ cells 22-28 and ranged carries in cells 1-7 in every comp checked.
   many items the unit usually holds — is what keeps the two consistent: a unit whose
   most-played build is one Thief's Gloves is not also written as a three-item carry.
 - **Tier:** the §7.1 percentile bands (`assignTiers`), over the selected comps' average
-  placements. **Style:** a three-starred 1-3 cost carry means `reroll_<cost>` whatever
-  level it ends on; otherwise the modal final level gives `fast9` / `fast8` / `flex`.
+  placements. **Style:** a three-starred 1-3 cost **shop** carry means `reroll_<cost>`
+  whatever level it ends on (a three-starred Pebbles is not rolled for); otherwise the
+  modal final level gives `fast9` / `fast8` / `flex`.
 - **`guide`:** assembled from the feed's numbers — the most-played opener, the level
   timings, the carries' builds — and says in its last line that these are boards people
   played rather than a plan somebody wrote.
@@ -933,15 +945,32 @@ CommunityDragon:
   hands each cluster its *nearest* guide however far away — Executioner Malphite and Blossom Sett
   Sivir both inherited "AHRI & Morgana" — so without this a comp page recommends another comp's
   augments. A carry is a name a reader can check; a `distance` cutoff would not be.
+- **Fallback guide** (Phase 6 Task 11, `pickFallbackGuide`). When a cluster has no guide, or its
+  own does not fit, another distinct guide is adopted if every carry in its title is fielded
+  **and** the trait in its title is one the comp is *named for* (the cluster's trait name parts).
+  Stricter than the cluster's own guide on purpose, since we chose it rather than MetaTFT. Merely
+  *active* was tried first and let Fae Rengar and Blossom Sett Sivir, which field Sivir with a
+  small Hunter bonus, adopt "SIVIR > Hunter". A title trait that is not a real trait
+  ("Legendaries", "Solar") never qualifies. Ties: more carries named, then more augments graded,
+  then title. On 18.2 it adds `hunter-sivir` (SIVIR > Hunter) and `blossom-sett-sivir` (ASHE > Blossom).
 - **Order:** the guide's grade; then how much higher this guide grades an augment than the distinct
   guides do on average (`guideConsensus`, ungraded counting below C, guides deduplicated by title);
   then the global tier; then the guide's own order. One per family ("Glass Cannon I"/"II",
   "Branching Out"/"+"). Under 4 listed picks, none.
   - Ranking against the *global* list instead was tried first: "Feeling Lucky" topped 7 of 9
     comps, because that measured where two lists disagree rather than what a comp wants.
+- **Rarity balance** (Task 11). Picks are taken round-robin Silver → Gold → Prismatic, each the
+  best of its rarity in the order above; a rarity that runs out is skipped and the others fill
+  its slots. The file lists them Silver, Gold, Prismatic, best first inside each. Ranked straight
+  down, picks copied whatever rarity a guide graded most S's in — six Silvers on Draven, four
+  Prismatics on Kayle. **A guide that grades one rarity stays one rarity**: the Draven, Ashe and
+  Elder Dragon guides grade only Silver, and padding them from the global list would put generic
+  advice under a comp-specific heading. The panel says "This guide grades Silver augments only".
 - On patch 18.2: **248 augments** (`S 23 · A 89 · B 118 · C 18`; Silver 68 · Gold 111 · Prismatic
-  69), 10 skipped as newer than game data 16.18, and **9 of 25 comps** with picks. Two guide pairs
-  grade the same augments (Draven/Ashe, Ahri/Zyra), so those comps share picks — the feed's answer.
+  69), 10 skipped as newer than game data 16.18, and **13 of 25 comps** with picks (9 before Task
+  11). Still none: 9 clusters no guide names (Aphelios, Veigar, Rengar, Elderwood Ezreal/Xayah
+  comps) and 3 stub guides (CAMILLE & AKALI grades 2, CINDERLING / PEBBLES 3, CAITLYN 1). Guides
+  that grade the same augments (Draven/Ashe, Ahri/Zyra) still give their comps the same picks.
 
 **The file** is generated only. It carries its own names, icons and rarity, because augments are
 not in the static tables, so `augmentTiersFileSchema` is the whole contract: icon URLs must match

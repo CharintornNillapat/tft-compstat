@@ -11,6 +11,9 @@ import {
   parseCell,
   pickItems,
   placeUnits,
+  selectBoardUnits,
+  selectEarlyUnits,
+  selectFlexUnits,
   slugify,
   type CarryCandidate,
   type CompSource,
@@ -81,6 +84,125 @@ describe("placeUnits", () => {
     const placed = placeUnits([unit({ apiName: "Unseen", cells: [] })]);
     expect(placed).toHaveLength(1);
     expect(placed[0]).toMatchObject({ apiName: "Unseen" });
+  });
+
+  it("puts a unit with no positions on the back row, after every unit that has one", () => {
+    // Elder Dragon has no positioning in the feed; it must not take the hex the carry played.
+    const placed = placeUnits([
+      unit({ apiName: "DA_18_ElderDragon", share: 0.99, cells: [] }),
+      unit({ apiName: "DA_Cinderling18", share: 0.6, cells: [{ cell: "cell_1", count: 900 }] }),
+      unit({ apiName: "DA_Krug18", share: 0.9, cells: [{ cell: "cell_25", count: 900 }] }),
+    ]);
+    expect(placed).toEqual([
+      { apiName: "DA_Krug18", row: 0, col: 3 },
+      { apiName: "DA_Cinderling18", row: 3, col: 0 },
+      { apiName: "DA_18_ElderDragon", row: 3, col: 1 },
+    ]);
+  });
+});
+
+describe("Riftbeast boards", () => {
+  // Riftbeasts are set 18 champions stored with is_shop_unit = false (architecture §4.8).
+  const setUnits = new Set([
+    "DA_Krug18",
+    "DA_18_Sentry",
+    "DA_Sentinel18",
+    "DA_Brambleback18",
+    "DA_Murkwolf18",
+    "DA_Scuttlecrab18",
+    "DA_18_ElderDragon",
+    "DA_Cinderling18",
+    "DA_18_GnarSmall",
+    "DA_Taric18",
+    "DA_Gromp18_AP",
+  ]);
+  const writable = (apiName: string) => setUnits.has(apiName);
+  // The shape of the live "Riftbeast Pebbles" cluster on patch 18.2, trimmed.
+  const stats = [
+    { unit: "DA_Krug18", pcnt: 0.988 },
+    { unit: "DA_18_Sentry", pcnt: 0.945 },
+    { unit: "DA_Sentinel18", pcnt: 0.914 },
+    { unit: "DA_Brambleback18", pcnt: 0.802 },
+    { unit: "DA_Murkwolf18", pcnt: 0.764 },
+    { unit: "DA_Scuttlecrab18", pcnt: 0.747 },
+    { unit: "DA_18_ElderDragon", pcnt: 0.628 },
+    { unit: "DA_Cinderling18", pcnt: 0.626 },
+    { unit: "DA_18_GnarSmall", pcnt: 0.415 },
+    { unit: "DA_Taric18", pcnt: 0.387 },
+    { unit: "DA_Gromp18_AP", pcnt: 0.229 },
+    // An alternate form our tables do not hold is still left off.
+    { unit: "TFT18_Gromp", pcnt: 0.3 },
+    { unit: "DA_Lux18_Base", pcnt: 0.02 },
+  ];
+
+  it("keeps non-shop Riftbeasts on the board instead of filling their slots with filler", () => {
+    const board = selectBoardUnits(stats, 9, writable, { minShare: 0.05, minUnits: 6 })!;
+    expect(board.map((row) => row.unit)).toEqual([
+      "DA_Krug18",
+      "DA_18_Sentry",
+      "DA_Sentinel18",
+      "DA_Brambleback18",
+      "DA_Murkwolf18",
+      "DA_Scuttlecrab18",
+      "DA_18_ElderDragon",
+      "DA_Cinderling18",
+      "DA_18_GnarSmall",
+    ]);
+  });
+
+  it("skips a board with too few writable units, and a unit under the share floor", () => {
+    expect(selectBoardUnits(stats, 9, () => false, { minShare: 0.05, minUnits: 6 })).toBeUndefined();
+    expect(selectBoardUnits(stats, 9, writable, { minShare: 0.7, minUnits: 6 })!.map((row) => row.unit)).toHaveLength(6);
+  });
+
+  it("makes the itemised Riftbeast the carry, not a unit holding one Thief's Gloves", () => {
+    const candidate = (apiName: string, items: string[], count: number): CarryCandidate => ({
+      apiName,
+      row: 0,
+      col: 0,
+      star: 2,
+      carry: false,
+      items,
+      share: 0.9,
+      builds: [{ items, count, avgPlace: 4 }],
+    });
+    const board = assignCarries([
+      candidate("DA_18_GnarSmall", ["DA_ThiefsGloves"], 3426),
+      candidate("DA_18_Sentry", ["DA_BlueBuff", "DA_JeweledGauntlet", "DA_RabadonsDeathcap"], 7909),
+      candidate("DA_18_ElderDragon", ["DA_InfinityEdge", "DA_LastWhisper", "DA_StrikersFlail"], 6665),
+    ]);
+    const byName = new Map(board.map((row) => [row.apiName, row]));
+    expect(byName.get("DA_18_Sentry")).toMatchObject({ carry: true, priority: 1 });
+    expect(byName.get("DA_18_ElderDragon")).toMatchObject({ carry: true, priority: 2 });
+    expect(byName.get("DA_18_GnarSmall")!.carry).toBe(false);
+  });
+
+  it("names Riftbeasts in the opener and as flex units", () => {
+    expect(selectEarlyUnits("DA_Cinderling18&DA_18_Sentry&TFT18_Gromp&DA_18_Sentry", writable, 6)).toEqual([
+      "DA_Cinderling18",
+      "DA_18_Sentry",
+    ]);
+    const onBoard = new Set(stats.slice(0, 9).map((row) => row.unit));
+    expect(selectFlexUnits(stats, onBoard, writable, { minShare: 0.12, max: 4 })).toEqual(["DA_Taric18", "DA_Gromp18_AP"]);
+  });
+});
+
+describe("selectFlexUnits", () => {
+  it("lists off-board units at or above the share, most-played first, up to max", () => {
+    const stats = [
+      { unit: "Board", pcnt: 0.99 },
+      { unit: "Often", pcnt: 0.4 },
+      { unit: "Edge", pcnt: 0.12 },
+      { unit: "Rare", pcnt: 0.119 },
+      { unit: "Second", pcnt: 0.3 },
+    ];
+    // The old rule wanted a share both >= 12% and < 5%, so it could never list anything.
+    expect(selectFlexUnits(stats, new Set(["Board"]), () => true, { minShare: 0.12, max: 4 })).toEqual([
+      "Often",
+      "Second",
+      "Edge",
+    ]);
+    expect(selectFlexUnits(stats, new Set(["Board"]), () => true, { minShare: 0.12, max: 1 })).toEqual(["Often"]);
   });
 });
 
@@ -192,6 +314,10 @@ describe("compStyle", () => {
   it("ignores a three-starred unit that is not the carry, and a 4-cost that is", () => {
     expect(compStyle(9, [{ apiName: "Tank", cost: 1, star: 3, carry: false }])).toBe("fast9");
     expect(compStyle(9, carry(4, 3))).toBe("fast9");
+  });
+
+  it("does not call a three-starred Riftbeast carry a reroll, since it is not bought", () => {
+    expect(compStyle(9, [{ apiName: "DA_18_Sentry", cost: 1, star: 3, carry: true, shop: false }])).toBe("fast9");
   });
 
   it("rates reaching 9 the hardest ask", () => {

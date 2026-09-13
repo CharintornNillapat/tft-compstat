@@ -54,6 +54,9 @@ import {
   isGenerated,
   pickItems,
   placeUnits,
+  selectBoardUnits,
+  selectEarlyUnits,
+  selectFlexUnits,
   slugify,
   type CompSource,
   type CompUnitInput,
@@ -66,6 +69,7 @@ import {
   guideConsensus,
   guideFitsBoard,
   pickCompAugments,
+  pickFallbackGuide,
   resolveAugmentTiers,
   type AugmentEntry,
   type AugmentInfo,
@@ -410,7 +414,8 @@ function parseItemKinds(input: string): Set<string> {
 /* ------------------------------------------------------------------ comps (§7.2) */
 
 /**
- * A comp's board is the `level` shop units it plays most, down to this share.
+ * A comp's board is the `level` set units it plays most, down to this share — shop
+ * units and Riftbeasts alike (`selectBoardUnits`), since both take a board slot.
  *
  * The floor is low on purpose. A cluster is fuzzy — the same comp is played with
  * different last units — so demanding a unit be on *most* boards leaves a level-8 comp
@@ -422,8 +427,8 @@ const CORE_SHARE = 0.05;
 const FLEX_SHARE = 0.12;
 /**
  * Under this many units we cannot describe the comp, so it is skipped and said so.
- * What this catches is a comp built around Riftbeasts and other summons (§11): the
- * feed rates them, they are most of the board, and none of them can be written down.
+ * Since Riftbeasts are written like any other unit, what this still catches is a
+ * cluster dominated by units our tables do not hold (the feed's `TFT18_*` forms).
  */
 const MIN_BOARD_UNITS = 6;
 
@@ -465,6 +470,8 @@ type CompPlan = {
   cluster: string;
   /** Board api names, for checking a guide is about this comp before taking its augments. */
   board: string[];
+  /** Display names of the traits the comp is named for, for adopting another cluster's guide (§7.5). */
+  compTraits: string[];
   file: string;
   text: string;
   name: string;
@@ -518,8 +525,8 @@ function buildComp(input: {
 }): { source: CompSource; units: number } | undefined {
   const { details, stats, references, setId } = input;
 
-  const isShopUnit = (apiName: string) =>
-    references.index.champions.get(apiName)?.setId === setId && references.shopUnits.has(apiName);
+  // Any champion of the set, shop or not: Riftbeasts are board units (selectBoardUnits).
+  const isSetUnit = (apiName: string) => references.index.champions.get(apiName)?.setId === setId;
 
   /**
    * A build worth writing: items we know, of a kind a comp should show, and no emblem
@@ -542,11 +549,11 @@ function buildComp(input: {
   const finalLevel = modal(details.final_levels);
   const level = Math.min(10, Math.max(1, Number(finalLevel?.level ?? 8)));
 
-  const core = details.unit_stats
-    .filter((unit) => unit.pcnt >= CORE_SHARE && isShopUnit(unit.unit))
-    .sort((a, b) => b.pcnt - a.pcnt || a.unit.localeCompare(b.unit))
-    .slice(0, level);
-  if (core.length < MIN_BOARD_UNITS) return undefined;
+  const core = selectBoardUnits(details.unit_stats, level, isSetUnit, {
+    minShare: CORE_SHARE,
+    minUnits: MIN_BOARD_UNITS,
+  });
+  if (!core) return undefined;
 
   const units: CompUnitInput[] = core.map((unit) => ({
     apiName: unit.unit,
@@ -578,19 +585,15 @@ function buildComp(input: {
   if (!board.some((unit) => unit.carry)) return undefined;
 
   const onBoard = new Set(board.map((unit) => unit.apiName));
-  const flexUnits = details.unit_stats
-    .filter((unit) => unit.pcnt >= FLEX_SHARE && unit.pcnt < CORE_SHARE && isShopUnit(unit.unit) && !onBoard.has(unit.unit))
-    .sort((a, b) => b.pcnt - a.pcnt || a.unit.localeCompare(b.unit))
-    .slice(0, MAX_FLEX_UNITS)
-    .map((unit) => unit.unit);
+  const flexUnits = selectFlexUnits(details.unit_stats, onBoard, isSetUnit, {
+    minShare: FLEX_SHARE,
+    max: MAX_FLEX_UNITS,
+  });
 
   // The earliest level the feed reports an opener for: what to hold in stage 2.
   const earliest = Object.keys(details.early_options).sort((a, b) => Number(a) - Number(b))[0];
   const opener = earliest === undefined ? undefined : modal(details.early_options[earliest] ?? []);
-  const earlyUnits = (opener?.unit_list.split("&") ?? [])
-    .map((unit) => unit.trim())
-    .filter((unit) => isShopUnit(unit))
-    .slice(0, MAX_EARLY_UNITS);
+  const earlyUnits = selectEarlyUnits(opener?.unit_list, isSetUnit, MAX_EARLY_UNITS);
 
   const display = (apiName: string) => references.index.champions.get(apiName)?.name ?? apiName;
   const carries = board.filter((unit) => unit.carry).sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9));
@@ -599,6 +602,7 @@ function buildComp(input: {
     cost: references.costs.get(unit.apiName) ?? 0,
     star: unit.star,
     carry: unit.carry,
+    shop: references.shopUnits.has(unit.apiName),
   }));
   const style = compStyle(level, styleUnits);
   const lead = carries[0];
@@ -752,7 +756,7 @@ async function planComps(input: {
     });
     if (!built) {
       skipped.push(
-        `${row.name}: fewer than ${MIN_BOARD_UNITS} set ${setId} shop units on the board, or no carry among them`,
+        `${row.name}: fewer than ${MIN_BOARD_UNITS} set ${setId} units on the board, or no carry among them`,
       );
       continue;
     }
@@ -774,6 +778,9 @@ async function planComps(input: {
       slug,
       cluster: row.cluster.cluster,
       board: built.source.board.map((unit) => unit.apiName),
+      compTraits: row.cluster.nameParts.flatMap((part) =>
+        part.type === "trait" ? [references.index.traits.get(part.name)?.name ?? part.name] : [],
+      ),
       file,
       text,
       name: row.name,
@@ -923,14 +930,23 @@ async function planAugments(input: {
     const graded = await fetchCompAugmentTiers(input.comps.clusterId, setId);
     const consensus = guideConsensus(graded.values());
     for (const plan of input.comps.plans) {
-      const guide = graded.get(plan.cluster);
+      const own = graded.get(plan.cluster);
       const names = plan.board.map((apiName) => input.references.index.champions.get(apiName)?.name ?? apiName);
-      const fits = guide !== undefined && guideFitsBoard(guide.source, names);
-      const augments = fits ? pickCompAugments(guide.augments, listed, consensus) : null;
-      if (!guide) unpicked.push(`${plan.slug}: MetaTFT matched no guide to its cluster`);
-      else if (!fits) unpicked.push(`${plan.slug}: its nearest guide "${guide.source ?? "untitled"}" names a carry it does not field`);
-      else if (!augments) unpicked.push(`${plan.slug}: its guide grades too few listed augments`);
-      else picks.push({ slug: plan.slug, source: guide.source, augments });
+      const ownFits = own !== undefined && guideFitsBoard(own.source, names);
+      // No guide of its own that fits: adopt another cluster's, on carries *and* trait.
+      const guide = ownFits ? own : pickFallbackGuide(graded.values(), names, plan.compTraits);
+      const augments = guide ? pickCompAugments(guide.augments, listed, consensus) : null;
+      if (!guide) {
+        unpicked.push(
+          own
+            ? `${plan.slug}: its nearest guide "${own.source ?? "untitled"}" names a carry it does not field, and no other guide fits`
+            : `${plan.slug}: MetaTFT matched no guide to its cluster, and no other guide names its carries and trait`,
+        );
+      } else if (!augments) {
+        unpicked.push(`${plan.slug}: its guide "${guide.source ?? "untitled"}" grades too few listed augments`);
+      } else {
+        picks.push({ slug: plan.slug, source: guide.source, augments });
+      }
     }
   } else if (before !== undefined) {
     // The comps were not synced, so neither are their picks — while every pick is still listed.

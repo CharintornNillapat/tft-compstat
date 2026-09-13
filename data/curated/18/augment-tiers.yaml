@@ -2,7 +2,7 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-13T07:52:11.139Z. Names, icons, rarity and text: CommunityDragon 16.18.
+# (per comp), updated 2026-09-13T10:53:57.660Z. Names, icons, rarity and text: CommunityDragon 16.18.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
@@ -1591,28 +1591,40 @@ augments:
 comps:
   adaptor-master-yi:
     source: MASTER YI > Adaptor > Lvl 7 reroll
-    augments: [ DA_ForgedInStrength, DA_CookingPot, DA_18_BranchingOutPlus, DA_SpreadingRoots, DA_LivingForge, DA_SweetTreats ]
+    augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
   blossom-sett-ashe:
+    source: ASHE > Blossom > Lvl 9 rush
+    augments: [ DA_LateGameSpecialist, DA_ChampDelivery, DA_SliceOfLife, DA_BandOfThieves, DA_SlightlyMagicRoll, DA_18_WispRebatePlus ]
+  blossom-sett-sivir:
     source: ASHE > Blossom > Lvl 9 rush
     augments: [ DA_LateGameSpecialist, DA_ChampDelivery, DA_SliceOfLife, DA_BandOfThieves, DA_SlightlyMagicRoll, DA_18_WispRebatePlus ]
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll
-    augments: [ DA_TheTraitTree, DA_ShoppingSpree, DA_FrontlineFoundation, DA_UrfsGrabBag, DA_18_BranchingOutPlus, DA_SpreadingRoots ]
+    augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_FrontlineFoundation, DA_SpreadingRoots, DA_TheTraitTree, DA_UrfsGrabBag ]
   elderwood-ezreal-draven:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_ChampDelivery, DA_SliceOfLife, DA_BandOfThieves, DA_SlightlyMagicRoll, DA_18_WispRebatePlus ]
   elderwood-kayle:
     source: XAYAH & KAYLE > Solar > Lvl 5 & 6 reroll
-    augments: [ DA_ShimmerscaleEssence, DA_InvestmentStrategy, DA_BaronsLair, DA_CursedCrown, DA_PrismaticTicket, DA_BuriedTreasuresIII ]
+    augments: [ DA_MissedConnections, DA_RollingForDays, DA_HeroicGrabBag, DA_TradeSector, DA_ShimmerscaleEssence, DA_InvestmentStrategy ]
   executioner-malphite:
-    source: ZYRA & SORAKA > Executioner > Lvl 8 push
-    augments: [ DA_BlackthornTraitAugment, DA_GlassCannon_Gold, DA_TwinGuardians, DA_EpicRolldown, DA_SeraphimsStaff, DA_Staffsmith ]
+    source: SORAKA & ZYRA > Executioner > Lvl 8 push
+    augments: [ DA_TwinGuardians, DA_GlassCannon_Silver, DA_FlowingTears, DA_BlackthornTraitAugment, DA_EpicRolldown, DA_SeraphimsStaff ]
+  hunter-sivir:
+    source: SIVIR > Hunter > Lvl 8 push
+    augments: [ DA_StandUnited, DA_FutureFocused, DA_CyberneticImplants_Gold, DA_Swordsmith, DA_BronzeForLifeII, DA_SwordOverflow ]
   invoker-ahri:
     source: AHRI & Morgana > Blossom > Lvl 8 push
-    augments: [ DA_BlackthornTraitAugment, DA_GlassCannon_Gold, DA_TwinGuardians, DA_EpicRolldown, DA_SeraphimsStaff, DA_Staffsmith ]
+    augments: [ DA_TwinGuardians, DA_GlassCannon_Silver, DA_FlowingTears, DA_BlackthornTraitAugment, DA_EpicRolldown, DA_SeraphimsStaff ]
+  invoker-morgana-taric:
+    source: ELDER DRAGON > Legendaries > Lvl 9
+    augments: [ DA_18_OneTwoFive, DA_LateGameSpecialist, DA_KickStart, DA_CarveAPath, DA_ChampDeliveryPlusPlus, DA_SliceOfLife ]
+  juggernaut-sivir:
+    source: ELDER DRAGON > Legendaries > Lvl 9
+    augments: [ DA_18_OneTwoFive, DA_LateGameSpecialist, DA_KickStart, DA_CarveAPath, DA_ChampDeliveryPlusPlus, DA_SliceOfLife ]
   primal-sivir:
     source: SIVIR > Hunter > Lvl 8 push
-    augments: [ DA_CyberneticImplants_Gold, DA_Swordsmith, DA_StandUnited, DA_FutureFocused, DA_18_PrimalAugment_Nidalee, DA_BronzeForLifeII ]
+    augments: [ DA_StandUnited, DA_FutureFocused, DA_CyberneticImplants_Gold, DA_Swordsmith, DA_BronzeForLifeII, DA_SwordOverflow ]
   riftbeast-malphite:
     source: SIVIR > Hunter > Lvl 8 push
-    augments: [ DA_CyberneticImplants_Gold, DA_Swordsmith, DA_StandUnited, DA_FutureFocused, DA_18_PrimalAugment_Nidalee, DA_BronzeForLifeII ]
+    augments: [ DA_StandUnited, DA_FutureFocused, DA_CyberneticImplants_Gold, DA_Swordsmith, DA_BronzeForLifeII, DA_SwordOverflow ]

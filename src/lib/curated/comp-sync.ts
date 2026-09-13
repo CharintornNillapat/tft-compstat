@@ -73,13 +73,27 @@ export type PlacedUnit = {
  * A unit whose every recorded hex is taken gets the first free one — the schema
  * requires unique hexes, and a comp is more useful with a unit in a slightly wrong
  * place than not written at all.
+ *
+ * A unit the feed records **no** hex for (Elder Dragon, the Lux forms) is placed after
+ * every unit that has one, so it cannot take a hex somebody actually played, and on
+ * the first free **back-row** hex: the front line is where a misplaced unit costs most.
  */
 export function placeUnits(units: readonly CompUnitInput[]): { apiName: string; row: number; col: number }[] {
   const taken = new Set<string>();
   const key = (row: number, col: number) => `${row},${col}`;
   const placed: { apiName: string; row: number; col: number }[] = [];
+  const unplaced = (unit: CompUnitInput) => (unit.cells.length === 0 ? 1 : 0);
 
-  for (const unit of [...units].sort((a, b) => b.share - a.share || a.apiName.localeCompare(b.apiName))) {
+  for (const unit of [...units].sort(
+    (a, b) => unplaced(a) - unplaced(b) || b.share - a.share || a.apiName.localeCompare(b.apiName),
+  )) {
+    if (unit.cells.length === 0) {
+      const hex = firstFreeHex(taken, "back");
+      if (!hex) continue;
+      taken.add(key(hex.row, hex.col));
+      placed.push({ apiName: unit.apiName, ...hex });
+      continue;
+    }
     let hex: { row: number; col: number } | undefined;
     for (const candidate of [...unit.cells].sort((a, b) => b.count - a.count || a.cell.localeCompare(b.cell))) {
       const cell = parseCell(candidate.cell);
@@ -97,13 +111,70 @@ export function placeUnits(units: readonly CompUnitInput[]): { apiName: string; 
   return placed;
 }
 
-function firstFreeHex(taken: ReadonlySet<string>): { row: number; col: number } | undefined {
-  for (let row = 0; row < BOARD_ROWS; row++) {
+function firstFreeHex(taken: ReadonlySet<string>, from: "front" | "back" = "front"): { row: number; col: number } | undefined {
+  for (let step = 0; step < BOARD_ROWS; step++) {
+    const row = from === "front" ? step : BOARD_ROWS - 1 - step;
     for (let col = 0; col < BOARD_COLS; col++) {
       if (!taken.has(`${row},${col}`)) return { row, col };
     }
   }
   return undefined;
+}
+
+/** A unit's row in the feed's `unit_stats`: its api name and share of the comp's boards. */
+export type UnitShare = { unit: string; pcnt: number };
+
+/**
+ * Which units a comp may name: any champion of the set, **shop or not**.
+ *
+ * Riftbeasts are unbuyable (`is_shop_unit = false`) but they are real board units that
+ * take a slot — on a level-9 Riftbeast comp eight of the nine units are Riftbeasts, and
+ * Pebbles and Cinderling hold the items. Filtering to shop units once wrote that comp as
+ * Gnar "carrying" a Thief's Gloves. Tier lists still rate shop units only; that filter
+ * lives with them, not here.
+ */
+export type UnitFilter = (apiName: string) => boolean;
+
+/**
+ * The board: the `level` most-played writable units at or above `minShare`, most-played
+ * first. Undefined when fewer than `minUnits` survive, since a board that short cannot
+ * describe the comp.
+ */
+export function selectBoardUnits<T extends UnitShare>(
+  stats: readonly T[],
+  level: number,
+  writable: UnitFilter,
+  limits: { minShare: number; minUnits: number },
+): T[] | undefined {
+  const core = stats
+    .filter((row) => row.pcnt >= limits.minShare && writable(row.unit))
+    .sort((a, b) => b.pcnt - a.pcnt || a.unit.localeCompare(b.unit))
+    .slice(0, level);
+  return core.length >= limits.minUnits ? core : undefined;
+}
+
+/**
+ * Flex units: writable units **off** the board that were still played on at least
+ * `minShare` of its boards, most-played first. (The old filter asked for a share both
+ * at least 12% and under 5%, so every generated comp shipped with no flex units.)
+ */
+export function selectFlexUnits(
+  stats: readonly UnitShare[],
+  onBoard: ReadonlySet<string>,
+  writable: UnitFilter,
+  limits: { minShare: number; max: number },
+): string[] {
+  return stats
+    .filter((row) => row.pcnt >= limits.minShare && !onBoard.has(row.unit) && writable(row.unit))
+    .sort((a, b) => b.pcnt - a.pcnt || a.unit.localeCompare(b.unit))
+    .slice(0, limits.max)
+    .map((row) => row.unit);
+}
+
+/** The feed's opener, `"A&B&C"`, → the writable units in it, once each, up to `max`. */
+export function selectEarlyUnits(unitList: string | undefined, writable: UnitFilter, max: number): string[] {
+  const units = (unitList?.split("&") ?? []).map((unit) => unit.trim()).filter((unit) => unit && writable(unit));
+  return [...new Set(units)].slice(0, max);
 }
 
 /**
@@ -176,19 +247,25 @@ export function assignCarries(units: readonly CarryCandidate[]): PlacedUnit[] {
   });
 }
 
-/** A carry as the style rule sees it: what it costs and how far it is levelled. */
-export type StyleUnit = { apiName: string; cost: number; star: number; carry: boolean };
+/**
+ * A carry as the style rule sees it: what it costs, how far it is levelled, and whether
+ * it can be bought at all (`shop`, default true).
+ */
+export type StyleUnit = { apiName: string; cost: number; star: number; carry: boolean; shop?: boolean };
 
 /**
  * Which of the six `comp_style` values this comp is.
  *
  * Reroll first, because it is the strongest signal: a three-starred cheap carry means
- * the comp is built by rolling at a level, whatever level it ends on. Otherwise the
- * modal final level decides, and a comp that ends below 8 is `flex` rather than a
+ * the comp is built by rolling at a level, whatever level it ends on. Only a **shop**
+ * unit counts — a three-starred Pebbles is not something you roll the shop for. Otherwise
+ * the modal final level decides, and a comp that ends below 8 is `flex` rather than a
  * "fast" anything.
  */
 export function compStyle(finalLevel: number, units: readonly StyleUnit[]): CompStyle {
-  const reroll = units.find((unit) => unit.carry && unit.star >= 3 && unit.cost >= 1 && unit.cost <= 3);
+  const reroll = units.find(
+    (unit) => unit.carry && unit.shop !== false && unit.star >= 3 && unit.cost >= 1 && unit.cost <= 3,
+  );
   if (reroll) return `reroll_${reroll.cost as 1 | 2 | 3}`;
   if (finalLevel >= 9) return "fast9";
   if (finalLevel === 8) return "fast8";

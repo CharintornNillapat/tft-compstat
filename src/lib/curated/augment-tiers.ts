@@ -20,7 +20,7 @@ export type Augment = {
 export type CompAugments = {
   /** The guide MetaTFT took the grades from. */
   source: string | null;
-  /** Best first. */
+  /** Silver, then Gold, then Prismatic; best first inside each (§7.5). */
   augments: Augment[];
 };
 

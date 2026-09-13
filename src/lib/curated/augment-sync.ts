@@ -1,6 +1,6 @@
 import { Document, isSeq, parse } from "yaml";
 import { TIER_RANKS, type TierRank } from "@/lib/static/game";
-import { COMP_AUGMENTS, type AugmentRarity } from "./schemas";
+import { AUGMENT_RARITIES, COMP_AUGMENTS, type AugmentRarity } from "./schemas";
 
 /**
  * Pure: MetaTFT's augment grades + CommunityDragon's augment data → the generated
@@ -150,7 +150,7 @@ export function guideConsensus(guides: Iterable<Guide>): Map<string, number> {
 /**
  * A comp's best augments, from the grades of the guide MetaTFT matched to it.
  *
- * Ordered by the comp's own grade, best first; then by how much **higher** this guide
+ * **Ranking.** The comp's own grade, best first; then how much **higher** this guide
  * rates an augment than the guides do on average (`guideConsensus`) — that gap is the
  * synergy the section is for. Nearly every guide grades the same econ augments S, so
  * an augment every comp wants is not advice about this one; ranked against MetaTFT's
@@ -158,6 +158,15 @@ export function guideConsensus(guides: Iterable<Guide>): Map<string, number> {
  * that only measured where two lists disagree. Then the global tier, then the guide's
  * own order. Only augments on the global list can be shown (it is where names and
  * icons come from), one per family.
+ *
+ * **Rarity balance.** Picks are taken round-robin Silver → Gold → Prismatic, each the
+ * best-ranked of its rarity not yet taken, and a rarity that runs out is skipped so the
+ * others fill its slots. Ranked straight down instead, a guide's picks were whatever
+ * rarity it happened to grade most S's in: six Silvers for one comp, four Prismatics for
+ * another, while a game offers one augment of each. A guide that grades a single rarity
+ * (the Draven and Ashe guides grade only Silver) still yields only that rarity — the
+ * picks stay this guide's grades rather than being padded from the global list.
+ * The result lists Silver, then Gold, then Prismatic, best-ranked first inside each.
  *
  * Null under `min`: a guide grading two augments is a stub, not a recommendation.
  */
@@ -178,16 +187,32 @@ export function pickCompAugments(
     (a, b) => a.rank - b.rank || b.lift - a.lift || RANK[a.entry.tier] - RANK[b.entry.tier] || a.index - b.index,
   );
 
-  const picks: string[] = [];
+  const queues = new Map(AUGMENT_RARITIES.map((rarity) => [rarity, candidates.filter((c) => c.entry.rarity === rarity)]));
+  const picked: { entry: AugmentEntry; order: number }[] = [];
   const families = new Set<string>();
-  for (const { entry } of candidates) {
-    const family = augmentFamily(entry.name);
-    if (families.has(family)) continue;
-    families.add(family);
-    picks.push(entry.apiName);
-    if (picks.length === limits.max) break;
+  let order = 0;
+  for (let progress = true; progress && picked.length < limits.max; ) {
+    progress = false;
+    for (const rarity of AUGMENT_RARITIES) {
+      if (picked.length === limits.max) break;
+      const queue = queues.get(rarity) ?? [];
+      // The next of this rarity whose family has not been shown; a spent queue is skipped.
+      while (queue.length) {
+        const { entry } = queue.shift()!;
+        const family = augmentFamily(entry.name);
+        if (families.has(family)) continue;
+        families.add(family);
+        picked.push({ entry, order: order++ });
+        progress = true;
+        break;
+      }
+    }
   }
-  return picks.length >= limits.min ? picks : null;
+  if (picked.length < limits.min) return null;
+  const rarityRank = (rarity: AugmentRarity) => AUGMENT_RARITIES.indexOf(rarity);
+  return picked
+    .sort((a, b) => rarityRank(a.entry.rarity) - rarityRank(b.entry.rarity) || a.order - b.order)
+    .map(({ entry }) => entry.apiName);
 }
 
 const normalizeName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -220,6 +245,54 @@ export function guideFitsBoard(source: string | null, boardNames: Iterable<strin
   if (carries.length === 0) return false;
   const fielded = new Set([...boardNames].map(normalizeName));
   return carries.every((group) => group.some((name) => fielded.has(name)));
+}
+
+/**
+ * The trait a guide title names, the segment after the first ">":
+ * "SIVIR > Hunter > Lvl 8 push" → "hunter". Undefined when there is none.
+ */
+export function guideTrait(source: string | null): string | undefined {
+  const trait = normalizeName(source?.split(">")[1] ?? "");
+  return trait || undefined;
+}
+
+type TitledGuide = { source: string | null; augments: readonly { id: string; tier: string }[] };
+
+/**
+ * A guide for a comp whose own cluster has none that fits: another of MetaTFT's guides
+ * that names this comp **twice over** — every carry in its title is fielded
+ * (`guideFitsBoard`) *and* the trait in its title is one the comp is **defined by**
+ * (the traits its name is built from, `compTraitNames`).
+ *
+ * Stricter than the cluster's own guide on purpose. MetaTFT chose that one for this
+ * comp, however loosely; this one is chosen by us, and a carry alone is too weak a tie.
+ * Merely *active* was tried first and was still too weak: on patch 18.2 Fae Rengar and
+ * Blossom Sett Sivir both field Sivir with a small Hunter bonus, and both adopted
+ * "SIVIR > Hunter" — the Hunter comp's augments on two comps that are not it. A title
+ * whose trait segment is not a real trait ("Legendaries", "Solar") never qualifies.
+ *
+ * Among several, the guide naming more carries wins (it is the more specific), then the
+ * one grading more augments, then the title, so the same feed always picks the same one.
+ */
+export function pickFallbackGuide<G extends TitledGuide>(
+  guides: Iterable<G>,
+  boardNames: readonly string[],
+  compTraitNames: readonly string[],
+): G | undefined {
+  const active = new Set(compTraitNames.map(normalizeName));
+  const distinct = new Map<string, G>();
+  for (const guide of guides) if (guide.source && !distinct.has(guide.source)) distinct.set(guide.source, guide);
+  return [...distinct.values()]
+    .filter((guide) => {
+      const trait = guideTrait(guide.source);
+      return trait !== undefined && active.has(trait) && guideFitsBoard(guide.source, boardNames);
+    })
+    .sort(
+      (a, b) =>
+        guideCarries(b.source).length - guideCarries(a.source).length ||
+        b.augments.length - a.augments.length ||
+        (a.source ?? "").localeCompare(b.source ?? ""),
+    )[0];
 }
 
 export type CompAugmentPicks = { slug: string; source: string | null; augments: string[] };
