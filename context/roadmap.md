@@ -321,8 +321,20 @@ Approved task by task rather than as a whole phase.
     `invoker-morgana-taric` and `juggernaut-sivir` now fit "ELDER DRAGON" because Elder Dragon is
     on the board; `hunter-sivir` and `blossom-sett-sivir` adopt a guide by the fallback.
   - Still none, and correctly: 9 comps no guide names, and 3 stub guides (2, 3 and 1 augments).
-- **Not deployed yet.** The seeded comps are live; the code, the panel note and `augment-tiers.yaml`
-  ship with the next deploy.
+- **Deployed (2026-09-13, commit `ab8baad`)** and checked on https://tft-compstat.vercel.app over
+  HTTP (curl on the served HTML; the Playwright server did not connect, so not in a browser):
+  - **Panel note:** "This guide grades Silver augments only" on `elderwood-ezreal-draven`,
+    `blossom-sett-ashe` and `invoker-morgana-taric`, and absent on `hunter-sivir` and
+    `adaptor-master-yi`, whose picks mix rarities. The footer reads "by rarity, best first within each".
+  - **Rarity balance:** Hunter Sivir and Adaptor Master Yi render Silver, Gold and Prismatic picks.
+  - **Fallback guides:** `hunter-sivir` credits "SIVIR > Hunter", `blossom-sett-sivir` "ASHE > Blossom".
+  - **No picks, no panel:** `lunar-aphelios-nidalee` and `riftbeast-pebbles` render no augment panel.
+  - **Riftbeast Pebbles:** all eight Riftbeasts and Gnar on the board, "Fast 9" rather than a 1-cost
+    reroll, flex units shown; listed on `/comps` with Hunter Sivir and Riftbeast Malphite.
+  - **`/augments`:** 200, 248 cards across the three rarities.
+  - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items` and `/me` all 200.
+  - A React quirk for anyone re-checking: the note's rarity is an interpolated value, so the served
+    HTML reads `grades <!-- -->Silver<!-- --> augments only` and a literal-phrase grep finds nothing.
 
 - [ ] Further tasks — not yet specified.
 
