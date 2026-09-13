@@ -356,6 +356,21 @@ Approved task by task rather than as a whole phase.
     Murkwolf and Mama Beak have no 3-item build reaching 200 games.
 - **Checks:** `pnpm check` (402 tests) and `pnpm build` (fetch cache cleared) green.
 - **Local `pnpm start`:** `/tiers/champions` renders all ten Riftbeasts, `/bis` the seven with builds.
+- **Style decision:** `riftbeast-pebbles` stays `reroll_1` (difficulty 2), with no Riftbeast exception —
+  Pebbles and Cinderling are 1-cost carries three-starred by rolling early before pushing levels for
+  Elder Dragon.
+- **Deployed (2026-09-13, commit `f708502`)** and checked on https://tft-compstat.vercel.app over
+  HTTP (curl on the served HTML):
+  - **First build failed** on a transient Supabase `Gateway Timeout` (`comp traits`, prerendering
+    `/comps/ashe-fast-9`) — a query this task did not touch. `vercel redeploy` of the same commit was
+    ready in 48s, and the GitHub Vercel status for `f708502` is success.
+  - **`/tiers/champions`:** all ten Riftbeasts, each in its cost row — Pebbles and Cinderling 1-cost;
+    Gromp, Murkwolf and Scuttlecrab 2-cost; Krug and Mama Beak 3-cost; Sentinel and Brambleback
+    4-cost; Elder Dragon 5-cost (S).
+  - **`/bis`:** seven Riftbeasts with full 3-item builds; Gromp, Murkwolf and Mama Beak are absent,
+    correctly, under the 200-game threshold.
+  - **`/comps/riftbeast-pebbles`:** renders as "1-cost reroll".
+  - **Routes:** `/tiers/champions`, `/bis`, `/comps/riftbeast-pebbles` and `/` all 200 with no error markup.
 
 - [ ] Further tasks — not yet specified.
 
