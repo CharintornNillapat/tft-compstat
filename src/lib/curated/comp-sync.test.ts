@@ -102,7 +102,7 @@ describe("placeUnits", () => {
 });
 
 describe("Riftbeast boards", () => {
-  // Riftbeasts are set 18 champions stored with is_shop_unit = false (architecture §4.8).
+  // Riftbeasts are set 18 shop units (architecture §4.8); a board takes any set unit regardless.
   const setUnits = new Set([
     "DA_Krug18",
     "DA_18_Sentry",
@@ -135,7 +135,7 @@ describe("Riftbeast boards", () => {
     { unit: "DA_Lux18_Base", pcnt: 0.02 },
   ];
 
-  it("keeps non-shop Riftbeasts on the board instead of filling their slots with filler", () => {
+  it("keeps Riftbeasts on the board instead of filling their slots with filler", () => {
     const board = selectBoardUnits(stats, 9, writable, { minShare: 0.05, minUnits: 6 })!;
     expect(board.map((row) => row.unit)).toEqual([
       "DA_Krug18",
@@ -316,8 +316,12 @@ describe("compStyle", () => {
     expect(compStyle(9, carry(4, 3))).toBe("fast9");
   });
 
-  it("does not call a three-starred Riftbeast carry a reroll, since it is not bought", () => {
-    expect(compStyle(9, [{ apiName: "DA_18_Sentry", cost: 1, star: 3, carry: true, shop: false }])).toBe("fast9");
+  it("does not call a three-starred carry a reroll when the shop does not sell it", () => {
+    expect(compStyle(9, [{ apiName: "Summon", cost: 1, star: 3, carry: true, shop: false }])).toBe("fast9");
+  });
+
+  it("reads a three-starred Riftbeast carry as a reroll, since Riftbeasts are shop units", () => {
+    expect(compStyle(9, [{ apiName: "DA_18_Sentry", cost: 1, star: 3, carry: true, shop: true }])).toBe("reroll_1");
   });
 
   it("rates reaching 9 the hardest ask", () => {

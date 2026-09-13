@@ -55,7 +55,7 @@ A minimalist, dark, data-dense TFT companion site built for a second monitor whi
 | Styling | Tailwind CSS v4, dark only | Design tokens in `@theme` (`src/app/globals.css`); `tabular-nums` everywhere |
 | DB | Supabase Postgres + RLS | Supabase CLI migrations in `supabase/migrations/`; generated types in `src/lib/supabase/types.ts` |
 | Validation | Zod | Env vars, YAML seeds, Riot DTO subset |
-| Static game data | CommunityDragon `cdragon/tft/en_us.json`; Riot Data Dragon `tft-champion.json` | CommunityDragon: champion, trait and item names, costs, breakpoints, icons. Data Dragon: which units are in the shop (§4.8) |
+| Static game data | CommunityDragon `cdragon/tft/en_us.json` | Champion, trait and item names, costs, breakpoints, icons (§4.8) |
 | Charts | Inline SVG (sparkline, placement histogram) | No chart library needed at this scale |
 | Tests | Vitest | Pure functions: limiter, header parsing, comp signature, stats, seed schemas |
 | Tooling | pnpm 12, ESLint 9 (flat config), Supabase CLI as a devDependency, `tsx` for scripts | Bundled Next docs live in `node_modules/next/dist/docs/`. Check them before using a Next API (see `AGENTS.md`). |
@@ -178,7 +178,7 @@ create table champions (
   cost         smallint not null check (cost between 1 and 5),  -- playable units only; summons filtered out
   traits       text[] not null default '{}',     -- trait api_names
   icon_url     text,
-  is_shop_unit boolean not null default true     -- false = playable but unbuyable (Riftbeasts); §4.8
+  is_shop_unit boolean not null default true     -- true for every playable unit, Riftbeasts included; §4.8
 );
 
 create table items (
@@ -368,10 +368,9 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 
 **Champions**
 - A **playable** unit has a cost of 1–5 and at least one trait. That test alone excludes the junk: legacy `TFT_*` summons carry no traits, and the anvils have cost 8 or 11.
-- Riot's Data Dragon `tft-champion.json` (preferring the release matching the data version) then sets **`is_shop_unit`**, rather than filtering. Units it omits are stored with `is_shop_unit = false`: in Set 18 those are exactly the ten Riftbeast units, all of which carry the `Riftbeast` trait — Pebbles (`DA_18_Sentry`), Cinderling, Gromp, Murkwolf, Scuttlecrab, Krug, Mama Beak (`DA_CrimsonRaptor18`), Sentinel, Brambleback and Elder Dragon.
-  - Why a flag and not a filter (Phase 4): these are real board units that meta comps field, so curated comps must be able to reference them and match derivation must resolve their `character_id` to a cost. The flag keeps shop and non-shop distinguishable instead of discarding the distinction.
-  - Migration `20260912120000_champion_shop_flag.sql`. Set 18 went from 64 to 74 champions.
-- If Data Dragon lists no units for the set, every unit is marked as a shop unit and the sync warns. Unreachable Data Dragon does the same, silently.
+- Every playable unit is stored with **`is_shop_unit = true`** (Phase 6 Task 12). That includes Set 18's ten Riftbeast units, which all carry the `Riftbeast` trait and are sold by the shop at their 1–5 costs like any other champion: Pebbles (`DA_18_Sentry`, 1), Cinderling (1), Gromp (`DA_Gromp18_AP`, 2), Murkwolf (2), Scuttlecrab (2), Krug (3), Mama Beak (`DA_CrimsonRaptor18`, 3), Sentinel (4), Brambleback (4) and Elder Dragon (5).
+  - **History.** From the Phase 4 pre-requisite until Task 12 the flag came from Riot's Data Dragon `tft-champion.json`, and units it omitted were stored `false`. Data Dragon 16.18.1 lists 64 of Set 18's 74 playable units, and the ten it omits are exactly the Riftbeasts, so they were treated as unbuyable and left off `/tiers/champions` and `/bis`. `sync:static` no longer fetches Data Dragon: the cost-and-traits test is the whole rule.
+  - Migration `20260912120000_champion_shop_flag.sql` added the column; Set 18 went from 64 to 74 champions when the Data Dragon filter became a flag. The column and its readers (`shopUnits` in the tier-list and BIS syncs, the reroll rule) stay, but nothing sets it `false` today — a future set with unbuyable units needs a real source for it. The column's database comment still describes the old rule.
 - Element variants such as the nine Set 18 Lux forms stay as separate rows, because match data names them.
 - Champion `traits` in CommunityDragon are display names. They're mapped to trait api names within the set. When a name is shared (Set 17 has 8 "Stargazer" variants), the shortest api name wins and the sync warns.
 - `icon_url` uses `tileIcon` (128px face crop), falling back to `squareIcon`, then `icon`.
@@ -732,8 +731,9 @@ flat patch. The generated header therefore records where the bands actually fell
 tier's size and worst average placement — since that boundary moves from run to run and
 cannot be worked out from the shares.
 
-**What is rated.** Champions: shop units of the folder's set — the Riftbeasts and
-summons of §11 are rated by the feed but belong on no tier list. Items: `completed`,
+**What is rated.** Champions: shop units of the folder's set — every playable unit,
+Riftbeasts included (§4.8, Phase 6 Task 12), each shown in its cost row. Summons are not in
+`champions`, so the feed rates them but they resolve to nothing and are reported. Items: `completed`,
 `emblem` and `artifact` by default (`--item-kinds` to change it, confirmed as the
 standard filter 2026-09-12); components and consumables have an average placement
 without being tier-list material, and radiants split each item into a thin second
@@ -810,12 +810,12 @@ cells 22-28 and ranged carries in cells 1-7 in every comp checked.
   the modal final level. The share floor is deliberately low (5%): a cluster is fuzzy, so
   demanding a unit appear on *most* boards leaves a level-8 comp with five units. A comp
   with fewer than 6 writable units is skipped and said so.
-  - **Riftbeasts are written like any other unit** (fixed in Phase 6 Task 11). They are
-    stored with `is_shop_unit = false` (§4.8) and take a board slot: unit shares sum to
-    ~8.5 on a level-9 Riftbeast board, where eight of the nine are Riftbeasts and Pebbles
-    and Cinderling hold the items. The first version filtered boards to shop units, so
-    "Riftbeast Pebbles" was written as Gnar carrying one Thief's Gloves. The shop filter
-    now applies to the tier lists only (§7.1). The feed's `TFT18_*` alternate forms are not
+  - **Riftbeasts are written like any other unit** (fixed in Phase 6 Task 11). They take a
+    board slot: unit shares sum to ~8.5 on a level-9 Riftbeast board, where eight of the nine
+    are Riftbeasts and Pebbles and Cinderling hold the items. The first version filtered boards
+    to shop units while Riftbeasts were still wrongly flagged non-shop (§4.8), so "Riftbeast
+    Pebbles" was written as Gnar carrying one Thief's Gloves. Boards take any set unit; the
+    shop filter applies to the tier lists and BIS only (§7.1, §7.4). The feed's `TFT18_*` alternate forms are not
     in our tables and stay off; their share in a comp is at most ~1%, so no alias is needed.
   - The rules are pure in `comp-sync.ts`: `selectBoardUnits`, `selectFlexUnits` (units off
     the board on ≥12% of its boards — the first version asked for ≥12% *and* <5%, so no
@@ -836,7 +836,8 @@ cells 22-28 and ranged carries in cells 1-7 in every comp checked.
   most-played build is one Thief's Gloves is not also written as a three-item carry.
 - **Tier:** the §7.1 percentile bands (`assignTiers`), over the selected comps' average
   placements. **Style:** a three-starred 1-3 cost **shop** carry means `reroll_<cost>`
-  whatever level it ends on (a three-starred Pebbles is not rolled for); otherwise the
+  whatever level it ends on (Riftbeasts count since Task 12, so a three-starred Pebbles
+  carry is `reroll_1`); otherwise the
   modal final level gives `fast9` / `fast8` / `flex`.
 - **`guide`:** assembled from the feed's numbers — the most-played opener, the level
   timings, the carries' builds — and says in its last line that these are boards people
@@ -867,7 +868,7 @@ guard for early in a patch, when a cluster can be that thin.
 ### 7.4 Champion best-in-slot (`pnpm sync:bis`, Phase 6 Task 7)
 
 **Source.** `GET {STAT_ORIGIN}/unit_detail?queue=1100&patch=current&rank=…&days=N&unit=<api_name>`,
-one request per shop champion. It returns, for that champion, every item **build** that
+one request per shop champion (every playable unit, Riftbeasts included — §4.8). It returns, for that champion, every item **build** that
 was played (`buildNames`, a `|`-separated list of item api names) and every single
 **item** it held, each with the same eight-bucket `places` histogram §7.1 reads — so
 average placement is **computed**, never scraped. `games[0].patch[0]` is the patch label.
@@ -1151,7 +1152,7 @@ comps:                        # keyed by comp slug; a comp without an entry show
 - [x] Riot's match-API trait `style` is **not** used: the style comes from `tier_current` indexed into the stored `breakpoints` (verified 2026-09-12, §6.1).
 - [x] Phase 3: replacing `comp_units` needs `unique (comp_id, hex_row, hex_col)` made `DEFERRABLE INITIALLY IMMEDIATE` or a transactional RPC. Resolved with the `seed_comp` RPC (§4.9); the constraint is unchanged.
 - [x] **Riftbeast units were missing from `champions`** (resolved 2026-09-12, Phase 4 pre-requisite). Data Dragon's shop list became `is_shop_unit` instead of a filter (§4.8), so all ten are stored with their real costs. The live diff found two the earlier note had missed, Gromp (`DA_Gromp18_AP`) and Mama Beak (`DA_CrimsonRaptor18`).
-- [x] Data Dragon's `tft-champion.json` now only sets `is_shop_unit` (§4.8), so if Riot stops publishing TFT data there the sync degrades to marking everything buyable rather than dropping rows. The cost-and-traits test is what keeps summons out, and it holds on its own for Set 18.
+- [x] **Riftbeasts are shop units** (resolved 2026-09-13, Phase 6 Task 12). Data Dragon's `tft-champion.json` omits all ten, so they were stored `is_shop_unit = false` and left off `/tiers/champions` and `/bis`. `sync:static` no longer reads Data Dragon; every playable unit is a shop unit, and the cost-and-traits test alone keeps summons out (§4.8).
 
 ---
 

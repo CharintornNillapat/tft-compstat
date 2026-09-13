@@ -57,7 +57,7 @@ const set18 = {
     champion("DA_18_KhaZix", "Kha'Zix", 3, ["Rival"]),
     champion("DA_Lux18_Base", "Lux", 5, ["Avatar"]),
     champion("DA_18_Seer", "Seer", 2, ["Stargazer", "Mystery"]),
-    champion("DA_Krug18", "Krug", 3, ["Riftbeast"]), // playable, but never in the shop
+    champion("DA_Krug18", "Krug", 3, ["Riftbeast"]), // a Riftbeast: bought like any other unit
     champion("TFT_TrainingDummy", "Target Dummy", 1, []),
     champion("TFT_ArmoryKeyOrnn", "Armory", 8, []),
   ],
@@ -114,7 +114,6 @@ const fixture = {
 
 const data = parseCdragonTft(fixture);
 const PATCH = "16.18";
-const playableIds = new Set(["DA_18_Ashe", "DA_18_KhaZix", "DA_Lux18_Base", "DA_18_Seer", "TFT17_Jinx"]);
 
 describe("versions and asset URLs", () => {
   it("reads the game-data version", () => {
@@ -176,7 +175,7 @@ describe("pickSet / setDisplayName", () => {
 });
 
 describe("buildStaticSnapshot", () => {
-  const snapshot = buildStaticSnapshot(data, { patch: PATCH, playableIds });
+  const snapshot = buildStaticSnapshot(data, { patch: PATCH });
 
   it("describes the set", () => {
     expect(snapshot.set).toEqual({
@@ -207,17 +206,18 @@ describe("buildStaticSnapshot", () => {
     });
   });
 
-  it("marks playable units Data Dragon does not sell as non-shop", () => {
+  it("marks every playable unit as a shop unit, Riftbeasts included", () => {
     // The traitless legacy summons and the cost-8/11 anvils are excluded outright;
-    // Krug is a real board unit, so it is stored with is_shop_unit false (§4.8, §11).
+    // Krug is a Riftbeast, sold by the shop at its cost like any other unit (§4.8).
     const byName = Object.fromEntries(snapshot.champions.map((c) => [c.api_name, c.is_shop_unit]));
     expect(byName).toEqual({
       DA_18_Ashe: true,
       DA_18_KhaZix: true,
       DA_Lux18_Base: true,
       DA_18_Seer: true,
-      DA_Krug18: false,
+      DA_Krug18: true,
     });
+    expect(snapshot.champions.find((c) => c.api_name === "DA_Krug18")?.cost).toBe(3);
     expect(snapshot.champions.find((c) => c.api_name === "TFT_TrainingDummy")).toBeUndefined();
     expect(snapshot.champions.find((c) => c.api_name === "TFT_ArmoryKeyOrnn")).toBeUndefined();
   });
@@ -246,7 +246,6 @@ describe("buildStaticSnapshot", () => {
   it("stores trait types when given, null for traits the source lacks, with one warning", () => {
     const typed = buildStaticSnapshot(data, {
       patch: PATCH,
-      playableIds,
       traitKinds: new Map([
         ["DA_18_Hunter", "class"],
         ["DA_18_Blossom", "origin"],
@@ -262,17 +261,6 @@ describe("buildStaticSnapshot", () => {
   it("leaves kind out of the rows entirely without a source, so an upsert keeps stored types", () => {
     expect(snapshot.traits.every((t) => !("kind" in t))).toBe(true);
     expect(snapshot.warnings).not.toContainEqual(expect.stringMatching(/No trait type/));
-  });
-
-  it("marks every unit as a shop unit when Data Dragon lists nothing for the set", () => {
-    const fallback = buildStaticSnapshot(data, { patch: PATCH, playableIds: new Set(["TFT17_Jinx"]) });
-    expect(fallback.champions.every((c) => c.is_shop_unit)).toBe(true);
-    expect(fallback.warnings).toContainEqual(expect.stringMatching(/Data Dragon lists no set 18 units/));
-
-    // Same when Data Dragon is unreachable, but then there is nothing to warn about.
-    const unknown = buildStaticSnapshot(data, { patch: PATCH });
-    expect(unknown.champions.every((c) => c.is_shop_unit)).toBe(true);
-    expect(unknown.warnings).not.toContainEqual(expect.stringMatching(/Data Dragon/));
   });
 
   it("classifies items by tag, then by api name and recipe", () => {

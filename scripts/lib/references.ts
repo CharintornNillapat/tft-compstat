@@ -12,8 +12,8 @@ export type References = {
   setIds: Set<number>;
   index: ReferenceIndex;
   /**
-   * Champions buyable from the shop. Riftbeasts and other summons are stored too
-   * (architecture §11) and a meta feed rates them, but they belong on no tier list.
+   * Champions buyable from the shop: every playable unit `sync:static` stores, Riftbeasts
+   * included (architecture §4.8). The tier list and BIS rate these and nothing else.
    */
   shopUnits: Set<string>;
   /**

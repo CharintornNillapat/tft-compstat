@@ -151,7 +151,7 @@ async function main() {
   const bracket = ranks.length > 1 ? `${ranks[0]}+` : values.rank;
 
   const setId = values.set ? number("set", values.set) : Math.max(...refs.setIds);
-  // Shop units only: a Riftbeast cannot be bought, so it has no build to plan for.
+  // Shop units only, which is every playable unit of the set, Riftbeasts included (§4.8).
   const champions = [...refs.index.champions]
     .filter(([apiName, champion]) => champion.setId === setId && refs.shopUnits.has(apiName))
     .map(([apiName, champion]) => ({ apiName, name: champion.name, cost: refs.costs.get(apiName) ?? 0 }))

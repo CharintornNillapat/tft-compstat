@@ -74,7 +74,7 @@ pnpm db:types                     # only if the schema changed, not for data
 
 Run this **when Riot ships a new set**, or when a patch adds or rebalances units and items. Set 18 currently holds 36 traits, 74 champions and 771 items.
 
-> The script warns rather than fails if Data Dragon's shop list is missing: units then keep `is_shop_unit` true instead of rows being dropped. Non-shop units (Riftbeasts) are stored with their real costs so match derivation can resolve every `character_id`.
+> Every unit with a cost of 1–5 and at least one trait is stored as a shop unit (`is_shop_unit` true), Riftbeasts included, so they are rated on `/tiers/champions` and `/bis`. Traitless summons and the cost-8/11 anvils are skipped.
 
 ### 2. Curated tiers and comps — `pnpm seed:curated`
 

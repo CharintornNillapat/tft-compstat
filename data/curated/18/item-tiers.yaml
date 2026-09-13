@@ -3,15 +3,15 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 790,304 games on patch 18.2, set 18. Feed updated 2026-09-13T10:53:55.239Z.
+# Sample: 785,392 games on patch 18.2, set 18. Feed updated 2026-09-13T11:19:37.284Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 13 to 4.06, A 27 to 4.20, B 31 to 4.41, C 18 to 5.13.
+# Where they fell, as size and worst average placement: S 13 to 4.06, A 27 to 4.20, B 31 to 4.41, C 18 to 5.14.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: items-18.2
 kind: item
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 790,304 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 785,392 games over the last 3 days."
 tiers:
   S:
     - DA_TacticiansShield
@@ -23,17 +23,17 @@ tiers:
     - DA_18_EmblemJuggernaut
     - DA_SteraksGage
     - DA_Evenshroud
+    - DA_Artifact_Dawncore
     - DA_AdaptiveHelm
     - DA_BlueBuff
     - DA_TacticiansCrown
-    - DA_Artifact_Dawncore
   A:
     - DA_EdgeOfNight
     - DA_IonicSpark
     - DA_Deathblade
     - DA_ArchangelsStaff
-    - DA_18_EmblemVanguard
     - DA_Quicksilver
+    - DA_18_EmblemVanguard
     - DA_18_EmblemInvoker
     - DA_ProtectorsVow
     - DA_RabadonsDeathcap
@@ -41,8 +41,8 @@ tiers:
     - DA_GiantSlayer
     - DA_StrikersFlail
     - DA_SteadfastHeart
-    - DA_18_EmblemExecutioner
     - DA_18_EmblemElderwood
+    - DA_18_EmblemExecutioner
     - DA_RedBuff
     - DA_TitansResolve
     - DA_HextechGunblade
@@ -51,18 +51,18 @@ tiers:
     - DA_18_EmblemInferno
     - DA_NashorsTooth
     - DA_Morellonomicon
-    - DA_Artifact_GoldCollector
     - DA_SpearOfShojin
     - DA_Artifact_LudensTempest
     - DA_LastWhisper
-  B:
     - DA_Artifact_WitsEnd
+  B:
+    - DA_Artifact_GoldCollector
     - DA_Artifact_EternalPact
     - DA_InfinityEdge
     - DA_KrakensFury
     - DA_DragonsClaw
-    - DA_18_EmblemBrawler
     - DA_VoidStaff
+    - DA_18_EmblemBrawler
     - DA_WarmogsArmor
     - DA_Artifact_LichBane
     - DA_18_EmblemHunter
@@ -73,13 +73,13 @@ tiers:
     - DA_18_EmblemRapidfire
     - DA_Artifact_HellfireHatchet
     - DA_18_EmblemBlossom
-    - DA_Artifact_SeekersArmguard
     - DA_18_EmblemPrimal
+    - DA_Artifact_SeekersArmguard
     - DA_Artifact_LightshieldCrest
-    - DA_Artifact_HorizonFocus
-    - DA_18_EmblemSlayer
     - DA_18_EmblemFloraFatalis
+    - DA_18_EmblemSlayer
     - DA_JeweledGauntlet
+    - DA_Artifact_HorizonFocus
     - DA_GargoyleStoneplate
     - DA_Artifact_Manazane
     - DA_Artifact_RapidFireCannon
@@ -90,19 +90,19 @@ tiers:
   C:
     - DA_18_EmblemFae
     - DA_Artifact_ZhonyasParadox
-    - DA_Artifact_TitanicHydra
     - DA_Artifact_VoidGauntlet
-    - DA_Artifact_AegisOfDawn
+    - DA_Artifact_TitanicHydra
     - DA_Artifact_Fishbones
     - DA_18_EmblemFloraFatalisAugment
+    - DA_Artifact_AegisOfDawn
     - DA_Artifact_BlightingJewel
     - DA_Artifact_NavoriFlickerblade
     - DA_Artifact_TheIndomitable
     - DA_18_EmblemSprykin
     - DA_Artifact_MogulsMail
     - DA_18_EmblemBlackthorn
-    - DA_Artifact_AegisOfDusk
     - DA_Artifact_GamblersBlade
+    - DA_Artifact_AegisOfDusk
     - DA_Artifact_ForbiddenIdol
     - DA_Artifact_StatikkShiv
     - DA_18_EmblemCoven

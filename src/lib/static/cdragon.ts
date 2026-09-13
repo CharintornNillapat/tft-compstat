@@ -231,13 +231,6 @@ export type SnapshotOptions = {
   /** Set number; defaults to the newest standard set. */
   setNumber?: number;
   /**
-   * Champion ids Riot lists as shop units (Data Dragon `tft-champion.json`). Sets
-   * `is_shop_unit`; units it omits are still stored, because non-shop units are
-   * playable (Set 18 Riftbeasts) and match data names them. Undefined or empty for
-   * the set means every unit is treated as a shop unit, and the sync warns.
-   */
-  playableIds?: ReadonlySet<string>;
-  /**
    * Trait type by api name (MetaTFT's lookup file; CommunityDragon has none). Undefined
    * when unavailable: `kind` is then left out of the rows entirely, so the stored values
    * survive. A trait the map lacks gets null and one warning for all of them.
@@ -282,15 +275,11 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
     }
   }
 
-  // Champions: every playable unit. A cost of 1–5 plus at least one trait excludes
-  // the traitless legacy summons and the cost-8/11 anvils; Data Dragon then only
-  // decides which of the survivors are buyable (§4.8).
+  // Champions: every playable unit, each a shop unit. A cost of 1–5 plus at least one
+  // trait excludes the traitless legacy summons and the cost-8/11 anvils. Data Dragon's
+  // shop list is not consulted: it omits Set 18's Riftbeasts, which the shop sells at
+  // their costs like any other champion (§4.8).
   const playable = cdSet.champions.filter((c) => c.cost >= 1 && c.cost <= 5 && c.traits.length > 0);
-  const shopIds = options.playableIds;
-  const knowsShop = shopIds !== undefined && playable.some((c) => shopIds.has(c.apiName));
-  if (shopIds && !knowsShop) {
-    warnings.push(`Data Dragon lists no set ${setId} units; all ${playable.length} marked as shop units.`);
-  }
   const champions = playable.map((c) => ({
     api_name: c.apiName,
     set_id: setId,
@@ -302,7 +291,8 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
       return apiName ? [apiName] : [];
     }),
     icon_url: cdragonAssetUrl(c.tileIcon ?? c.squareIcon ?? c.icon, patch),
-    is_shop_unit: knowsShop ? shopIds.has(c.apiName) : true,
+    // Explicit rather than the column default, so an upsert clears a stale false.
+    is_shop_unit: true,
   }));
 
   // Items: everything the set's pool references. Emblems name their trait: "Coven Emblem".

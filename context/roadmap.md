@@ -336,6 +336,27 @@ Approved task by task rather than as a whole phase.
   - A React quirk for anyone re-checking: the note's rarity is an interpolated value, so the served
     HTML reads `grades <!-- -->Silver<!-- --> augments only` and a literal-phrase grep finds nothing.
 
+- [x] **Task 12 — Riftbeasts are shop units** (requested 2026-09-13)
+  - **Root cause.** `sync:static` took `is_shop_unit` from Data Dragon's `tft-champion.json`, which
+    lists 64 of Set 18's 74 playable units; the ten it omits are exactly the Riftbeasts. Stored
+    `false`, they were dropped by `shopUnits` in `sync:meta`'s champion tier list and in `sync:bis`.
+  - **Fix.** Data Dragon is no longer fetched: every playable unit (cost 1–5, at least one trait)
+    is stored `is_shop_unit = true`, set explicitly so the upsert clears the stale `false` rows. No
+    migration; the column stays (architecture §4.8, §11).
+  - **Knock-on, by the existing rule:** a three-starred 1–3 cost shop carry is a reroll, so
+    `riftbeast-pebbles` now reads `reroll_1` (difficulty 2) instead of Task 11's `fast9`.
+
+**Verified — Task 12 (2026-09-13):**
+- **Data:** `pnpm sync:static` wrote 74 champions (cost 1 14 · 2 13 · 3 14 · 4 14 · 5 19); Supabase
+  holds 0 non-shop Set 18 rows and all ten Riftbeasts at their costs.
+  - `pnpm sync:meta --seed`: 65 champions rated (was 55) — S Elder Dragon; A Sentinel, Pebbles, Krug,
+    Cinderling; B Brambleback, Gromp, Murkwolf, Mama Beak; C Scuttlecrab. Seeded 2 tier lists and 28
+    comps; the run's feed refresh also retired `elderwood-aphelios-xayah` and added `vanguard-khazix`.
+  - `pnpm sync:bis`: 74 champions queried, 53 with a build. 7 of 10 Riftbeasts have one; Gromp,
+    Murkwolf and Mama Beak have no 3-item build reaching 200 games.
+- **Checks:** `pnpm check` (402 tests) and `pnpm build` (fetch cache cleared) green.
+- **Local `pnpm start`:** `/tiers/champions` renders all ten Riftbeasts, `/bis` the seven with builds.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

@@ -1077,7 +1077,8 @@ async function main() {
       days: values.days,
       minGames,
       candidates: references.index.champions,
-      // Summons are rated by the feed but are not in the shop, so they belong on no list.
+      // Shop units of the set, Riftbeasts included (§4.8). Summons are not in `champions`,
+      // so the feed rates them but they resolve to nothing and are reported instead.
       keep: (apiName) =>
         references.index.champions.get(apiName)?.setId === setId && references.shopUnits.has(apiName),
     }),

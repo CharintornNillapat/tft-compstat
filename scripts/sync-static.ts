@@ -25,33 +25,10 @@ import { chunks, must, selectAll } from "./lib/db";
 import { fetchTraitKinds } from "./lib/meta-feed";
 import { revalidateSite } from "./lib/revalidate";
 
-const DDRAGON_ORIGIN = "https://ddragon.leagueoflegends.com";
-
 async function getJson(url: string): Promise<unknown> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`GET ${url} failed: ${response.status} ${response.statusText}`);
   return response.json();
-}
-
-/**
- * Shop-unit ids from Riot's Data Dragon, preferring the release that matches the
- * CommunityDragon data. Undefined when unavailable: every playable unit is then
- * marked as a shop unit, and the transform warns.
- */
-async function fetchPlayableIds(patch: string): Promise<Set<string> | undefined> {
-  try {
-    const versions = z.array(z.string()).parse(await getJson(`${DDRAGON_ORIGIN}/api/versions.json`));
-    const version = versions.find((v) => v.startsWith(`${patch}.`)) ?? versions[0];
-    if (!version) return undefined;
-    if (!version.startsWith(`${patch}.`)) console.warn(`Data Dragon has no ${patch} release yet; using ${version}.`);
-    const { data } = z
-      .object({ data: z.record(z.string(), z.object({ id: z.string() })) })
-      .parse(await getJson(`${DDRAGON_ORIGIN}/cdn/${version}/data/en_US/tft-champion.json`));
-    return new Set(Object.values(data).map((champion) => champion.id));
-  } catch (error) {
-    console.warn(`Data Dragon unavailable (${(error as Error).message}).`);
-    return undefined;
-  }
 }
 
 /**
@@ -77,15 +54,11 @@ function countBy<T, K extends string | number>(rows: readonly T[], key: (row: T)
 }
 
 function printSummary({ set, traits, champions, items, warnings }: StaticSnapshot) {
-  const nonShop = champions.filter((c) => c.is_shop_unit === false);
   console.log(`\nSet ${set.id} · ${set.name} (${set.mutator}), game data ${set.patch}`);
   const typed = traits.filter((t) => t.kind);
   const kinds = typed.length ? `  (${countBy(typed, (t) => t.kind as TraitKind, TRAIT_KINDS)})` : "  (types unchanged)";
   console.log(`  traits     ${traits.length}${kinds}`);
   console.log(`  champions  ${champions.length}  (cost ${countBy(champions, (c) => c.cost, CHAMPION_COSTS)})`);
-  if (nonShop.length) {
-    console.log(`    non-shop ${nonShop.length}  (${nonShop.map((c) => `${c.name} ${c.cost}`).join(" · ")})`);
-  }
   console.log(`  items      ${items.length}  (${countBy(items, (i) => i.kind, ITEM_KINDS)})`);
   if (warnings.length) console.log(`  warnings:\n${warnings.map((w) => `    - ${w}`).join("\n")}`);
 }
@@ -128,14 +101,9 @@ async function main() {
     .parse(await getJson(`${CDRAGON_ORIGIN}/latest/content-metadata.json`));
   const patch = cdragonPatch(version);
   console.log(`Fetching CommunityDragon TFT data for game version ${patch}…`);
-  const [raw, playableIds] = await Promise.all([
-    getJson(`${CDRAGON_ORIGIN}/${patch}/cdragon/tft/en_us.json`),
-    fetchPlayableIds(patch),
-  ]);
-
-  const data = parseCdragonTft(raw);
+  const data = parseCdragonTft(await getJson(`${CDRAGON_ORIGIN}/${patch}/cdragon/tft/en_us.json`));
   const traitKinds = await fetchKinds(pickSet(data, setNumber).number);
-  const snapshot = buildStaticSnapshot(data, { patch, setNumber, playableIds, traitKinds });
+  const snapshot = buildStaticSnapshot(data, { patch, setNumber, traitKinds });
   printSummary(snapshot);
   if (values["dry-run"]) {
     console.log("\nDry run: nothing written.");

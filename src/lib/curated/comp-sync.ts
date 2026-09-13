@@ -127,11 +127,11 @@ export type UnitShare = { unit: string; pcnt: number };
 /**
  * Which units a comp may name: any champion of the set, **shop or not**.
  *
- * Riftbeasts are unbuyable (`is_shop_unit = false`) but they are real board units that
- * take a slot — on a level-9 Riftbeast comp eight of the nine units are Riftbeasts, and
- * Pebbles and Cinderling hold the items. Filtering to shop units once wrote that comp as
- * Gnar "carrying" a Thief's Gloves. Tier lists still rate shop units only; that filter
- * lives with them, not here.
+ * A comp names whatever takes a board slot — on a level-9 Riftbeast comp eight of the
+ * nine units are Riftbeasts, and Pebbles and Cinderling hold the items. Filtering boards
+ * to shop units once wrote that comp as Gnar "carrying" a Thief's Gloves, back when
+ * Riftbeasts were wrongly flagged unbuyable (architecture §4.8). Tier lists rate shop
+ * units only; that filter lives with them, not here.
  */
 export type UnitFilter = (apiName: string) => boolean;
 
@@ -258,7 +258,8 @@ export type StyleUnit = { apiName: string; cost: number; star: number; carry: bo
  *
  * Reroll first, because it is the strongest signal: a three-starred cheap carry means
  * the comp is built by rolling at a level, whatever level it ends on. Only a **shop**
- * unit counts — a three-starred Pebbles is not something you roll the shop for. Otherwise
+ * unit counts, since nobody rolls for a unit the shop does not sell; Riftbeasts are shop
+ * units (architecture §4.8), so a three-starred Pebbles carry is a reroll. Otherwise
  * the modal final level decides, and a comp that ends below 8 is `flex` rather than a
  * "fast" anything.
  */

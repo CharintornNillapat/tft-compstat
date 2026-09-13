@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster juggernaut-caitlyn, DIAMOND+.
-# Sample: 9,967 boards, avg 4.52, patch 18.2, set 18.
+# Sample: 9,990 boards, avg 4.52, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,7 +15,7 @@ style: reroll_2
 difficulty: 2
 patch: "18.2"
 order: 21
-summary: "Ends at level 8 with Caitlyn carrying. MetaTFT DIAMOND+: 9,967 boards, avg 4.52, picked 1.3% of boards."
+summary: "Ends at level 8 with Caitlyn carrying. MetaTFT DIAMOND+: 9,990 boards, avg 4.52, picked 1.3% of boards."
 avg_place: 4.52
 pick_rate: 1.34
 level_recommended: 8
@@ -42,4 +42,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 9,967 boards, avg 4.52. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 9,990 boards, avg 4.52. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
