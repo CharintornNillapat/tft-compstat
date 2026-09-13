@@ -52,16 +52,46 @@ function hashedVariables(effect: Effect): Map<string, number> {
 /** 0.10000000149011612 × 100 → "10": float noise off, at most two decimals. */
 const formatValue = (value: number) => String(Number(value.toFixed(2)));
 
-/** Fills placeholders from the first scope that has the variable. */
-function substitute(markup: string, effect: Effect | undefined, scopes: readonly ReadonlyMap<string, number>[]): string {
+/** Fills placeholders from the first scope that has the variable; `onMiss` hears about each one it can't. */
+function substitute(
+  markup: string,
+  effect: Effect | undefined,
+  scopes: readonly ReadonlyMap<string, number>[],
+  onMiss?: () => void,
+): string {
   return markup.replace(PLACEHOLDER, (_, name: string, scale: string | undefined) => {
     const value =
       name === "MinUnits"
         ? (effect?.minUnits ?? undefined)
         : scopes.map((scope) => scope.get(binHash(name))).find((found) => found !== undefined);
     const scaled = value === undefined ? NaN : value * (scale === undefined ? 1 : Number(scale));
-    return Number.isFinite(scaled) ? formatValue(scaled) : UNKNOWN_VALUE;
+    if (Number.isFinite(scaled)) return formatValue(scaled);
+    onMiss?.();
+    return UNKNOWN_VALUE;
   });
+}
+
+/**
+ * An augment's `desc` → plain text, or null when any placeholder is unresolved.
+ *
+ * An augment keeps its variables in one flat `effects` object rather than per
+ * breakpoint. And unlike a trait row, where a visible "?" beats a blank bonus, a
+ * tooltip reading "Gain ? Gold" is worse than no description — so a miss drops the
+ * text. On patch 18.2 every augment on MetaTFT's list resolves (248 of 248).
+ */
+export function augmentText(
+  desc: string | null | undefined,
+  variables: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!desc) return null;
+  const effect: Effect = { minUnits: null, variables };
+  let missed = false;
+  const text = toPlainText(
+    substitute(desc, effect, [hashedVariables(effect)], () => {
+      missed = true;
+    }),
+  );
+  return missed || !text ? null : text;
 }
 
 function toPlainText(markup: string): string {
@@ -76,6 +106,9 @@ function toPlainText(markup: string): string {
         .replace(/\s+/g, " ")
         // Not "?" or "!": the unknown-value marker is a "?" that must keep its space.
         .replace(/\s+([,.;:])/g, "$1")
+        // An uppercase OR/AND stranded at either end of a line joined two stat icons the
+        // export dropped: Set 18's Adaptor ships "@ADAPGain*100@%  OR", which read "25% OR".
+        .replace(/^(?:OR|AND)\s+|\s+(?:OR|AND)$/g, "")
         .trim(),
     )
     .join("\n")

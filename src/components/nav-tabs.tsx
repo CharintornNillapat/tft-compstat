@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /**
- * The six routes, and the single source of truth for the number shortcuts — the
+ * The seven routes, and the single source of truth for the number shortcuts — the
  * position in this list *is* the key, so reordering it rebinds them.
  *
- * `/bis` sits with the other two reference pages rather than at the end, which is
- * what moved `Me` from 5 to 6.
+ * `/bis` and `/augments` sit with the other reference pages rather than at the end,
+ * which is what moved `Me` from 5 to 6 and then to 7.
  */
 export const NAV_ITEMS = [
   { href: "/", label: "Overview" },
@@ -16,6 +16,7 @@ export const NAV_ITEMS = [
   { href: "/tiers/champions", label: "Champions" },
   { href: "/tiers/items", label: "Items" },
   { href: "/bis", label: "BIS" },
+  { href: "/augments", label: "Augments" },
   { href: "/me", label: "Me" },
 ] as const;
 

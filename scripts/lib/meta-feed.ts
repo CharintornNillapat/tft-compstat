@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isTraitKind, type TraitKind } from "@/lib/static/game";
 
 /**
  * The MetaTFT HTTP layer shared by `sync-meta`: the stat feed behind the tier lists
@@ -150,6 +151,112 @@ export function rankStats(
   }
   if (boards === 0 || bracket === 0) return undefined;
   return { boards, avgPlace: placeSum / boards, pickRate: (boards / bracket) * 100 };
+}
+
+/* ------------------------------------------------------------ lookups (§4.8) */
+
+export const LOOKUP_ORIGIN = "https://data.metatft.com/lookups";
+
+const lookupSchema = z.object({
+  traits: z.array(z.object({ apiName: z.string(), type: z.string().nullish() })),
+  _metadata: z.object({ set: z.string() }),
+});
+
+/**
+ * Trait type by api name, from MetaTFT's per-set lookup file. It is the one source
+ * that has it — CommunityDragon and Data Dragon carry no origin/class split — so
+ * `sync:static` reads this and nothing else from MetaTFT. A type it does not
+ * recognise is dropped rather than stored.
+ */
+export async function fetchTraitKinds(setId: number): Promise<Map<string, TraitKind>> {
+  const url = new URL(`${LOOKUP_ORIGIN}/TFTSet${setId}_latest_en_us.json`);
+  const feed = parseFeed(lookupSchema, await getJson(url), `set ${setId} lookup`);
+  if (parseFeedSet(feed._metadata.set) !== setId) {
+    throw new Error(`${SOURCE_NAME} lookup for set ${setId} describes ${feed._metadata.set}.`);
+  }
+  const kinds = new Map<string, TraitKind>();
+  for (const trait of feed.traits) {
+    const kind = trait.type?.toLowerCase();
+    if (isTraitKind(kind)) kinds.set(trait.apiName, kind);
+  }
+  return kinds;
+}
+
+/* ------------------------------------------------------------ augments (§7.5) */
+
+const augmentTierListSchema = z.object({
+  tft_set: z.string(),
+  /** Epoch milliseconds. */
+  updated: z.number(),
+  content: z.object({
+    author: z.object({ gameName: z.string().nullish() }).nullish(),
+    content: z.object({
+      /** Labels S…D, best first; each lists augment api names in the author's order. */
+      tierList: z.array(z.object({ label: z.string(), content: z.array(z.object({ id: z.string() })) })),
+    }),
+  }),
+});
+
+export type AugmentTierListFeed = {
+  setId: number;
+  updated: Date;
+  author: string | null;
+  tiers: { label: string; ids: string[] }[];
+};
+
+/**
+ * MetaTFT's augment tier list. **A graded list, not measured stats**: Set 18 match
+ * data carries no augments, so no site can compute an augment's placement, and the
+ * stat routes that would (`tft-stat-api/augments`) answer 500.
+ */
+export async function fetchAugmentTierList(): Promise<AugmentTierListFeed> {
+  const feed = parseFeed(augmentTierListSchema, await getJson(new URL(`${STAT_ORIGIN}/augments_tiers`)), "augment tiers");
+  return {
+    setId: parseFeedSet(feed.tft_set),
+    updated: new Date(feed.updated),
+    author: feed.content.author?.gameName ?? null,
+    tiers: feed.content.content.tierList.map((tier) => ({
+      label: tier.label,
+      ids: tier.content.map((entry) => entry.id),
+    })),
+  };
+}
+
+const compAugmentTiersSchema = z.object({
+  tft_set: z.string(),
+  cluster_id: z.number(),
+  results: z.record(
+    z.string(),
+    z.object({
+      /** The guide the grades were taken from, e.g. "DRAVEN > Legendaries > Lvl 9". */
+      source_title: z.string().nullish(),
+      augments: z.array(z.object({ id: z.string(), tier: z.string() })),
+    }),
+  ),
+});
+
+export type CompAugmentTiers = Map<string, { source: string | null; augments: { id: string; tier: string }[] }>;
+
+/**
+ * Per comp cluster, the augment grades of the guide closest to it. Several clusters
+ * share one guide, and a cluster with no guide is simply absent.
+ */
+export async function fetchCompAugmentTiers(clusterId: number, setId: number): Promise<CompAugmentTiers> {
+  const url = new URL(`${COMPS_ORIGIN}/comp_augment_tiers`);
+  url.searchParams.set("cluster_id", String(clusterId));
+  const feed = parseFeed(compAugmentTiersSchema, await getJson(url), "comp augment tiers");
+  if (parseFeedSet(feed.tft_set) !== setId || feed.cluster_id !== clusterId) {
+    throw new Error(
+      `${SOURCE_NAME} comp augment tiers are for ${feed.tft_set} cluster ${feed.cluster_id}, ` +
+        `but the comps are set ${setId} cluster ${clusterId}. Retry in a moment.`,
+    );
+  }
+  return new Map(
+    Object.entries(feed.results).map(([cluster, row]) => [
+      cluster,
+      { source: row.source_title?.trim() || null, augments: row.augments },
+    ]),
+  );
 }
 
 /** The value with the largest share, e.g. the star level a unit is most often played at. */

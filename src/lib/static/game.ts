@@ -41,6 +41,20 @@ export function isChampionCost(cost: number): cost is ChampionCost {
 export const TRAIT_STYLES = ["bronze", "silver", "gold", "prismatic", "unique"] as const;
 export type TraitStyle = (typeof TRAIT_STYLES)[number];
 
+/** `traits.kind`: what the tooltip header calls a trait under its name. */
+export const TRAIT_KINDS = ["origin", "class", "unique"] as const;
+export type TraitKind = (typeof TRAIT_KINDS)[number];
+
+export const TRAIT_KIND_LABELS = {
+  origin: "Origin",
+  class: "Class",
+  unique: "Unique",
+} as const satisfies Record<TraitKind, string>;
+
+export function isTraitKind(value: unknown): value is TraitKind {
+  return (TRAIT_KINDS as readonly unknown[]).includes(value);
+}
+
 /** One `traits.breakpoints` entry: the style reached at `min` units. Sorted by `min`. */
 export type TraitBreakpoint = { min: number; style: TraitStyle };
 

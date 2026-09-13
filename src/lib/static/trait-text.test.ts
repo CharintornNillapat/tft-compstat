@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { traitEffects } from "./cdragon";
-import { binHash, traitText, UNKNOWN_VALUE } from "./trait-text";
+import { augmentText, binHash, traitText, UNKNOWN_VALUE } from "./trait-text";
 
 // Hunter as CommunityDragon ships it for Set 18 (game data 16.18), trimmed to two rows:
 // a named key (DamageAmp) next to hashed ones (HunterAD, HunterDuration).
@@ -87,5 +87,42 @@ describe("traitEffects", () => {
       { min: 1, text: "bronze one" },
       { min: 2, text: "two" },
     ]);
+  });
+});
+
+describe("augmentText", () => {
+  it("resolves an augment's flat variables, named and hashed, scaled and unscaled", () => {
+    // U.R.F as CommunityDragon ships it (game data 16.18).
+    expect(
+      augmentText(
+        "Gain a Spatula. Champions holding Spatula or Frying Pan items gain @AttackSpeed*100@% Attack Speed and @ManaRegen@ Mana Regen.",
+        { AttackSpeed: 0.20000000298023224, [binHash("ManaRegen")]: 3 },
+      ),
+    ).toBe("Gain a Spatula. Champions holding Spatula or Frying Pan items gain 20% Attack Speed and 3 Mana Regen.");
+  });
+
+  it("turns line breaks into newlines and strips keyword tags", () => {
+    expect(augmentText("Gain <TFTBonus>@Gold@</TFTBonus> gold.<br><br>Now.", { Gold: 12 })).toBe("Gain 12 gold.\n\nNow.");
+  });
+
+  it("returns null rather than printing a marker when any placeholder is unresolved", () => {
+    expect(augmentText("Reward: @TFTUnitProperty.item:TFT11_Augment_CallToChaos@", { Gold: 52 })).toBeNull();
+    expect(augmentText("Gain @Gold@ gold and @Missing@ XP.", { Gold: 4 })).toBeNull();
+  });
+
+  it("returns null for no text at all", () => {
+    expect(augmentText(null, {})).toBeNull();
+    expect(augmentText("<br>", {})).toBeNull();
+  });
+});
+
+describe("traitText, icons the export dropped", () => {
+  it("drops an OR stranded where two stat icons used to be, and keeps one between words", () => {
+    // Adaptor as CommunityDragon ships it for Set 18: the AP and AD icons are gone.
+    const { rows } = traitText("<row>(@MinUnits@) @ADAPGain*100@%  OR</row><br><row>(@MinUnits@) @X@% %i:scaleAD% OR %i:scaleAP%</row>", [
+      { minUnits: 2, variables: { ADAPGain: 0.25 } },
+      { minUnits: 3, variables: { X: 10 } },
+    ]);
+    expect(rows).toEqual(["25%", "10% AD OR AP"]);
   });
 });

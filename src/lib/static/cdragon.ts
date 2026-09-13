@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { TablesInsert } from "@/lib/supabase/types";
-import type { ItemKind, TraitBreakpoint, TraitEffect, TraitStyle } from "./game";
+import type { ItemKind, TraitBreakpoint, TraitEffect, TraitKind, TraitStyle } from "./game";
 import { traitText } from "./trait-text";
 
 /**
@@ -237,6 +237,12 @@ export type SnapshotOptions = {
    * the set means every unit is treated as a shop unit, and the sync warns.
    */
   playableIds?: ReadonlySet<string>;
+  /**
+   * Trait type by api name (MetaTFT's lookup file; CommunityDragon has none). Undefined
+   * when unavailable: `kind` is then left out of the rows entirely, so the stored values
+   * survive. A trait the map lacks gets null and one warning for all of them.
+   */
+  traitKinds?: ReadonlyMap<string, TraitKind>;
 };
 
 export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions): StaticSnapshot {
@@ -246,6 +252,7 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
   const setId = cdSet.number;
 
   // Traits. Champions reference them by display name, so map name → api name.
+  const { traitKinds } = options;
   const traits = cdSet.traits.map((trait) => {
     const text = traitText(trait.desc, trait.effects);
     return {
@@ -256,8 +263,15 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
       icon_url: cdragonAssetUrl(trait.icon, patch),
       description: text.description,
       effects: traitEffects(trait.effects, text.rows),
+      // Omitted rather than null when there is no source, so an upsert keeps the kinds
+      // an earlier sync stored instead of wiping them over a failed fetch.
+      ...(traitKinds ? { kind: traitKinds.get(trait.apiName) ?? null } : {}),
     };
   });
+  if (traitKinds) {
+    const untyped = traits.filter((trait) => trait.kind === null).map((trait) => trait.api_name);
+    if (untyped.length) warnings.push(`No trait type for ${untyped.join(", ")}; their kind stays null.`);
+  }
   const traitByName = new Map<string, string>();
   for (const trait of [...cdSet.traits].sort((a, b) => a.apiName.length - b.apiName.length)) {
     const existing = traitByName.get(trait.name);

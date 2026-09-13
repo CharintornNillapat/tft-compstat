@@ -6,6 +6,7 @@
  *   pnpm sync:meta --seed              write, then run `pnpm seed:curated`
  *   pnpm sync:meta --rank CHALLENGER --days 7 --min-games 2000
  *   pnpm sync:meta --item-kinds completed,emblem,artifact,radiant
+ *   pnpm sync:meta --no-augments     skip data/curated/<setId>/augment-tiers.yaml (§7.5)
  *
  * The feed reports `api_name`s and an eight-bucket placement histogram, so average
  * placement is computed rather than scraped and no display-name lookup is needed in
@@ -58,7 +59,27 @@ import {
   type CompUnitInput,
   type PlacedUnit,
 } from "@/lib/curated/comp-sync";
-import { COMPS_DIR, TIER_LIST_FILES, type TierListKind } from "@/lib/curated/schemas";
+import {
+  augmentRarity,
+  augmentTiersFingerprint,
+  buildAugmentTiersYaml,
+  guideConsensus,
+  guideFitsBoard,
+  pickCompAugments,
+  resolveAugmentTiers,
+  type AugmentEntry,
+  type AugmentInfo,
+  type AugmentSkip,
+  type CompAugmentPicks,
+} from "@/lib/curated/augment-sync";
+import { parseAugmentTiers } from "@/lib/curated/augment-tiers";
+import {
+  AUGMENT_RARITIES,
+  AUGMENT_TIERS_FILE,
+  COMPS_DIR,
+  TIER_LIST_FILES,
+  type TierListKind,
+} from "@/lib/curated/schemas";
 import {
   checkCompSet,
   formatIssue,
@@ -68,10 +89,14 @@ import {
   type SeedComp,
   type SeedIssue,
 } from "@/lib/curated/validate";
+import { CDRAGON_ORIGIN, cdragonAssetUrl, cleanItemName } from "@/lib/static/cdragon";
 import { ITEM_KINDS, TIER_RANKS, type CompStyle, type TierRank } from "@/lib/static/game";
+import { augmentText } from "@/lib/static/trait-text";
 import {
   COMPS_ORIGIN,
+  fetchAugmentTierList,
   fetchClusterInfo,
+  fetchCompAugmentTiers,
   fetchCompDetails,
   fetchCompTotals,
   getJson,
@@ -436,6 +461,10 @@ type CompStats = { boards: number; avgPlace: number; pickRate: number };
 
 type CompPlan = {
   slug: string;
+  /** MetaTFT's cluster id: what its per-comp augment grades are keyed by (§7.5). */
+  cluster: string;
+  /** Board api names, for checking a guide is about this comp before taking its augments. */
+  board: string[];
   file: string;
   text: string;
   name: string;
@@ -653,7 +682,7 @@ async function planComps(input: {
   maxComps: number;
   minBoards: number;
   references: References;
-}): Promise<{ plans: CompPlan[]; stale: string[]; skipped: string[] }> {
+}): Promise<{ plans: CompPlan[]; stale: string[]; skipped: string[]; clusterId: number }> {
   const { setId, references } = input;
   const info = await fetchClusterInfo();
   if (info.setId !== setId) {
@@ -743,6 +772,8 @@ async function planComps(input: {
 
     plans.push({
       slug,
+      cluster: row.cluster.cluster,
+      board: built.source.board.map((unit) => unit.apiName),
       file,
       text,
       name: row.name,
@@ -768,7 +799,7 @@ async function planComps(input: {
       if (isGenerated(await readFile(file, "utf8"))) stale.push(file);
     }
   }
-  return { plans, stale, skipped };
+  return { plans, stale, skipped, clusterId: info.clusterId };
 }
 
 function reportComps(plans: readonly CompPlan[], stale: readonly string[], skipped: readonly string[], dir: string) {
@@ -805,6 +836,165 @@ function validateCompPlans(plans: readonly CompPlan[], setId: number, references
   return [...issues, ...checkCompSet(comps)];
 }
 
+/* ------------------------------------------------------------- augments (§7.5) */
+
+/** Longer than this is a rules essay rather than a tooltip, so the augment is shown without one. */
+const MAX_AUGMENT_DESCRIPTION = 600;
+
+/** The whole file holds every set and mode; only the fields an augment needs are read. */
+const cdragonTftSchema = z.object({
+  items: z.array(z.looseObject({ apiName: z.string() })),
+  setData: z.array(z.looseObject({ mutator: z.string(), augments: z.array(z.string()).nullish() })),
+});
+
+const cdragonAugmentSchema = z.object({
+  apiName: z.string(),
+  name: z.string().nullish(),
+  desc: z.string().nullish(),
+  icon: z.string().nullish(),
+  effects: z.record(z.string(), z.unknown()).nullish(),
+  tags: z.array(z.string()).nullish(),
+});
+
+/**
+ * Set `setId`'s augment pool from CommunityDragon, pinned to the game-data version
+ * `sync:static` stored — so an augment's icon and a champion's on the same page come
+ * from the same directory. An entry that does not parse is left out, and the tier
+ * list then reports that augment as unknown rather than failing the whole run.
+ */
+async function fetchCdragonAugments(setId: number, version: string): Promise<Map<string, AugmentInfo>> {
+  const raw = cdragonTftSchema.parse(await getJson(new URL(`${CDRAGON_ORIGIN}/${version}/cdragon/tft/en_us.json`)));
+  const pool = raw.setData.find((row) => row.mutator === `TFTSet${setId}`)?.augments ?? [];
+  if (pool.length === 0) throw new Error(`CommunityDragon ${version} lists no augments for set ${setId}.`);
+
+  const items = new Map(raw.items.map((item) => [item.apiName, item]));
+  const info = new Map<string, AugmentInfo>();
+  for (const apiName of pool) {
+    const parsed = cdragonAugmentSchema.safeParse(items.get(apiName));
+    if (!parsed.success) continue;
+    const augment = parsed.data;
+    const description = augmentText(augment.desc, augment.effects);
+    info.set(apiName, {
+      name: cleanItemName(augment.name, apiName),
+      rarity: augmentRarity(augment.tags),
+      iconUrl: cdragonAssetUrl(augment.icon, version),
+      description: description && description.length <= MAX_AUGMENT_DESCRIPTION ? description : null,
+    });
+  }
+  return info;
+}
+
+type AugmentPlan = {
+  file: string;
+  text: string;
+  entries: AugmentEntry[];
+  skipped: AugmentSkip[];
+  picks: CompAugmentPicks[];
+  /** Comps that got no picks, and why. */
+  unpicked: string[];
+  /** True when the file on disk already says exactly this. */
+  unchanged: boolean;
+};
+
+async function planAugments(input: {
+  setId: number;
+  patch: string;
+  references: References;
+  /** Undefined under --no-comps: the picks already in the file are then carried over. */
+  comps: { plans: readonly CompPlan[]; clusterId: number } | undefined;
+}): Promise<AugmentPlan> {
+  const { setId } = input;
+  const version = input.references.setPatches.get(setId);
+  if (!version) throw new Error(`Set ${setId} has no game-data version stored; run pnpm sync:static first.`);
+
+  const [feed, info] = await Promise.all([fetchAugmentTierList(), fetchCdragonAugments(setId, version)]);
+  if (feed.setId !== setId) {
+    throw new Error(`${SOURCE_NAME} augment grades are for set ${feed.setId}, but the tier feeds report set ${setId}.`);
+  }
+  const { entries, skipped } = resolveAugmentTiers(feed.tiers, info);
+  const listed = new Map(entries.map((entry) => [entry.apiName, entry]));
+
+  const file = `${CURATED_DIR}/${setId}/${AUGMENT_TIERS_FILE}`;
+  const before = existsSync(file) ? await readFile(file, "utf8") : undefined;
+
+  const picks: CompAugmentPicks[] = [];
+  const unpicked: string[] = [];
+  if (input.comps) {
+    const graded = await fetchCompAugmentTiers(input.comps.clusterId, setId);
+    const consensus = guideConsensus(graded.values());
+    for (const plan of input.comps.plans) {
+      const guide = graded.get(plan.cluster);
+      const names = plan.board.map((apiName) => input.references.index.champions.get(apiName)?.name ?? apiName);
+      const fits = guide !== undefined && guideFitsBoard(guide.source, names);
+      const augments = fits ? pickCompAugments(guide.augments, listed, consensus) : null;
+      if (!guide) unpicked.push(`${plan.slug}: MetaTFT matched no guide to its cluster`);
+      else if (!fits) unpicked.push(`${plan.slug}: its nearest guide "${guide.source ?? "untitled"}" names a carry it does not field`);
+      else if (!augments) unpicked.push(`${plan.slug}: its guide grades too few listed augments`);
+      else picks.push({ slug: plan.slug, source: guide.source, augments });
+    }
+  } else if (before !== undefined) {
+    // The comps were not synced, so neither are their picks — while every pick is still listed.
+    for (const [slug, comp] of Object.entries(parseAugmentTiers(file, before).tiers?.comps ?? {})) {
+      const augments = comp.augments.map((augment) => augment.apiName);
+      if (augments.every((apiName) => listed.has(apiName))) picks.push({ slug, source: comp.source, augments });
+      else unpicked.push(`${slug}: a pick from the last sync is no longer listed`);
+    }
+  }
+
+  const text = buildAugmentTiersYaml({
+    patch: input.patch,
+    source:
+      `${SOURCE_NAME} augment tier list${feed.author ? ` by ${feed.author}` : ""}, updated ` +
+      `${feed.updated.toISOString().slice(0, 10)}. Expert grades rather than placement stats: ` +
+      `set ${setId} match data carries no augments.`,
+    provenance: [
+      `Source: ${SOURCE_NAME} ${STAT_ORIGIN}/augments_tiers (grades) and ${COMPS_ORIGIN}/comp_augment_tiers`,
+      `(per comp), updated ${feed.updated.toISOString()}. Names, icons, rarity and text: CommunityDragon ${version}.`,
+      "Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data",
+      `for set ${setId} carries no augments, so there is no placement to rank them by.`,
+      "A comp's picks are its guide's best grades, preferring augments it rates above the other guides",
+      "on average, one per augment family, and only from a guide whose named carries the comp fields.",
+    ],
+    entries,
+    comps: picks,
+  });
+
+  return {
+    file,
+    text,
+    entries,
+    skipped,
+    picks,
+    unpicked,
+    unchanged: before !== undefined && augmentTiersFingerprint(before) === augmentTiersFingerprint(text),
+  };
+}
+
+function reportAugments(plan: AugmentPlan) {
+  const count = <T,>(values: readonly T[], of: (entry: AugmentEntry) => T) =>
+    values.map((value) => `${String(value)} ${plan.entries.filter((entry) => of(entry) === value).length}`).join(" · ");
+  const name = new Map(plan.entries.map((entry) => [entry.apiName, entry.name]));
+
+  console.log(`\n${plan.file}`);
+  console.log(
+    `  ${plural(plan.entries.length, "augment")}  (${count(TIER_RANKS, (e) => e.tier)})  ` +
+      `(${count(AUGMENT_RARITIES, (e) => e.rarity)}), ${plan.entries.filter((e) => e.description).length} with a description`,
+  );
+  if (plan.skipped.length) {
+    console.log(
+      `  skipped ${plural(plan.skipped.length, "augment")}: ` +
+        plan.skipped.map((skip) => `${skip.apiName} (${skip.reason})`).join(", "),
+    );
+  }
+  console.log(`  best augments for ${plural(plan.picks.length, "comp")}:`);
+  for (const pick of plan.picks) {
+    console.log(`    ${pick.slug.padEnd(28)} [${pick.source ?? "untitled"}]`);
+    console.log(`    ${"".padEnd(28)} ${pick.augments.map((apiName) => name.get(apiName) ?? apiName).join(", ")}`);
+  }
+  for (const line of plan.unpicked) console.log(`    none for ${line}`);
+  console.log(plan.unchanged ? "  no change: the file already says exactly this" : "  grades or picks changed");
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -816,6 +1006,7 @@ async function main() {
       "min-games": { type: "string", default: String(DEFAULT_MIN_GAMES) },
       "item-kinds": { type: "string", default: DEFAULT_ITEM_KINDS },
       "no-comps": { type: "boolean", default: false },
+      "no-augments": { type: "boolean", default: false },
       "max-comps": { type: "string", default: String(DEFAULT_MAX_COMPS) },
       "min-boards": { type: "string", default: String(DEFAULT_MIN_COMP_BOARDS) },
     },
@@ -901,9 +1092,21 @@ async function main() {
       });
   if (comps) reportComps(comps.plans, comps.stale, comps.skipped, `${CURATED_DIR}/${setId}/${COMPS_DIR}`);
 
+  const augments = values["no-augments"]
+    ? undefined
+    : await planAugments({
+        setId,
+        patch: championFeed.patch,
+        references,
+        comps: comps ? { plans: comps.plans, clusterId: comps.clusterId } : undefined,
+      });
+  if (augments) reportAugments(augments);
+
   const issues = [
     ...validatePlans(plans, setId, references),
     ...(comps ? validateCompPlans(comps.plans, setId, references) : []),
+    // The site's own build-time parser, run on the text before it is written.
+    ...(augments ? parseAugmentTiers(augments.file, augments.text).issues : []),
   ];
   if (issues.length) {
     console.error(`\n${plural(issues.length, "problem")} in the generated files; nothing was written:\n`);
@@ -916,12 +1119,14 @@ async function main() {
   // A hand-written comp is never rewritten, so it never reaches this list.
   const writtenComps = comps?.plans.filter((plan) => plan.status === "new" || plan.status === "changed") ?? [];
   const stale = comps?.stale ?? [];
+  const writeAugments = augments !== undefined && !augments.unchanged;
 
   if (values["dry-run"]) {
     console.log(
       "\nDry run: everything valid, nothing written. Would write " +
         `${plural(writtenTiers.length, "tier list")} and ${plural(writtenComps.length, "comp")}` +
         (stale.length ? `, and remove ${plural(stale.length, "generated comp")}` : "") +
+        (writeAugments ? ", and the augment tier list" : "") +
         ".",
     );
     if (values.seed) console.log("--seed does nothing in a dry run; the files on disk did not change.");
@@ -933,6 +1138,10 @@ async function main() {
     await writeFile(plan.file, plan.text, "utf8");
   }
   for (const file of stale) await unlink(file);
+  if (writeAugments) {
+    await mkdir(dirname(augments.file), { recursive: true });
+    await writeFile(augments.file, augments.text, "utf8");
+  }
 
   console.log(
     writtenTiers.length || writtenComps.length
@@ -940,6 +1149,9 @@ async function main() {
       : "\nEverything was already up to date.",
   );
   if (stale.length) console.log(`Removed ${plural(stale.length, "generated comp")} that left the selection.`);
+  if (writeAugments) {
+    console.log(`Wrote ${augments.file}. It is read at build time, so redeploy to publish it.`);
+  }
 
   if (values.seed) runSeed();
   else if (writtenTiers.length || writtenComps.length || stale.length) {

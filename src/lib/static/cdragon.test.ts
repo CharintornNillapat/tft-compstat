@@ -243,6 +243,27 @@ describe("buildStaticSnapshot", () => {
     expect(hunter?.effects).toEqual([]);
   });
 
+  it("stores trait types when given, null for traits the source lacks, with one warning", () => {
+    const typed = buildStaticSnapshot(data, {
+      patch: PATCH,
+      playableIds,
+      traitKinds: new Map([
+        ["DA_18_Hunter", "class"],
+        ["DA_18_Blossom", "origin"],
+      ]),
+    });
+    const kinds = Object.fromEntries(typed.traits.map((t) => [t.api_name, t.kind]));
+    expect(kinds.DA_18_Hunter).toBe("class");
+    expect(kinds.DA_18_Blossom).toBe("origin");
+    expect(kinds.DA_18_Rival).toBeNull();
+    expect(typed.warnings.filter((w) => w.startsWith("No trait type for"))).toHaveLength(1);
+  });
+
+  it("leaves kind out of the rows entirely without a source, so an upsert keeps stored types", () => {
+    expect(snapshot.traits.every((t) => !("kind" in t))).toBe(true);
+    expect(snapshot.warnings).not.toContainEqual(expect.stringMatching(/No trait type/));
+  });
+
   it("marks every unit as a shop unit when Data Dragon lists nothing for the set", () => {
     const fallback = buildStaticSnapshot(data, { patch: PATCH, playableIds: new Set(["TFT17_Jinx"]) });
     expect(fallback.champions.every((c) => c.is_shop_unit)).toBe(true);

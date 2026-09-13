@@ -1,9 +1,9 @@
 # Daily MetaTFT → data/curated sync (README "Tier lists and comps from the live meta").
 #
-# Runs `pnpm sync:meta --seed` (tier lists + comps, then seed:curated into Supabase) and
-# `pnpm sync:bis` (champion-bis.yaml), then commits whatever changed under data/curated/
-# straight to main. That push is what redeploys Vercel, which is how the build-time
-# files (champion-bis.yaml) reach the site.
+# Runs `pnpm sync:meta --seed` (tier lists + comps, then seed:curated into Supabase, plus
+# augment-tiers.yaml) and `pnpm sync:bis` (champion-bis.yaml), then commits whatever changed
+# under data/curated/ straight to main. That push is what redeploys Vercel, which is how the
+# build-time files (augment-tiers.yaml, champion-bis.yaml) reach the site.
 
 name: Sync meta and BIS
 

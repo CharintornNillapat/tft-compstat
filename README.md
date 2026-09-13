@@ -119,7 +119,15 @@ pnpm sync:meta --min-games 2000   # raise the sample floor (default 500)
 pnpm sync:meta --item-kinds completed,emblem,artifact,radiant
 pnpm sync:meta --no-comps         # tier lists only
 pnpm sync:meta --max-comps 8      # how many comps to write (default 25)
+pnpm sync:meta --no-augments      # skip augment-tiers.yaml
 ```
+
+It also writes `data/curated/<setId>/augment-tiers.yaml`, behind `/augments` and each comp's
+"Best augments" panel (architecture §7.5). That file is **not seeded**: the site reads it at build
+time, so a change reaches the live site with the next deploy. Its tiers are MetaTFT's expert grades,
+**not** percentile bands, because Set 18 match data carries no augments and so there is no
+placement to rank by. A comp only gets picks from a MetaTFT guide whose named carries it actually
+fields; the dry run prints every comp's guide title and picks, and says why the rest got none.
 
 **Read the dry run before you let it write.** It prints each tier with its average
 placements, every name it could not resolve, and a per-entry diff against the file on

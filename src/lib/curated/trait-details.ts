@@ -1,4 +1,4 @@
-import type { TraitBreakpoint, TraitEffect, TraitStyle } from "@/lib/static/game";
+import type { TraitBreakpoint, TraitEffect, TraitKind, TraitStyle } from "@/lib/static/game";
 
 /**
  * What a trait tooltip shows beyond a board's count (architecture §9): the trait's text
@@ -11,7 +11,13 @@ export type TraitMember = { apiName: string; name: string; cost: number; iconUrl
 /** One breakpoint with its bonus text; null where the source has no row for it. */
 export type TraitTier = { min: number; style: TraitStyle; text: string | null };
 
-export type TraitDetail = { description: string | null; tiers: TraitTier[]; members: TraitMember[] };
+export type TraitDetail = {
+  /** Origin, class or unique; null when `sync:static` had no source for it. */
+  kind: TraitKind | null;
+  description: string | null;
+  tiers: TraitTier[];
+  members: TraitMember[];
+};
 
 /** Keyed by trait api name. A Record rather than a Map, for the same reason as `NameBook`. */
 export type TraitDetailBook = Record<string, TraitDetail>;
@@ -29,9 +35,22 @@ export function parseTraitEffects(json: unknown): TraitEffect[] {
   });
 }
 
+/**
+ * Float noise off every number in a stat line: `7.00001%` → `7%`, `3.0 seconds` →
+ * `3 seconds`, `0.10000000149` → `0.1`. `sync:static` already rounds the values it
+ * substitutes (§4.8), so this is the guard for text that reached the table some other
+ * way — a number with three or more decimals is never meant, and neither is a `.0`.
+ * Two real decimals (`12.5%`, `1.25`) and dotted versions (`16.18`) are left alone.
+ */
+export function cleanStatText(text: string): string {
+  return text
+    .replace(/(?<![\d.])\d+\.\d{3,}(?![\d.])/g, (match) => String(Number(Number(match).toFixed(2))))
+    .replace(/(?<![\d.])(\d+)\.0+(?![\d.])/g, "$1");
+}
+
 /** Breakpoints joined with their text by unit count, so a tier can be coloured by its style. */
 export function traitTiers(breakpoints: readonly TraitBreakpoint[], effects: readonly TraitEffect[]): TraitTier[] {
-  const text = new Map(effects.map((effect) => [effect.min, effect.text]));
+  const text = new Map(effects.map((effect) => [effect.min, cleanStatText(effect.text)]));
   return breakpoints.map(({ min, style }) => ({ min, style, text: text.get(min) ?? null }));
 }
 
@@ -49,6 +68,7 @@ export function buildTraitDetails(input: {
     breakpoints: readonly TraitBreakpoint[];
     description: string | null;
     effects: readonly TraitEffect[];
+    kind?: TraitKind | null;
   }[];
   champions: readonly (TraitMember & { traits: readonly string[] })[];
 }): TraitDetailBook {
@@ -69,7 +89,8 @@ export function buildTraitDetails(input: {
     input.traits.map((trait) => [
       trait.apiName,
       {
-        description: trait.description?.trim() || null,
+        kind: trait.kind ?? null,
+        description: trait.description?.trim() ? cleanStatText(trait.description.trim()) : null,
         tiers: traitTiers(trait.breakpoints, trait.effects),
         members: members.get(trait.apiName) ?? [],
       },

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import type { CompAugments } from "@/lib/curated/augment-tiers";
 import type { CompChampion, CompDetail } from "@/lib/curated/queries";
 import { isContested } from "@/lib/curated/comp-badges";
+import { AugmentFace } from "./augment-parts";
 import { ChampionIcon } from "./champion-icon";
 import { CONTESTED_TOOLTIP, ContestedBadge, DifficultyBadge, PlaystyleBadge } from "./comp-badges";
 import { GEM_TOOLTIP, GemBadge, PriorityChip, StarPips } from "./comp-details";
@@ -15,8 +17,11 @@ import { TierBadge } from "./tier-row";
 
 const updated = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
-/** A comp's page body: board, traits, item builds, early and flex units, and the guide. */
-export function CompGuide({ comp }: { comp: CompDetail }) {
+/**
+ * A comp's page body: board, traits, item builds, best augments, early and flex units,
+ * and the guide. `augments` is null for a comp MetaTFT matched no guide to.
+ */
+export function CompGuide({ comp, augments = null }: { comp: CompDetail; augments?: CompAugments | null }) {
   // `comp.units` already arrives carries-then-priority-then-cost from the query, so
   // "1st" leads this list without a second sort here.
   const itemHolders = comp.units.filter((unit) => unit.items.length > 0);
@@ -97,6 +102,33 @@ export function CompGuide({ comp }: { comp: CompDetail }) {
               </li>
             ))}
           </ul>
+        </Panel>
+      ) : null}
+
+      {augments?.augments.length ? (
+        <Panel title="Best augments" className="mt-3">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(12.5rem,1fr))] gap-1.5">
+            {augments.augments.map((augment) => (
+              // A native title rather than the shared tooltip: this page has no HoverTip
+              // instance, and six descriptions do not earn a client island.
+              <li
+                key={augment.apiName}
+                title={augment.description ?? undefined}
+                className="flex min-w-0 items-center gap-2 rounded-md border border-line bg-raised/40 p-1.5"
+              >
+                <AugmentFace augment={augment} />
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[11px] text-faint">
+            <span>
+              {augments.source ? <>Graded for this comp by the MetaTFT guide “{augments.source}”</> : "Graded for this comp by MetaTFT"}
+              , best first.
+            </span>
+            <Link href="/augments" className="text-muted hover:text-fg">
+              All augments →
+            </Link>
+          </p>
         </Panel>
       ) : null}
 

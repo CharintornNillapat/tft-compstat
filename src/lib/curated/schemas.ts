@@ -292,3 +292,67 @@ export const championBisFileSchema = z.strictObject({
 });
 
 export type ChampionBisFile = z.infer<typeof championBisFileSchema>;
+
+/**
+ * The augment tier list at `/augments` and each comp's best augments:
+ * `data/curated/<setId>/augment-tiers.yaml` (§7.5). **Generated** by `pnpm sync:meta`
+ * and read at build time like the BIS file — but unlike it, the file carries its own
+ * names, icons and rarity, because augments are not in the static tables. So this
+ * schema is the whole contract: the sync checks it before writing, the site at build.
+ */
+export const AUGMENT_TIERS_FILE = "augment-tiers.yaml";
+
+export const AUGMENT_RARITIES = ["Silver", "Gold", "Prismatic"] as const;
+export type AugmentRarity = (typeof AUGMENT_RARITIES)[number];
+
+/** A comp's picks: fewer is a stub guide, more stops being a short list. */
+export const COMP_AUGMENTS = { min: 4, max: 6 } as const;
+
+/**
+ * Exactly what `next.config.ts` lets `next/image` load, so a bad URL fails the build
+ * here with a line number instead of throwing inside a render.
+ */
+const cdragonIconUrl = z
+  .string()
+  .regex(
+    /^https:\/\/raw\.communitydragon\.org\/[^/?]+\/game\/assets\/[^?]+$/,
+    "must be a CommunityDragon asset URL like https://raw.communitydragon.org/16.18/game/assets/…",
+  );
+
+export const augmentSchema = z.strictObject({
+  api_name: apiName,
+  name: z.string().trim().min(1, "must not be empty"),
+  rarity: z.enum(AUGMENT_RARITIES, {
+    error: (issue) =>
+      issue.code === "invalid_value" ? `must be one of ${AUGMENT_RARITIES.map((r) => `"${r}"`).join(", ")}` : undefined,
+  }),
+  tier: z.enum(TIER_RANKS),
+  icon_url: cdragonIconUrl.nullable(),
+  description: z.string().trim().min(1, "must not be empty").max(600, "must be at most 600 characters").optional(),
+});
+
+export const augmentTiersFileSchema = z.strictObject({
+  patch,
+  title: z.string().trim().min(1).optional(),
+  /** Where the grades came from, printed under the page title. */
+  source: z.string().trim().min(1).optional(),
+  augments: z
+    .array(augmentSchema, { error: "must be a list of augments" })
+    .min(1, "needs at least one augment; an empty file would render an empty page"),
+  /** Keyed by comp slug. A comp with no entry simply shows no augment panel. */
+  comps: z
+    .record(
+      z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must be a comp slug like "ashe-fast-9"'),
+      z.strictObject({
+        /** The guide the grades came from. */
+        source: z.string().trim().min(1).optional(),
+        augments: z
+          .array(apiName, { error: "must be a list of augment api_names" })
+          .min(COMP_AUGMENTS.min, `needs at least ${COMP_AUGMENTS.min} augments`)
+          .max(COMP_AUGMENTS.max, `holds at most ${COMP_AUGMENTS.max} augments`),
+      }),
+    )
+    .default({}),
+});
+
+export type AugmentTiersFile = z.infer<typeof augmentTiersFileSchema>;

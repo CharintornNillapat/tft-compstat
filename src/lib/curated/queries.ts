@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import {
+  isTraitKind,
   ITEM_KINDS,
   TIER_RANKS,
   type CompStyle,
@@ -311,7 +312,7 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
     ...[...items.values()].flatMap((item) => item.grants_trait ?? []),
   ]);
   const [traitResult, memberResult] = await Promise.all([
-    db.from("traits").select("api_name, name, icon_url, breakpoints, description, effects").in("api_name", traitNames),
+    db.from("traits").select("api_name, name, icon_url, breakpoints, description, effects, kind").in("api_name", traitNames),
     // Every champion with one of these traits, fielded or not: the tooltip lists the whole trait.
     traitNames.length
       ? db.from("champions").select("api_name, name, cost, icon_url, traits").overlaps("traits", traitNames)
@@ -329,6 +330,8 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
       breakpoints: breakpointsOf(row),
       description: row.description,
       effects: parseTraitEffects(row.effects),
+      // A check constraint, not an enum, so the generated type is plain `string`.
+      kind: isTraitKind(row.kind) ? row.kind : null,
     })),
     champions: (memberResult ? must(memberResult, "trait members") : []).map((row) => ({
       apiName: row.api_name,

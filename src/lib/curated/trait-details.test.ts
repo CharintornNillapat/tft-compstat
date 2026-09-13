@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { buildTraitDetails, parseTraitEffects, pickTraitDetails, traitTiers } from "./trait-details";
+import { buildTraitDetails, cleanStatText, parseTraitEffects, pickTraitDetails, traitTiers } from "./trait-details";
+
+describe("cleanStatText", () => {
+  it("rounds float noise to at most two decimals and drops a trailing .0", () => {
+    expect(cleanStatText("+7.00001% Attack Speed")).toBe("+7% Attack Speed");
+    expect(cleanStatText("7.999999% AD")).toBe("8% AD");
+    expect(cleanStatText("0.10000000149 AP")).toBe("0.1 AP");
+    expect(cleanStatText("Stun for 1.33333 seconds")).toBe("Stun for 1.33 seconds");
+    expect(cleanStatText("Lasts 3.0 seconds, 2.00 times")).toBe("Lasts 3 seconds, 2 times");
+  });
+
+  it("leaves real decimals, versions and plain numbers alone", () => {
+    expect(cleanStatText("12.5% Health and 1.25 mana")).toBe("12.5% Health and 1.25 mana");
+    expect(cleanStatText("Patch 16.18, 3 stacks, 1.2.3")).toBe("Patch 16.18, 3 stacks, 1.2.3");
+  });
+});
 
 describe("parseTraitEffects", () => {
   it("keeps { min, text } entries and drops everything else", () => {
@@ -82,7 +97,27 @@ describe("buildTraitDetails", () => {
   it("trims the description to null when blank, and keeps traits nobody has", () => {
     expect(book.DA_18_Brawler?.description).toBe("Your team gains 120 max Health.");
     expect(book.DA_18_LuxUniqueTrait?.description).toBeNull();
-    expect(book.DA_18_Lonely).toEqual({ description: null, tiers: [], members: [] });
+    expect(book.DA_18_Lonely).toEqual({ kind: null, description: null, tiers: [], members: [] });
+  });
+
+  it("carries the trait type, and cleans float noise out of every stat line", () => {
+    const typed = buildTraitDetails({
+      traits: [
+        {
+          apiName: "DA_18_Rapidfire",
+          breakpoints: [{ min: 2, style: "bronze" }],
+          description: "Your team gains 10.000000149% Attack Speed.",
+          effects: [{ min: 2, text: "+7.00001% Attack Speed per Attack" }],
+          kind: "class",
+        },
+      ],
+      champions: [],
+    });
+    expect(typed.DA_18_Rapidfire).toMatchObject({
+      kind: "class",
+      description: "Your team gains 10% Attack Speed.",
+      tiers: [{ min: 2, style: "bronze", text: "+7% Attack Speed per Attack" }],
+    });
   });
 
   it("picks only the traits a page names, ignoring unknown ones", () => {

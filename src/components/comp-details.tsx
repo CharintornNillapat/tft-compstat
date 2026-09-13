@@ -1,10 +1,11 @@
 import type { CompUnit } from "@/lib/curated/queries";
 import { MISSING_TRAIT_TEXT, type TraitDetail } from "@/lib/curated/trait-details";
 import type { TraitCount } from "@/lib/curated/traits";
+import { TRAIT_KIND_LABELS } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
 import { COST_TEXT } from "./cost-styles";
 import { ItemIcon } from "./item-icon";
-import { TraitBreakpoints, TraitHex, TraitTierMin } from "./trait-badge";
+import { TraitBreakpoints, TraitHex } from "./trait-badge";
 
 const STAR_TEXT: Record<number, string> = {
   1: "text-trait-bronze",
@@ -57,10 +58,11 @@ export function UnitDetails({ unit }: { unit: CompUnit }) {
 }
 
 /**
- * Tooltip body for a trait: its description, each breakpoint's bonus (reached ones in
- * the trait's style) and every champion that has it. `onBoard` holds the fielded
- * champions' names; members not among them are dimmed. Without synced text it falls
- * back to the bare breakpoints and says the description is missing.
+ * Tooltip body for a trait, laid out after OP.GG's (architecture §9): the name with its
+ * type underneath, the description, the breakpoints as a numbered list with **only the
+ * tier the board sits on** lit, then every champion that has the trait on its cost
+ * border. `onBoard` holds the fielded champions' names; members not among them are
+ * dimmed. Without synced text it falls back to the bare breakpoints and says so.
  */
 export function TraitDetails({
   trait,
@@ -73,41 +75,61 @@ export function TraitDetails({
 }) {
   const described = detail?.tiers.some((tier) => tier.text !== null) ?? false;
   const description = detail?.description ?? (described ? null : MISSING_TRAIT_TEXT);
+  // `level` counts the breakpoints reached, so the board sits on the last of them; -1 when inactive.
+  const current = trait.level - 1;
 
   return (
     <div className="w-72 max-w-full">
-      <p className="flex items-center gap-1.5">
-        <TraitHex trait={trait} size={16} />
-        <span className="font-semibold text-fg">{trait.name}</span>
-        <span className="ml-auto text-muted">
-          {trait.count} {trait.count === 1 ? "unit" : "units"}
-        </span>
-      </p>
+      <div className="flex items-center gap-2">
+        <TraitHex trait={trait} size={24} />
+        <div className="min-w-0">
+          <p className="truncate text-[13px] leading-tight font-bold text-fg">{trait.name}</p>
+          {detail?.kind ? (
+            <p className="text-[11px] leading-tight text-faint">{TRAIT_KIND_LABELS[detail.kind]}</p>
+          ) : null}
+        </div>
+      </div>
       {description ? (
-        <p className={`mt-1 whitespace-pre-line ${detail?.description ? "text-muted" : "text-faint italic"}`}>
+        <p className={`mt-2 whitespace-pre-line ${detail?.description ? "text-muted" : "text-faint italic"}`}>
           {description}
         </p>
       ) : null}
       {described && detail ? (
-        <ul aria-label="Bonuses" className="mt-1.5 space-y-1">
-          {detail.tiers.map((tier, i) => (
-            <li key={tier.min} className="flex items-start gap-1.5">
-              <TraitTierMin min={tier.min} style={tier.style} reached={i < trait.level} />
-              <span className={`min-w-0 whitespace-pre-line ${i < trait.level ? "text-fg" : "text-muted"}`}>
-                {tier.text ?? "—"}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <ol aria-label="Breakpoints" className="mt-2 space-y-0.5">
+          {detail.tiers.map((tier, i) => {
+            const active = i === current;
+            return (
+              <li
+                key={tier.min}
+                aria-current={active ? "true" : undefined}
+                // The ring and fill are on the row too, so the lit tier reads at a glance
+                // even where its text wraps to a second line.
+                className={`-mx-1 flex items-start gap-2 rounded px-1 py-0.5 ${active ? "bg-fg/[0.07] ring-1 ring-fg/25" : ""}`}
+              >
+                <span
+                  className={`grid size-4.5 shrink-0 place-items-center rounded-full text-[10px] font-bold tabular-nums ${
+                    active ? "bg-fg text-surface" : "text-faint ring-1 ring-line ring-inset"
+                  }`}
+                >
+                  {tier.min}
+                </span>
+                <span className={`min-w-0 pt-px whitespace-pre-line ${active ? "font-semibold text-fg" : "text-muted"}`}>
+                  {tier.text ?? "—"}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
       ) : (
         <p className="mt-1 text-muted">
           <TraitBreakpoints trait={trait} />
         </p>
       )}
       {detail?.members.length ? (
-        <div className="mt-2 border-t border-line pt-1.5">
-          <p className="mb-1 text-[10px] tracking-wider text-faint uppercase">
-            Champions{onBoard ? " · dimmed ones are not on this board" : ""}
+        <div className="mt-2 border-t border-line pt-2">
+          <p className="mb-1 flex items-baseline justify-between gap-2 text-[10px] tracking-wider text-faint uppercase">
+            <span>Champions</span>
+            {onBoard ? <span className="tracking-normal normal-case">dimmed: not on this board</span> : null}
           </p>
           <ul className="flex flex-wrap gap-1">
             {detail.members.map((member) => {

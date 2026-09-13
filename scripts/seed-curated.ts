@@ -20,6 +20,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import type { CacheTag } from "@/lib/cache-tags";
 import {
+  AUGMENT_TIERS_FILE,
   CHAMPION_BIS_FILE,
   COMPS_DIR,
   META_NOTES_FILE,
@@ -69,10 +70,10 @@ async function findCuratedFiles(): Promise<{ tierFiles: TierFile[]; compFiles: C
   const compFiles: CompFile[] = [];
   if (!existsSync(CURATED_DIR)) return { tierFiles, compFiles };
 
-  // meta-notes.yaml, openers.yaml and champion-bis.yaml are curated too, but the site
-  // reads them straight from the repo at build time (src/lib/curated/{meta-brief,openers,bis}.ts).
+  // meta-notes.yaml, openers.yaml, champion-bis.yaml and augment-tiers.yaml are curated too, but the
+  // site reads them straight from the repo at build time (src/lib/curated/{meta-brief,openers,bis,augments}.ts).
   // They are known here only so they don't warn.
-  const known = new Set([...Object.values(TIER_LIST_FILES), META_NOTES_FILE, OPENERS_FILE, CHAMPION_BIS_FILE]);
+  const known = new Set([...Object.values(TIER_LIST_FILES), META_NOTES_FILE, OPENERS_FILE, CHAMPION_BIS_FILE, AUGMENT_TIERS_FILE]);
   const expected = `${[...known].join(", ")} or ${COMPS_DIR}/<slug>.yaml`;
   for (const dir of await readdir(CURATED_DIR, { withFileTypes: true })) {
     if (!dir.isDirectory()) continue;

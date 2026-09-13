@@ -571,6 +571,7 @@ export type Database = {
           description: string | null
           effects: Json
           icon_url: string | null
+          kind: string | null
           name: string
           set_id: number
         }
@@ -580,6 +581,7 @@ export type Database = {
           description?: string | null
           effects?: Json
           icon_url?: string | null
+          kind?: string | null
           name: string
           set_id: number
         }
@@ -589,6 +591,7 @@ export type Database = {
           description?: string | null
           effects?: Json
           icon_url?: string | null
+          kind?: string | null
           name?: string
           set_id?: number
         }

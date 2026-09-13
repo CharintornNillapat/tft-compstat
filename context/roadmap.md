@@ -270,7 +270,64 @@ Approved task by task rather than as a whole phase.
     slate, rose). Gem is unchanged. Tokens and the collision reasoning in architecture §9.
   - `sync:meta --max-comps` default 12 → **25**. `--min-boards` stays 300: at 25 the last comp still
     has ~7,000 Diamond+ boards, so lowering the floor would add nothing (architecture §7.2).
+- [x] **Task 9 — Trait tooltip in the OP.GG layout** (requested 2026-09-13)
+  - Migration `20260913180000_trait_kind.sql`: `traits.kind` (origin / class / unique). Neither
+    CommunityDragon nor Data Dragon has it, so `pnpm sync:static` reads MetaTFT's per-set lookup file;
+    when that is unreachable the rows omit `kind`, so stored types survive (architecture §4.8).
+  - `TraitDetails` rebuilt: bold name with its type underneath, description, numbered breakpoint
+    circles with **only the current tier** lit (white circle, bold white text, ringed row) and every
+    other tier muted, then the "Champions" row on cost borders (architecture §9). `TraitTierMin` removed.
+  - `cleanStatText` (a display guard: `7.00001%` → `7%`, `3.0` → `3`), plus a source fix in
+    `trait-text.ts`: an uppercase OR/AND stranded where CommunityDragon dropped two stat icons.
+    Adaptor read "25% OR"; it now reads "25%".
+- [x] **Task 10 — Augment tier list (`/augments`) and each comp's best augments** (requested 2026-09-13)
+  - **Not delivered as specced: no placement stats and no percentile bands.** Set 18 match data
+    carries no augments (checked on the real fixture), and MetaTFT's augment stat routes answer 500,
+    so there is no average placement, top-4 or pick rate to ingest or band. Tiers are MetaTFT's
+    **expert grades** instead (D folded into C), and the page says so under its title (architecture §7.5).
+  - `pnpm sync:meta` gains an augment step (`--no-augments` skips it): `augments_tiers` +
+    `comp_augment_tiers` + CommunityDragon's augment pool → generated `data/curated/18/augment-tiers.yaml`.
+    Rules are pure in `augment-sync.ts`; `augment-tiers.ts` is the parser the site and the sync share.
+  - A comp's picks come only from a guide whose named carries it fields, ordered by the guide's grade
+    and then by how far above the other guides it grades an augment; one per family, 4–6 or none.
+  - `/augments` (Static): tier and rarity filters, cards with icon, name, rarity pill and a
+    description tooltip. The nav gained a seventh tab, so `Me` moved to `7`.
+  - `/comps/[slug]` (still Partial Prerender): a "Best augments" panel.
 - [ ] Further tasks — not yet specified.
+
+**Verified — Tasks 9 and 10 (2026-09-13):**
+- **Checks:** `pnpm check` (386 tests, up from 352) and `pnpm build` are green. `/augments` builds
+  **Static** at revalidate 30d / expire 1y (`cacheLife("max")`); every other route keeps its shape and
+  lifetime. One regression was caught in the build output and fixed: reading the augment file before
+  awaiting params put `cacheLife("max")` on the `/comps/[slug]` fallback shell (listed at 30d / 1y).
+- **Data:** migration pushed and types regenerated. `pnpm sync:static` stored origin 14 · class 12 ·
+  unique 10 and revalidated `static`. `pnpm sync:meta` wrote **248 augments** (`S 23 · A 89 · B 118 ·
+  C 18`; Silver 68 · Gold 111 · Prismatic 69), all described; 10 skipped as newer than game data
+  16.18; **9 of 25 comps** with picks. The tier lists and comps the same run rewrote were restored,
+  keeping this change to augments.
+- **Two defects the first real run exposed, both fixed before the file was kept:**
+  1. MetaTFT hands each cluster its *nearest* guide: Executioner Malphite and Blossom Sett Sivir both
+     got "AHRI & Morgana" → `guideFitsBoard` (every named carry must be on the board).
+  2. Ranking against MetaTFT's global list put "Feeling Lucky" first on 7 of 9 comps → `guideConsensus`.
+     Now Master Yi leads with Forged In Strength and Cooking Pot, Cassiopeia with The Trait Tree.
+  - Still true, and the feed's own answer: the Draven/Ashe and Ahri/Zyra guides grade the same
+    augments, so those comp pairs share picks.
+- **Interaction (headless Edge over CDP, 960px and 400px):** `/augments` renders 248 cards in four
+  tier rows with 248/248 icons loaded; the Prismatic filter leaves 69 cards, all Prismatic, and adding
+  S leaves 6; the tooltip opens inside the viewport. The trait tooltip on `/comps` and on a guide shows
+  the type (Elderwood · Origin, Adaptor · Class) with exactly one `aria-current` tier, inside the
+  viewport at both widths, 6/6 member avatars loaded. The guide panel lists six picks at both widths,
+  and a comp without picks renders none. Shortcut `6` opens `/augments`.
+- **Layout:** `scrollWidth === clientWidth` and nothing escaping a scroll container on `/augments`, a
+  guide page, `/comps`, `/`, both tier lists, `/bis` and `/me`, at 960px and 400px. **Zero console
+  errors** with extensions disabled; the warnings in a first run came from the browser profile.
+- **A build-cache trap, found while verifying:** a `pnpm build` run *after* `sync:static` fixed
+  Adaptor's text still prerendered "35% OR". `.next/cache/fetch-cache` keeps supabase-js responses
+  between builds, and the build reused ones cached before the sync. With that folder moved aside, the
+  rebuilt page carries the clean text. Locally, clear `fetch-cache` before verifying a build against
+  freshly synced data. Whether Vercel's restored build cache does the same on deploy is **unverified**.
+- **Already live:** `sync:static` revalidated production, so its trait rows hold `kind` and Adaptor's
+  cleaned text. **The code is not committed or deployed**; `augment-tiers.yaml` reaches the site with it.
 
 **Verified — Task 8 (2026-09-13):**
 - **Checks:** `pnpm check` (352 tests, up from 333) and `pnpm build` are green. `/comps` is still
