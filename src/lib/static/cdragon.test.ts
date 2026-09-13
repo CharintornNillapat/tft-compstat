@@ -231,12 +231,16 @@ describe("buildStaticSnapshot", () => {
 
   it("keeps every trait of the set with normalized breakpoints", () => {
     expect(snapshot.traits).toHaveLength(7);
-    expect(snapshot.traits.find((t) => t.api_name === "DA_18_Hunter")?.breakpoints).toEqual([
+    const hunter = snapshot.traits.find((t) => t.api_name === "DA_18_Hunter");
+    expect(hunter?.breakpoints).toEqual([
       { min: 2, style: "bronze" },
       { min: 3, style: "silver" },
       { min: 4, style: "silver" },
       { min: 5, style: "gold" },
     ]);
+    // The fixture ships no `desc`, which is the safe fallback: no text, not a crash.
+    expect(hunter?.description).toBeNull();
+    expect(hunter?.effects).toEqual([]);
   });
 
   it("marks every unit as a shop unit when Data Dragon lists nothing for the set", () => {

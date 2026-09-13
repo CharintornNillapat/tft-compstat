@@ -42,6 +42,19 @@ export function TraitHex({ trait, size = 20 }: { trait: Pick<TraitCount, "name" 
   );
 }
 
+/** A breakpoint's unit count as a small plate: filled in its style once reached, outlined before. */
+export function TraitTierMin({ min, style, reached }: { min: number; style: TraitStyle; reached: boolean }) {
+  return (
+    <span
+      className={`grid h-4 min-w-4 shrink-0 place-items-center rounded-sm px-0.5 text-[10px] font-bold tabular-nums ${
+        reached ? `${STYLE_BG[style]} text-surface` : "text-faint ring-1 ring-line ring-inset"
+      }`}
+    >
+      {min}
+    </span>
+  );
+}
+
 /** "3 › 5 › 7": the breakpoints, with those reached in the trait's style color. */
 export function TraitBreakpoints({ trait }: { trait: Pick<TraitCount, "breakpoints" | "level" | "style"> }) {
   return (

@@ -97,7 +97,8 @@ src/app/
   me/page.tsx                Personal dashboard
   api/cron/sync/route.ts, api/revalidate/route.ts
 src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx), TierRow, CostFilter, ToggleGroup, HoverTip,
-                             HexBoard, CompList, CompGuide, GuideMarkdown, CarryMark (comp-details.tsx),
+                             HexBoard, CompList, CompGuide, CompTraitList, GuideMarkdown, CarryMark (comp-details.tsx),
+                             PlaystyleBadge, DifficultyBadge, ContestedBadge (comp-badges.tsx),
                              PlacementPill, StatTile, Sparkline, PlacementHistogram, Segmented, Skeleton, SyncNotice,
                              MeDashboard, MeMatchHistory, MeFavoriteComps, CarryCell (me-comp-cell.tsx),
                              Shortcuts, and the pure helpers placement-styles.ts, sparkline-geometry.ts, shortcut-match.ts
@@ -107,6 +108,7 @@ src/lib/
   supabase/{server,admin,types,result}.ts   admin = service role, `import 'server-only'`; result = `must()`
   static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds, queue ids)
   static/cdragon.ts          pure CommunityDragon → rows transform
+  static/trait-text.ts       pure: trait markup + hashed variables → plain text (§4.8)
   static/names.ts            NameBook: api name → display name/icon/cost (pure, client-safe) + pickNames
   static/lookup.ts           getStaticNames(): the whole NameBook, `use cache` + cacheTag("static")
   riot/{routing,client,limiter,headers,errors,schemas,endpoints}.ts
@@ -123,6 +125,8 @@ src/lib/
   curated/meta-sync.ts       pure: placement histogram → tier bands → tier-list YAML text (§7.1)
   curated/comp-sync.ts       pure: comp feed rows → board, carries, style → comp YAML text (§7.2)
   curated/traits.ts          computeActiveTraits (pure, client-safe)
+  curated/trait-details.ts   trait tooltip data: tiers with text, member champions (pure, client-safe)
+  curated/comp-badges.ts     Contested / difficulty / playstyle rules (pure, client-safe)
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
 ```
 
@@ -154,7 +158,9 @@ create table traits (
   set_id      smallint not null references tft_sets(id),
   name        text not null,
   breakpoints jsonb not null,                    -- [{ "min": 2, "style": "bronze" }, ...] sorted by min (§4.8)
-  icon_url    text
+  icon_url    text,
+  description text,                              -- general text, placeholders resolved (§4.8, Phase 6 Task 8)
+  effects     jsonb not null default '[]'        -- [{ "min": 2, "text": "20% AD" }, ...] per-breakpoint text
 );
 
 create table champions (
@@ -367,6 +373,10 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 - `breakpoints` stores **style names**, because CommunityDragon and Riot's match API number styles differently. CommunityDragon codes map as 1 bronze, 3 silver, 4 unique, 5 gold, 6 prismatic; other codes don't occur.
 - Effects without a unit count are dropped. When a count repeats, the lowest style is kept.
 - Phase 4 maps Riot's match-API `style` onto the same names.
+- **Text** (Phase 6 Task 8, migration `20260913120000_trait_descriptions.sql`). `desc` is client markup: a `<row>` per breakpoint, `<br>`, keyword tags, `%i:scaleAS%` stat icons and `@Var@` / `@Var*100@` placeholders. `trait-text.ts` turns it into `description` (the text outside the rows) and `effects` (one `{min, text}` per kept breakpoint, with the "(3)" prefix dropped because the tooltip draws the count itself).
+  - **Most variables ship hashed** (`{a9a813e7}`): the client keeps only a hash of the bin name, FNV-1a 32 over the **lowercased** name. `binHash` reproduces it, which resolves all 239 Set 18 placeholders — including Rapidfire's `@ASPerAttack@`, whose named key is spelled `ASperAttack`. Anything still unresolved prints `?`, visibly, rather than a blank.
+  - The n-th `<row>` belongs to the n-th effect with a unit count, which holds for every Set 18 trait. Where a count repeats, the text follows the effect `traitBreakpoints` kept, so a tier's text and its colour agree.
+  - Stat icons become words (`AD`, `Attack Speed`, `Durability`) and scaled values lose float noise (`0.10000000149 × 100` → `10`).
 
 **Items**
 - The sync stores every entry in the set's pool (`setData[].items`), so curated lists and match data can reference any of them.
@@ -822,8 +832,12 @@ run with `file:line:col`, leaving every file untouched. A sync writes a comp onl
 its ratings change (`compFingerprint`, which ignores `summary` because it quotes a
 sample size that grows between any two runs).
 
-**Flags:** `--no-comps` to sync only the tier lists, `--max-comps` (default 12) and
-`--min-boards` (default 300 boards in the bracket).
+**Flags:** `--no-comps` to sync only the tier lists, `--max-comps` (default **25**, raised from 12
+in Phase 6 Task 8) and `--min-boards` (default 300 boards in the bracket).
+
+The count, not the floor, is what bounds the list. On patch 18.2 the 25th comp still has ~7,000
+Diamond+ boards and a ~1% pick rate, so lowering `--min-boards` would add no comp; it stays as the
+guard for early in a patch, when a cluster can be that thin.
 
 ---
 
@@ -933,6 +947,10 @@ the file alone so a re-sync does not churn git.
   - Trait styles: bronze, silver, gold, prismatic, plus orange for unique (1-unit) traits. Active trait icons are black on a hexagon in the style color; inactive ones are gray.
   - Star goals: ★ bronze, ★★ silver, ★★★ **emerald** (`--color-star-3`). Not a third metal: ★★★ marks a reroll target — the comp's win condition — and the old gold sat directly on top of the gold 5-cost border, the same collision `--color-carry` was created to avoid.
   - Gem badge: `--color-gem` (warm amber), kept clear of `tier-b` and `cost-5`, which sit inches away on a comp row. The word "Gem" and a ◆ glyph both carry the meaning, so the colour is reinforcement rather than the only channel.
+  - Comp badges (`comp-badges.tsx`, rules in `curated/comp-badges.ts`), each a word plus a shape under the same rule:
+    - **Contested** at pick rate ≥ 12%: a `--color-contested` (coral) pill with a flame glyph — the Gem pill's opposite. Coral sits between tier-s rose and tier-a orange but is far more saturated than either.
+    - **Difficulty**: outlined tint chips with 1-3 rising bars — Easy `--color-diff-easy` (emerald), Medium `--color-diff-medium` (slate), Hard `--color-diff-hard` (rose). Pale tints, never solid plates, so Hard does not read as the solid rose S plate on the same row.
+    - **Playstyle** (Fast 8/9, N-cost reroll, Flex): a neutral chip with chevrons or rolling arrows; the tier plate and stats already spend the row's colour.
   - Carry marker: `--color-carry` (near-white), placed **outside the cost ramp on purpose**. Phase 3 used the gold accent, which read as the 5-cost cost border and left a 5-cost carry indistinguishable from an ordinary 5-cost. A `CarryMark` crosshair glyph carries the same meaning as a *shape*, so it survives colour-vision deficiency.
   - Patch brief: `--color-buff` (green) and `--color-nerf` (red), their own tokens for the same reason as `--color-carry` — the page's LP delta already spends `place-top4` and `tier-s` on "up" and "down", and a second meaning on the same colours would be ambiguous where they sit inches apart. Each badge also carries a ▲/▼ glyph, so **shape** says buff-or-nerf too.
 - **Layout:**
@@ -952,12 +970,14 @@ the file alone so a re-sync does not churn git.
   - `HexBoard`: 4×7 pointy-top hexes, front row (0) at the top, odd rows shifted right by half a hex.
     - Positions are percentages of an aspect-ratio box, so it scales from 400px to about 512px wide.
     - Each unit shows a cost-colored rim, a gold outer rim when it's a carry, star pips and up to 3 item icons, with details on hover.
-  - `/comps` rows: tier, name (+ Gem badge), style and difficulty, then the curated stats; carries (with items), a divider, then the rest of the board; active traits as icon + count.
+  - `/comps` rows: tier, name (+ Contested / Gem badges), playstyle and difficulty chips, then the curated stats; carries (with items), a divider, then the rest of the board; active traits as icon + count.
     - Units are ordered carries → stated item priority → cost → name, so "1st" reads first in both the lineup and the guide's item builds.
     - `PriorityChip` ("1st"/"2nd"/"3rd") and the ★★★ pips are pinned over the portrait's top corners rather than stacked above it, so a lineup mixing units with and without them stays one height.
     - The name row **wraps** instead of shrinking: a long name plus the Gem badge pushes the badge to a second line rather than eating into the name and truncating it.
     - `CompStatsRow` takes a `fields` list because the name column only fits three stats before the fourth wraps onto a ragged line — the list shows avg/top-4/pick and leaves the recommended level to the guide page.
-    - The Gem tooltip is a third body on the list's one shared `HoverTip` (`"gem" in item`), not a second tooltip instance.
+    - The Gem and Contested tooltips are bodies on the list's one shared `HoverTip` (`"badge" in item`), not extra tooltip instances.
+    - **Trait tooltip** (`TraitDetails`, on `/comps` rows and in the guide's `CompTraitList`): icon, name and count, the description, each breakpoint's bonus with its unit count on a plate filled in the trait's style once reached, and every champion with the trait, cheapest first. Members not on this board are dimmed — matched **by name**, because a champion's several forms (the nine Lux elements) are listed once. With no synced text it says "No description synced for this trait yet." and falls back to the bare breakpoints. It uses `HoverTip`'s `wide` variant (`max-w-80`), and a tip taller than the room on either side is clamped inside the viewport.
+    - The data comes from inside the cached `getComps()` / `getComp()`: one `traits` read and one `champions.traits` overlap query, so there is no new cache tag. `getComps()` ships details for **active** traits only (`pickTraitDetails`), since those are the only ones the rows show.
     - The whole row links to the guide, and units and traits keep their own tooltips.
     - Filters: tier and style toggles (only those present), plus search across comp, unit, item and trait names.
   - `PlacementPill` (always prints the digit, so colour is never the only channel), `StatTile`, `Sparkline`, `PlacementHistogram`, `Segmented` (single-select; `ToggleGroup` stays multi-select, and they share exported button classes so the two can't drift).

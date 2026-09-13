@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Comps" };
 const updated = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
 export default async function CompsPage() {
-  const { setName, comps } = await getComps();
+  const { setName, comps, traitDetails } = await getComps();
 
   if (comps.length === 0) {
     return (
@@ -32,7 +32,7 @@ export default async function CompsPage() {
           </>
         }
       />
-      <CompList comps={comps} />
+      <CompList comps={comps} traitDetails={traitDetails} />
     </>
   );
 }

@@ -44,6 +44,9 @@ export type TraitStyle = (typeof TRAIT_STYLES)[number];
 /** One `traits.breakpoints` entry: the style reached at `min` units. Sorted by `min`. */
 export type TraitBreakpoint = { min: number; style: TraitStyle };
 
+/** One `traits.effects` entry: the bonus text at `min` units, placeholders resolved. Sorted by `min`. */
+export type TraitEffect = { min: number; text: string };
+
 /** Item kinds in the order the item tier list shows them. */
 export const ITEM_KIND_LABELS = {
   completed: "Completed",

@@ -118,7 +118,7 @@ pnpm sync:meta --rank CHALLENGER --days 7
 pnpm sync:meta --min-games 2000   # raise the sample floor (default 500)
 pnpm sync:meta --item-kinds completed,emblem,artifact,radiant
 pnpm sync:meta --no-comps         # tier lists only
-pnpm sync:meta --max-comps 8      # how many comps to write (default 12)
+pnpm sync:meta --max-comps 8      # how many comps to write (default 25)
 ```
 
 **Read the dry run before you let it write.** It prints each tier with its average

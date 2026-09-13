@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster elderwood-kayle, DIAMOND+.
-# Sample: 19,669 boards, avg 4.88, patch 18.2, set 18.
+# Sample: 18,075 boards, avg 4.94, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -14,17 +14,17 @@ tier: C
 style: reroll_1
 difficulty: 2
 patch: "18.2"
-order: 10
-summary: "Ends at level 7 with Ornn carrying. MetaTFT DIAMOND+: 19,669 boards, avg 4.88, picked 3.0% of boards."
-avg_place: 4.88
-pick_rate: 3.01
+order: 11
+summary: "Ends at level 7 with Kayle carrying. MetaTFT DIAMOND+: 18,075 boards, avg 4.94, picked 2.5% of boards."
+avg_place: 4.94
+pick_rate: 2.52
 level_recommended: 7
 early_units: [ DA_18_Kayle, DA_18_Leona, DA_18_Ornn, DA_18_Xayah ]
 board:
   - { unit: DA_18_Xayah, row: 3, col: 1, star: 3, carry: true, priority: 3, items: [ DA_GuinsoosRageblade, DA_InfinityEdge, DA_KrakensFury ] }
   - { unit: DA_18_Leona, row: 0, col: 2, star: 3, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 1, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
-  - { unit: DA_18_Kayle, row: 3, col: 6, star: 3, carry: true, priority: 2, items: [ DA_GiantSlayer, DA_GuinsoosRageblade, DA_JeweledGauntlet ] }
+  - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 2, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
+  - { unit: DA_18_Kayle, row: 3, col: 0, star: 3, carry: true, priority: 1, items: [ DA_GiantSlayer, DA_GuinsoosRageblade, DA_JeweledGauntlet ] }
   - { unit: DA_18_Sejuani, row: 1, col: 3, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Rakan, row: 2, col: 3, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Hecarim, row: 2, col: 4, items: [ DA_ThiefsGloves ] }
@@ -34,10 +34,10 @@ guide: |-
   **Levelling:** level 7 by 5-1.
 
   **Items**, in the order to build them:
-  - **Ornn**: Gargoyle Stoneplate, Spirit Visage, Warmogs Armor
   - **Kayle**: Giant Slayer, Guinsoo's Rageblade, Jeweled Gauntlet
+  - **Ornn**: Gargoyle Stoneplate, Spirit Visage, Warmogs Armor
   - **Xayah**: Guinsoo's Rageblade, Infinity Edge, Kraken's Fury
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 19,669 boards, avg 4.88. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 18,075 boards, avg 4.94. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

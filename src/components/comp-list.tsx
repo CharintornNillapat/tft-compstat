@@ -1,19 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { isContested } from "@/lib/curated/comp-badges";
 import { filterComps } from "@/lib/curated/comp-filter";
 import type { CompSummary, CompUnit } from "@/lib/curated/queries";
+import type { TraitDetailBook } from "@/lib/curated/trait-details";
 import type { TraitCount } from "@/lib/curated/traits";
-import {
-  COMP_STYLE_LABELS,
-  COMP_STYLES,
-  DIFFICULTY_LABELS,
-  TIER_RANKS,
-  type CompStyle,
-  type TierRank,
-} from "@/lib/static/game";
+import { COMP_STYLE_LABELS, COMP_STYLES, TIER_RANKS, type CompStyle, type TierRank } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
+import { CONTESTED_TOOLTIP, ContestedBadge, DifficultyBadge, PlaystyleBadge } from "./comp-badges";
 import { GEM_TOOLTIP, GemBadge, PriorityChip, StarPips, TraitDetails, UnitDetails } from "./comp-details";
 import { CompStatsRow } from "./comp-stats";
 import { EmptyState } from "./empty-state";
@@ -23,15 +19,17 @@ import { TierBadge } from "./tier-row";
 import { TraitHex } from "./trait-badge";
 import { ToggleGroup } from "./toggle-group";
 
-/** The third tooltip body is the Gem badge's; it carries no data of its own. */
-type GemTip = { gem: true };
-type TipItem = CompUnit | TraitCount | GemTip;
+/** A meta badge's tooltip carries no data of its own, only which badge it was. */
+type BadgeTip = { badge: "gem" | "contested" };
+type TipItem = CompUnit | TraitCount | BadgeTip;
 type Tip = ReturnType<typeof useHoverTip<TipItem>>;
 
-const GEM_TIP: GemTip = { gem: true };
+const GEM_TIP: BadgeTip = { badge: "gem" };
+const CONTESTED_TIP: BadgeTip = { badge: "contested" };
+const BADGE_TOOLTIPS: Record<BadgeTip["badge"], string> = { gem: GEM_TOOLTIP, contested: CONTESTED_TOOLTIP };
 
-/** Dense comp rows with tier/style filters and search; units and traits show details on hover. */
-export function CompList({ comps }: { comps: CompSummary[] }) {
+/** Dense comp rows with tier/style filters and search; units, traits and badges show details on hover. */
+export function CompList({ comps, traitDetails }: { comps: CompSummary[]; traitDetails: TraitDetailBook }) {
   const [tiers, setTiers] = useState<ReadonlySet<TierRank>>(() => new Set());
   const [styles, setStyles] = useState<ReadonlySet<CompStyle>>(() => new Set());
   const [query, setQuery] = useState("");
@@ -77,11 +75,11 @@ export function CompList({ comps }: { comps: CompSummary[] }) {
       )}
 
       {tip.active ? (
-        <HoverTip id={tip.id} anchor={tip.active.anchor}>
-          {"gem" in tip.active.item ? (
-            <p className="max-w-56">{GEM_TOOLTIP}</p>
+        <HoverTip id={tip.id} anchor={tip.active.anchor} wide={"breakpoints" in tip.active.item}>
+          {"badge" in tip.active.item ? (
+            <p className="max-w-56">{BADGE_TOOLTIPS[tip.active.item.badge]}</p>
           ) : "breakpoints" in tip.active.item ? (
-            <TraitDetails trait={tip.active.item} />
+            <TraitTip trait={tip.active.item} comps={comps} details={traitDetails} />
           ) : (
             <UnitDetails unit={tip.active.item} />
           )}
@@ -91,42 +89,53 @@ export function CompList({ comps }: { comps: CompSummary[] }) {
   );
 }
 
+/** Trait counts are built per comp, so the hovered object itself says whose board it is. */
+function TraitTip({ trait, comps, details }: { trait: TraitCount; comps: CompSummary[]; details: TraitDetailBook }) {
+  const owner = comps.find((comp) => comp.traits.includes(trait));
+  return (
+    <TraitDetails
+      trait={trait}
+      detail={details[trait.apiName]}
+      onBoard={owner ? new Set(owner.units.map((unit) => unit.name)) : undefined}
+    />
+  );
+}
+
 function CompRow({ comp, tip }: { comp: CompSummary; tip: Tip }) {
   const carries = comp.units.filter((unit) => unit.isCarry);
   const others = comp.units.filter((unit) => !unit.isCarry);
-  const difficulty = comp.difficulty ? DIFFICULTY_LABELS[comp.difficulty] : null;
 
   return (
     <li className="relative flex flex-wrap items-center gap-x-4 gap-y-2 px-2.5 py-2 transition-colors hover:bg-raised/40">
       <div className="flex w-full min-w-0 items-start gap-2.5 sm:w-64 sm:shrink-0">
         <TierBadge tier={comp.tier} className="size-8 shrink-0 text-sm" />
         <div className="min-w-0 flex-1">
-          {/* Wraps rather than shrinks: a long name plus the badge pushes the badge to
+          {/* Wraps rather than shrinks: a long name plus its badges pushes the badges to
               the next line instead of eating into the name and truncating it. */}
-          <h2 className="flex min-w-0 flex-wrap items-center gap-x-1.5 font-semibold">
+          <h2 className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold">
             {/* Stretched link: the whole row opens the guide; units, traits and the
-                gem badge sit above it so their tooltips still work. */}
+                meta badges sit above it so their tooltips still work. */}
             <Link
               href={`/comps/${comp.slug}`}
               className="max-w-full truncate after:absolute after:inset-0 hover:text-accent"
             >
               {comp.name}
             </Link>
+            {isContested(comp.pickRate) ? (
+              <BadgeButton tip={tip} item={CONTESTED_TIP}>
+                <ContestedBadge />
+              </BadgeButton>
+            ) : null}
             {comp.isGem ? (
-              <button
-                type="button"
-                {...tip.triggerProps(GEM_TIP)}
-                aria-label={GEM_TOOLTIP}
-                className="pointer-events-auto relative shrink-0 rounded-full"
-              >
+              <BadgeButton tip={tip} item={GEM_TIP}>
                 <GemBadge />
-              </button>
+              </BadgeButton>
             ) : null}
           </h2>
-          <p className="truncate text-xs text-muted">
-            {COMP_STYLE_LABELS[comp.style]}
-            {difficulty ? ` · ${difficulty}` : ""}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-1">
+            <PlaystyleBadge style={comp.style} />
+            <DifficultyBadge difficulty={comp.difficulty} />
+          </div>
           {/* No level here: a fourth stat wraps this column onto a ragged second line. */}
           <CompStatsRow stats={comp} fields={["avg", "top4", "pick"]} className="mt-1" />
         </div>
@@ -158,6 +167,19 @@ function CompRow({ comp, tip }: { comp: CompSummary; tip: Tip }) {
         ))}
       </ul>
     </li>
+  );
+}
+
+function BadgeButton({ tip, item, children }: { tip: Tip; item: BadgeTip; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      {...tip.triggerProps(item)}
+      aria-label={BADGE_TOOLTIPS[item.badge]}
+      className="pointer-events-auto relative shrink-0 rounded-full"
+    >
+      {children}
+    </button>
   );
 }
 

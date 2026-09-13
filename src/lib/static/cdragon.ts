@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { TablesInsert } from "@/lib/supabase/types";
-import type { ItemKind, TraitBreakpoint, TraitStyle } from "./game";
+import type { ItemKind, TraitBreakpoint, TraitEffect, TraitStyle } from "./game";
+import { traitText } from "./trait-text";
 
 /**
  * CommunityDragon TFT data → static reference rows (architecture §4.2).
@@ -38,8 +39,16 @@ export function cdragonAssetUrl(assetPath: string | null | undefined, patch: str
 const traitSchema = z.object({
   apiName: z.string(),
   name: z.string(),
+  /** Client markup with @Variable@ placeholders; `trait-text.ts` turns it into plain text. */
+  desc: z.string().nullish(),
   icon: z.string().nullish(),
-  effects: z.array(z.object({ minUnits: z.number().nullable(), style: z.number().nullable() })),
+  effects: z.array(
+    z.object({
+      minUnits: z.number().nullable(),
+      style: z.number().nullable(),
+      variables: z.record(z.string(), z.unknown()).nullish(),
+    }),
+  ),
 });
 
 const championSchema = z.object({
@@ -154,6 +163,25 @@ export function traitBreakpoints(effects: z.infer<typeof traitSchema>["effects"]
   return breakpoints.filter((bp, i) => i === 0 || bp.min !== breakpoints[i - 1]!.min);
 }
 
+/**
+ * Bonus text for exactly the breakpoints `traitBreakpoints` keeps. `rows[i]` is
+ * `effects[i]`'s text (`traitText`); where a unit count repeats, the text comes from the
+ * effect whose style was kept, so a tooltip's tier and its colour always agree.
+ */
+export function traitEffects(
+  effects: z.infer<typeof traitSchema>["effects"],
+  rows: readonly (string | null)[],
+): TraitEffect[] {
+  return traitBreakpoints(effects).flatMap(({ min, style }) => {
+    const index = effects.findIndex(
+      (effect, i) =>
+        effect.minUnits === min && effect.style !== null && CDRAGON_TRAIT_STYLES[effect.style] === style && rows[i],
+    );
+    const text = index === -1 ? null : rows[index];
+    return text ? [{ min, text }] : [];
+  });
+}
+
 // ─── Items ──────────────────────────────────────────────────────────────────
 
 /** Hashed CommunityDragon item tags; stable across patches, but only exported as hashes. */
@@ -218,13 +246,18 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
   const setId = cdSet.number;
 
   // Traits. Champions reference them by display name, so map name → api name.
-  const traits = cdSet.traits.map((trait) => ({
-    api_name: trait.apiName,
-    set_id: setId,
-    name: trait.name,
-    breakpoints: traitBreakpoints(trait.effects),
-    icon_url: cdragonAssetUrl(trait.icon, patch),
-  }));
+  const traits = cdSet.traits.map((trait) => {
+    const text = traitText(trait.desc, trait.effects);
+    return {
+      api_name: trait.apiName,
+      set_id: setId,
+      name: trait.name,
+      breakpoints: traitBreakpoints(trait.effects),
+      icon_url: cdragonAssetUrl(trait.icon, patch),
+      description: text.description,
+      effects: traitEffects(trait.effects, text.rows),
+    };
+  });
   const traitByName = new Map<string, string>();
   for (const trait of [...cdSet.traits].sort((a, b) => a.apiName.length - b.apiName.length)) {
     const existing = traitByName.get(trait.name);

@@ -410,7 +410,12 @@ const MIN_BOARD_UNITS = 6;
 const COMP_ITEM_KINDS = new Set(["completed", "emblem", "artifact", "radiant"]);
 const MAX_FLEX_UNITS = 4;
 const MAX_EARLY_UNITS = 6;
-const DEFAULT_MAX_COMPS = 12;
+/**
+ * Enough to cover the meta rather than its top half. At 25 on patch 18.2 the last comp
+ * picked still has ~7,000 Diamond+ boards and ~1% pick rate, so `--min-boards` is not
+ * what bounds the list — this is.
+ */
+const DEFAULT_MAX_COMPS = 25;
 /** Boards in the chosen bracket. Under this the board and the items are noise. */
 const DEFAULT_MIN_COMP_BOARDS = 300;
 /** Candidates fetched beyond `--max-comps`, since the bracket filter drops some. */

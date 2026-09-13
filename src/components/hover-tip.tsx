@@ -63,8 +63,21 @@ export function useHoverTip<T>() {
   return { id, active, triggerProps };
 }
 
-/** Floats above its anchor (below when there's no room), kept inside the viewport. */
-export function HoverTip({ id, anchor, children }: { id: string; anchor: HTMLElement; children: ReactNode }) {
+/**
+ * Floats above its anchor (below when there's no room), kept inside the viewport.
+ * `wide` is for bodies with paragraphs of text, such as a trait's description.
+ */
+export function HoverTip({
+  id,
+  anchor,
+  wide = false,
+  children,
+}: {
+  id: string;
+  anchor: HTMLElement;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -74,7 +87,13 @@ export function HoverTip({ id, anchor, children }: { id: string; anchor: HTMLEle
     const { width, height } = tip.getBoundingClientRect();
     const gap = 6;
     const margin = 8;
-    const top = target.top - gap - height >= margin ? target.top - gap - height : target.bottom + gap;
+    const above = target.top - gap - height;
+    // Above when it fits, else below; a tip taller than the room on either side is
+    // pulled back inside the viewport rather than running off its bottom edge.
+    const top = Math.max(
+      margin,
+      Math.min(above >= margin ? above : target.bottom + gap, window.innerHeight - height - margin),
+    );
     const left = Math.min(
       Math.max(target.left + target.width / 2 - width / 2, margin),
       window.innerWidth - width - margin,
@@ -89,7 +108,7 @@ export function HoverTip({ id, anchor, children }: { id: string; anchor: HTMLEle
       id={id}
       role="tooltip"
       style={{ visibility: "hidden" }}
-      className="pointer-events-none fixed top-0 left-0 z-50 w-max max-w-64 rounded-md border border-line bg-raised px-2.5 py-2 text-xs leading-snug shadow-lg shadow-black/40"
+      className={`pointer-events-none fixed top-0 left-0 z-50 w-max ${wide ? "max-w-80" : "max-w-64"} rounded-md border border-line bg-raised px-2.5 py-2 text-xs leading-snug shadow-lg shadow-black/40`}
     >
       {children}
     </div>

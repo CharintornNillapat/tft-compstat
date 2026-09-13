@@ -11,6 +11,7 @@ import {
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import type { TierListKind } from "./schemas";
+import { buildTraitDetails, parseTraitEffects, pickTraitDetails, type TraitDetailBook } from "./trait-details";
 import { computeActiveTraits, isActive, type TraitCount, type TraitInfo } from "./traits";
 
 /**
@@ -280,6 +281,8 @@ export type CompDetail = Omit<CompSummary, "traits"> & {
   traits: TraitCount[];
   earlyUnits: CompChampion[];
   flexUnits: CompChampion[];
+  /** Tooltip text and members for every trait in `traits`. */
+  traitDetails: TraitDetailBook;
 };
 
 // One literal, so supabase-js can infer the row type (the `!inner` join lets the list filter on the set).
@@ -289,7 +292,7 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
   let query = db.from("comps").select(COMP_COLUMNS).eq("is_published", true);
   query = "slug" in filter ? query.eq("slug", filter.slug) : query.eq("set.is_active", true);
   const rows = must(await query.order("tier").order("sort_order").order("name"), "comps");
-  if (rows.length === 0) return [];
+  if (rows.length === 0) return { comps: [], traitDetails: {} };
 
   const unique = (values: string[]) => [...new Set(values)];
   const championNames = unique(
@@ -307,17 +310,34 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
     ...[...champions.values()].flatMap((champion) => champion.traits),
     ...[...items.values()].flatMap((item) => item.grants_trait ?? []),
   ]);
-  const traitRows = must(
-    await db.from("traits").select("api_name, name, icon_url, breakpoints").in("api_name", traitNames),
-    "comp traits",
-  );
+  const [traitResult, memberResult] = await Promise.all([
+    db.from("traits").select("api_name, name, icon_url, breakpoints, description, effects").in("api_name", traitNames),
+    // Every champion with one of these traits, fielded or not: the tooltip lists the whole trait.
+    traitNames.length
+      ? db.from("champions").select("api_name, name, cost, icon_url, traits").overlaps("traits", traitNames)
+      : null,
+  ]);
+  const traitRows = must(traitResult, "comp traits");
+  // sync-static writes breakpoints in exactly this shape (architecture §4.8).
+  const breakpointsOf = (row: (typeof traitRows)[number]) => row.breakpoints as TraitBreakpoint[];
   const traits = new Map<string, TraitInfo>(
-    traitRows.map((row) => [
-      row.api_name,
-      // sync-static writes breakpoints in exactly this shape (architecture §4.8).
-      { name: row.name, iconUrl: row.icon_url, breakpoints: row.breakpoints as TraitBreakpoint[] },
-    ]),
+    traitRows.map((row) => [row.api_name, { name: row.name, iconUrl: row.icon_url, breakpoints: breakpointsOf(row) }]),
   );
+  const traitDetails = buildTraitDetails({
+    traits: traitRows.map((row) => ({
+      apiName: row.api_name,
+      breakpoints: breakpointsOf(row),
+      description: row.description,
+      effects: parseTraitEffects(row.effects),
+    })),
+    champions: (memberResult ? must(memberResult, "trait members") : []).map((row) => ({
+      apiName: row.api_name,
+      name: row.name,
+      cost: row.cost,
+      iconUrl: row.icon_url,
+      traits: row.traits,
+    })),
+  });
 
   const toChampion = (apiName: string): CompChampion | undefined => {
     const champion = champions.get(apiName);
@@ -332,7 +352,7 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
   };
   const toChampions = (apiNames: string[]) => apiNames.flatMap((apiName) => toChampion(apiName) ?? []);
 
-  return rows.map((row) => {
+  const comps = rows.map((row) => {
     const units = row.units
       .flatMap((unit): CompUnit[] => {
         const champion = toChampion(unit.champion_api_name);
@@ -394,16 +414,32 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
       },
     };
   });
+  return { comps, traitDetails };
 }
 
-/** Published comps of the active set: by tier, then the YAML `order`, then name. */
-export async function getComps(): Promise<{ setName: string | null; comps: CompSummary[] }> {
+/**
+ * Published comps of the active set: by tier, then the YAML `order`, then name. Trait
+ * details cover only the active traits the rows show, so nothing unused is shipped.
+ */
+export async function getComps(): Promise<{
+  setName: string | null;
+  comps: CompSummary[];
+  traitDetails: TraitDetailBook;
+}> {
   "use cache";
   cacheTag("comps", "static");
   cacheLife("days");
 
-  const comps = await loadComps(getSupabase(), { activeSet: true });
-  return { setName: comps[0]?.detail.setName ?? null, comps: comps.map((comp) => comp.summary) };
+  const { comps, traitDetails } = await loadComps(getSupabase(), { activeSet: true });
+  const summaries = comps.map((comp) => comp.summary);
+  return {
+    setName: comps[0]?.detail.setName ?? null,
+    comps: summaries,
+    traitDetails: pickTraitDetails(
+      traitDetails,
+      summaries.flatMap((comp) => comp.traits.map((trait) => trait.apiName)),
+    ),
+  };
 }
 
 /** One published comp with its guide, or null. */
@@ -412,8 +448,16 @@ export async function getComp(slug: string): Promise<CompDetail | null> {
   cacheTag("comps", "static");
   cacheLife("days");
 
-  const [comp] = await loadComps(getSupabase(), { slug });
-  return comp ? { ...comp.summary, ...comp.detail } : null;
+  const {
+    comps: [comp],
+    traitDetails,
+  } = await loadComps(getSupabase(), { slug });
+  if (!comp) return null;
+  return {
+    ...comp.summary,
+    ...comp.detail,
+    traitDetails: pickTraitDetails(traitDetails, comp.detail.traits.map((trait) => trait.apiName)),
+  };
 }
 
 /** Slugs of every published comp, for prerendering `/comps/[slug]`. */

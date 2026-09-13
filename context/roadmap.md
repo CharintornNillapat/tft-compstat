@@ -253,7 +253,48 @@ Approved task by task rather than as a whole phase.
   - **Not delivered as specced:** the tooltip shows name, emblem trait and recipe but **not item
     stats or description** — `items` stores no such text, so it would need a new `sync-static`
     source. Flagged rather than faked, as in Task 3's ability note.
+- [x] **Task 8 — Trait tooltips, richer comp badges, 25 synced comps** (requested 2026-09-13)
+  - Migration `20260913120000_trait_descriptions.sql`: `traits.description` + `traits.effects`
+    (per-breakpoint text). Columns on an existing table, so its grants and RLS apply unchanged.
+  - `src/lib/static/trait-text.ts` (9 tests): CommunityDragon trait markup → plain text, written by
+    `pnpm sync:static`. Most variables ship **hashed**; FNV-1a over the lowercased name (`binHash`)
+    resolves all 239 Set 18 placeholders (architecture §4.8).
+  - `src/lib/curated/trait-details.ts` (6 tests), loaded inside the cached `getComps()`/`getComp()`:
+    description, per-tier text and every member champion, trimmed to the traits a page shows.
+  - Trait tooltip on `/comps` rows (the shared `HoverTip`, now with a `wide` variant) and on the
+    guide's trait panel (`CompTraitList`, a new client island): reached tiers filled in the trait's
+    style, members cheapest first with those not on this board dimmed, and "No description synced
+    for this trait yet." when the text is missing.
+  - `src/lib/curated/comp-badges.ts` (4 tests) + `comp-badges.tsx`: **Contested** at pick rate ≥ 12%,
+    a **playstyle** chip (chevrons / rolling arrows) and a **difficulty** chip (1-3 bars; emerald,
+    slate, rose). Gem is unchanged. Tokens and the collision reasoning in architecture §9.
+  - `sync:meta --max-comps` default 12 → **25**. `--min-boards` stays 300: at 25 the last comp still
+    has ~7,000 Diamond+ boards, so lowering the floor would add nothing (architecture §7.2).
 - [ ] Further tasks — not yet specified.
+
+**Verified — Task 8 (2026-09-13):**
+- **Checks:** `pnpm check` (352 tests, up from 333) and `pnpm build` are green. `/comps` is still
+  **Static** and `/comps/[slug]` still Partial Prerender, both at revalidate 1d / expire 1w.
+- **Trait text, all 36 Set 18 traits** parsed from game data 16.18 before anything was written: no
+  leftover `@`, `<` or `%i:` markup and no unresolved `?`. Rapidfire's `@ASPerAttack@` resolves only
+  because the hash lowercases — its key is spelled `ASperAttack`. Then migration pushed, types
+  regenerated, and `pnpm sync:static` wrote the columns and revalidated `static`.
+- **Comps:** `pnpm sync:meta` wrote 24 generated comps (12 new, 12 changed), `S 4 · A 7 · B 9 · C 5`
+  across all 25 with `defender-cassiopeia` kept as hand-written, and no generated comp left the
+  selection, so every `openers.yaml` pivot still resolves. `pnpm seed:curated --dry-run` validates
+  every file. The two tier lists the same run rewrote were restored, keeping this task to comps.
+  **Not seeded:** `/comps` shows the 16 already published until the next `sync:meta --seed`.
+- **Interaction (headless Edge over CDP, 960px and 400px):** hovering a trait opens its tooltip
+  (Elderwood: 5 tiers, 8 members, 5 dimmed) and leaving closes it; keyboard focus opens it with
+  `aria-describedby` pointing at it, and Escape closes it — on `/comps` and on the guide's panel.
+  The tallest body (Blossom, 267px) stays inside the viewport at 400px. The Contested badge
+  (Draven Fast 9, Elderwood Ezreal Draven) opens its own tooltip.
+- **Layout:** `scrollWidth === clientWidth` on `/comps` and a guide page at both widths, nothing
+  escapes a scroll container, no badge row wraps, and **zero console errors, exceptions or
+  hydration warnings** on either page.
+- **One defect found by screenshot and fixed:** the guide's trait rows became buttons, and their
+  hover padding truncated "Elderwood" in the 15rem panel. The button now takes the padding back with
+  a negative margin.
 
 **Verified — Task 7 (2026-09-12):**
 - **Checks:** `pnpm check` (333 tests, up from 304) and `pnpm build` are green. `/bis` builds

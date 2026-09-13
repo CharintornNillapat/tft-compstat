@@ -568,6 +568,8 @@ export type Database = {
         Row: {
           api_name: string
           breakpoints: Json
+          description: string | null
+          effects: Json
           icon_url: string | null
           name: string
           set_id: number
@@ -575,6 +577,8 @@ export type Database = {
         Insert: {
           api_name: string
           breakpoints: Json
+          description?: string | null
+          effects?: Json
           icon_url?: string | null
           name: string
           set_id: number
@@ -582,6 +586,8 @@ export type Database = {
         Update: {
           api_name?: string
           breakpoints?: Json
+          description?: string | null
+          effects?: Json
           icon_url?: string | null
           name?: string
           set_id?: number

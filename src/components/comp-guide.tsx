@@ -1,22 +1,22 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { CompChampion, CompDetail } from "@/lib/curated/queries";
-import { COMP_STYLE_LABELS, DIFFICULTY_LABELS } from "@/lib/static/game";
+import { isContested } from "@/lib/curated/comp-badges";
 import { ChampionIcon } from "./champion-icon";
+import { CONTESTED_TOOLTIP, ContestedBadge, DifficultyBadge, PlaystyleBadge } from "./comp-badges";
 import { GEM_TOOLTIP, GemBadge, PriorityChip, StarPips } from "./comp-details";
 import { CompStatsRow } from "./comp-stats";
+import { CompTraitList } from "./comp-traits";
 import { GuideMarkdown } from "./guide-markdown";
 import { HexBoard } from "./hex-board";
 import { ItemIcon } from "./item-icon";
 import { PageHeader } from "./page-header";
 import { TierBadge } from "./tier-row";
-import { TraitBreakpoints, TraitHex } from "./trait-badge";
 
 const updated = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
 /** A comp's page body: board, traits, item builds, early and flex units, and the guide. */
 export function CompGuide({ comp }: { comp: CompDetail }) {
-  const difficulty = comp.difficulty ? DIFFICULTY_LABELS[comp.difficulty] : null;
   // `comp.units` already arrives carries-then-priority-then-cost from the query, so
   // "1st" leads this list without a second sort here.
   const itemHolders = comp.units.filter((unit) => unit.items.length > 0);
@@ -28,18 +28,22 @@ export function CompGuide({ comp }: { comp: CompDetail }) {
           <span className="flex flex-wrap items-center gap-2">
             <TierBadge tier={comp.tier} className="size-6 text-xs" />
             {comp.name}
-            {/* A plain title here, not the list's tooltip: this page has no shared
-                HoverTip instance, and one badge does not earn a client component. */}
+            {/* Plain titles here, not the list's tooltip: the header has no shared
+                HoverTip instance, and two badges do not earn a client component. */}
+            {isContested(comp.pickRate) ? <ContestedBadge title={CONTESTED_TOOLTIP} /> : null}
             {comp.isGem ? <GemBadge title={GEM_TOOLTIP} /> : null}
           </span>
         }
         description={
-          <>
-            {COMP_STYLE_LABELS[comp.style]}
-            {difficulty ? ` · ${difficulty}` : ""} · Patch {comp.patch}
-            {comp.setName ? ` · ${comp.setName}` : ""} · Updated{" "}
-            <time dateTime={comp.updatedAt}>{updated.format(new Date(comp.updatedAt))}</time>
-          </>
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <PlaystyleBadge style={comp.style} />
+            <DifficultyBadge difficulty={comp.difficulty} />
+            <span>
+              Patch {comp.patch}
+              {comp.setName ? ` · ${comp.setName}` : ""} · Updated{" "}
+              <time dateTime={comp.updatedAt}>{updated.format(new Date(comp.updatedAt))}</time>
+            </span>
+          </span>
         }
       >
         <Link href="/comps" className="text-muted hover:text-fg">
@@ -54,7 +58,11 @@ export function CompGuide({ comp }: { comp: CompDetail }) {
           <HexBoard units={comp.units} />
         </Panel>
         <Panel title="Traits">
-          <TraitList traits={comp.traits} />
+          <CompTraitList
+            traits={comp.traits}
+            details={comp.traitDetails}
+            board={comp.units.map((unit) => unit.name)}
+          />
         </Panel>
       </div>
 
@@ -122,24 +130,6 @@ function Panel({ title, className = "", children }: { title: string; className?:
       <h2 className="mb-2 text-[11px] font-medium tracking-wider text-faint uppercase">{title}</h2>
       {children}
     </section>
-  );
-}
-
-/** Every trait on the board with its count and breakpoints; inactive ones dimmed. */
-function TraitList({ traits }: { traits: CompDetail["traits"] }) {
-  return (
-    <ul className="space-y-1.5">
-      {traits.map((trait) => (
-        <li key={trait.apiName} className={`flex items-center gap-2 ${trait.level > 0 ? "" : "opacity-50"}`}>
-          <TraitHex trait={trait} size={22} />
-          <span className="w-4 text-right font-semibold">{trait.count}</span>
-          <span className="min-w-0 flex-1 truncate">{trait.name}</span>
-          <span className="text-xs">
-            <TraitBreakpoints trait={trait} />
-          </span>
-        </li>
-      ))}
-    </ul>
   );
 }
 

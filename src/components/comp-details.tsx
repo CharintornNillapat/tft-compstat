@@ -1,8 +1,10 @@
 import type { CompUnit } from "@/lib/curated/queries";
+import { MISSING_TRAIT_TEXT, type TraitDetail } from "@/lib/curated/trait-details";
 import type { TraitCount } from "@/lib/curated/traits";
+import { ChampionIcon } from "./champion-icon";
 import { COST_TEXT } from "./cost-styles";
 import { ItemIcon } from "./item-icon";
-import { TraitBreakpoints, TraitHex } from "./trait-badge";
+import { TraitBreakpoints, TraitHex, TraitTierMin } from "./trait-badge";
 
 const STAR_TEXT: Record<number, string> = {
   1: "text-trait-bronze",
@@ -54,18 +56,78 @@ export function UnitDetails({ unit }: { unit: CompUnit }) {
   );
 }
 
-/** Tooltip body for a trait: name, count and breakpoints. */
-export function TraitDetails({ trait }: { trait: TraitCount }) {
+/**
+ * Tooltip body for a trait: its description, each breakpoint's bonus (reached ones in
+ * the trait's style) and every champion that has it. `onBoard` holds the fielded
+ * champions' names; members not among them are dimmed. Without synced text it falls
+ * back to the bare breakpoints and says the description is missing.
+ */
+export function TraitDetails({
+  trait,
+  detail,
+  onBoard,
+}: {
+  trait: TraitCount;
+  detail?: TraitDetail;
+  onBoard?: ReadonlySet<string>;
+}) {
+  const described = detail?.tiers.some((tier) => tier.text !== null) ?? false;
+  const description = detail?.description ?? (described ? null : MISSING_TRAIT_TEXT);
+
   return (
-    <>
+    <div className="w-72 max-w-full">
       <p className="flex items-center gap-1.5">
         <TraitHex trait={trait} size={16} />
         <span className="font-semibold text-fg">{trait.name}</span>
+        <span className="ml-auto text-muted">
+          {trait.count} {trait.count === 1 ? "unit" : "units"}
+        </span>
       </p>
-      <p className="mt-0.5 text-muted">
-        {trait.count} {trait.count === 1 ? "unit" : "units"} · <TraitBreakpoints trait={trait} />
-      </p>
-    </>
+      {description ? (
+        <p className={`mt-1 whitespace-pre-line ${detail?.description ? "text-muted" : "text-faint italic"}`}>
+          {description}
+        </p>
+      ) : null}
+      {described && detail ? (
+        <ul aria-label="Bonuses" className="mt-1.5 space-y-1">
+          {detail.tiers.map((tier, i) => (
+            <li key={tier.min} className="flex items-start gap-1.5">
+              <TraitTierMin min={tier.min} style={tier.style} reached={i < trait.level} />
+              <span className={`min-w-0 whitespace-pre-line ${i < trait.level ? "text-fg" : "text-muted"}`}>
+                {tier.text ?? "—"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-1 text-muted">
+          <TraitBreakpoints trait={trait} />
+        </p>
+      )}
+      {detail?.members.length ? (
+        <div className="mt-2 border-t border-line pt-1.5">
+          <p className="mb-1 text-[10px] tracking-wider text-faint uppercase">
+            Champions{onBoard ? " · dimmed ones are not on this board" : ""}
+          </p>
+          <ul className="flex flex-wrap gap-1">
+            {detail.members.map((member) => {
+              const fielded = onBoard?.has(member.name) ?? true;
+              return (
+                <li key={member.apiName} className={fielded ? "" : "opacity-40"}>
+                  <ChampionIcon
+                    name={member.name}
+                    cost={member.cost}
+                    iconUrl={member.iconUrl}
+                    size={24}
+                    alt={onBoard && fielded ? `${member.name}, on this board` : member.name}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
