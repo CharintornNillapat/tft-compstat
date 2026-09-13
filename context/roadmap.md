@@ -474,7 +474,13 @@ Approved task by task rather than as a whole phase.
   overflow, the button inside the viewport (32px tall, 44px at 390 where it wraps under the title),
   Enter from the keyboard copies a 40-character code, "Copied!" shows and is announced, resets after
   2s, the tooltip reads "Paste into the TFT Team Planner (Import)", zero console errors.
-- **Not verifiable here:** pasting into the TFT client itself — to be confirmed in-game after deploy.
+- **Deployed (2026-09-14, commit `11698fc`)**: `dpl_8qjbprBsnvk6tMBtxSgA7FCmvQ9R` Ready in `icn1` and
+  aliased to https://tft-compstat.vercel.app.
+  - **Same headless-Edge check against production** at 1280, 960 and 390px on three comps: every check
+    above passed, copying the same three codes as locally.
+  - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me`,
+    `/comps/riftbeast-pebbles` and `/comps/elderwood-kayle` all 200.
+- **Not verifiable here:** pasting into the TFT client itself — to be confirmed in-game.
 
 - [ ] Further tasks — not yet specified.
 
