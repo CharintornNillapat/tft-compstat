@@ -434,7 +434,13 @@ Approved task by task rather than as a whole phase.
   until its third item wrapped, and the label broke over three lines. The plate is now `md:flex-none`
   (every build is three items, so it also keeps the columns aligned), the champion column `md:w-44
   lg:w-52`, the label `w-14`: 0 of 53 plates wrap at any width, label on two lines.
-- **Not deployed yet** — uncommitted, awaiting review.
+- **Deployed (2026-09-13, commit `3a6b37f`)**: `dpl_61UVv9XopQrVHg4is2aYvgMRjFzk` built first time
+  (no Supabase timeout), Ready in ~31s in `icn1` and aliased to https://tft-compstat.vercel.app.
+  - **Same headless-Edge check against production** at 1280, 960 and 400px: 200, 53 rows, 52 with
+    artifact/radiant icons and one dash (Cinderling), no horizontal overflow, 0 of 53 BIS plates
+    wrapped, label on two lines, zero console errors; the tooltip reads "Rapid Firecannon · Artifact".
+  - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me` and
+    `/comps/riftbeast-pebbles` all 200.
 
 - [ ] Further tasks — not yet specified.
 
