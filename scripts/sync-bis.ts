@@ -4,7 +4,7 @@
  *   pnpm sync:bis                      fetch, derive, validate, overwrite the file
  *   pnpm sync:bis --dry-run            everything but the write, and print what would change
  *   pnpm sync:bis --rank CHALLENGER --days 7
- *   pnpm sync:bis --min-build-games 500 --min-item-games 1000
+ *   pnpm sync:bis --min-build-games 500 --min-item-games 1000 --min-special-games 200
  *
  * The `unit_detail` feed publishes, per champion, every item build that was played
  * with an eight-bucket placement histogram — the same shape `sync:meta` reads — so
@@ -108,6 +108,7 @@ function readEntries(text: string): BisEntry[] {
     role: row.role,
     primary: row.primary_bis,
     secondary: row.secondary_bis,
+    special: row.special_bis,
     avgPlace: row.avg_place ?? 0,
     games: row.games ?? 0,
     ...(row.notes ? { note: row.notes } : {}),
@@ -130,6 +131,7 @@ async function main() {
       days: { type: "string", default: "3" },
       "min-build-games": { type: "string", default: "200" },
       "min-item-games": { type: "string", default: "500" },
+      "min-special-games": { type: "string", default: "100" },
       set: { type: "string" },
     },
   });
@@ -142,6 +144,7 @@ async function main() {
   const thresholds = {
     minBuildGames: number("min-build-games", values["min-build-games"]),
     minItemGames: number("min-item-games", values["min-item-games"]),
+    minSpecialGames: number("min-special-games", values["min-special-games"]),
   };
   if (!/^\d+$/.test(values.days)) throw new Error(`--days expects a whole number, got "${values.days}"`);
 
@@ -228,6 +231,7 @@ async function main() {
     `Source: ${SOURCE_NAME} ${STAT_ORIGIN}/unit_detail, ranked queue ${RANKED_QUEUE}, ${bracket}, last ${plural(Number(values.days), "day")}.`,
     `Primary: the 3-item build with the best average placement over ${plural(thresholds.minBuildGames, "game")}.`,
     `Alternatives: the champion's best single items outside that build, over ${plural(thresholds.minItemGames, "game")}.`,
+    `Artifacts / radiants: the champion's best-placing ones, ranked only against each other, over ${plural(thresholds.minSpecialGames, "game")}.`,
     "Role is read off the components of the primary build, not off the champion.",
     "These are the builds that placed best, not a plan somebody wrote — read the numbers before trusting them.",
   ];

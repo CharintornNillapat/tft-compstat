@@ -5,6 +5,7 @@ import type { NameBook } from "@/lib/static/names";
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import { readNewestCuratedFile } from "./curated-files";
+import type { ItemKind } from "@/lib/static/game";
 import { CHAMPION_BIS_FILE, championBisFileSchema, type BisRole } from "./schemas";
 import { formatIssue, parseYaml, suggestApiNames, type SeedIssue } from "./validate";
 
@@ -24,6 +25,8 @@ export type BisItem = BisItemRef & {
   components: BisItemRef[];
   /** Trait name, for emblems. */
   grantsTrait: string | null;
+  /** `items.kind`, so the tooltip can say "Artifact" or "Radiant". Null when not stored. */
+  kind: ItemKind | null;
 };
 
 export type BisChampion = {
@@ -35,6 +38,8 @@ export type BisChampion = {
   /** Exactly three items. May repeat one: two of the same item is a legal board. */
   primary: BisItem[];
   secondary: BisItem[];
+  /** Best-placing artifacts and radiants. Empty when none cleared the sync's floor. */
+  special: BisItem[];
   notes: string | null;
   /** Average placement of the primary build, when the sync measured one. */
   avgPlace: number | null;
@@ -50,14 +55,18 @@ export type ChampionBis = {
 };
 
 /** Extra item columns the tooltip needs, which `NameBook` doesn't carry. */
-export type BisItemDetails = ReadonlyMap<string, { components: string[]; grantsTrait: string | null }>;
+export type BisItemDetails = ReadonlyMap<
+  string,
+  { components: string[]; grantsTrait: string | null; kind?: ItemKind }
+>;
 
 export type BisReferences = { names: NameBook; itemDetails: BisItemDetails };
 
 /**
  * Pure: YAML text plus the reference tables → resolved rows, or the issues that
  * stopped them. Beyond the schema: every champion and item exists, no champion is
- * listed twice, and no "alternative" is already in the primary build.
+ * listed twice, no "alternative" is already in the primary build, and no artifact or
+ * radiant is listed twice.
  */
 export function validateChampionBis(input: {
   /** Repo-relative path, used in issues. */
@@ -113,6 +122,7 @@ export function validateChampionBis(input: {
           iconUrl: refs.names.items[component]?.iconUrl ?? null,
         })),
         grantsTrait: details?.grantsTrait ? (refs.names.traits[details.grantsTrait]?.name ?? details.grantsTrait) : null,
+        kind: details?.kind ?? null,
       };
     };
 
@@ -127,6 +137,13 @@ export function validateChampionBis(input: {
       }
       return toItem(apiName, path);
     });
+    const seenSpecial = new Set<string>();
+    const special = row.special_bis.map((apiName, i) => {
+      const path = at("special_bis", i);
+      if (seenSpecial.has(apiName)) issues.push(yaml.issue(path, `${apiName} is listed twice in special_bis`));
+      seenSpecial.add(apiName);
+      return toItem(apiName, path);
+    });
 
     return {
       apiName: row.api_name,
@@ -136,6 +153,7 @@ export function validateChampionBis(input: {
       role: row.role,
       primary,
       secondary,
+      special,
       notes: row.notes ?? null,
       avgPlace: row.avg_place ?? null,
       games: row.games ?? null,
@@ -180,16 +198,18 @@ export async function getChampionBis(): Promise<ChampionBis | null> {
   const used = new Set<string>();
   const parsed = championBisFileSchema.safeParse(parseYaml(file, text).data);
   if (parsed.success) {
-    for (const row of parsed.data.champions) for (const item of [...row.primary_bis, ...row.secondary_bis]) used.add(item);
+    for (const row of parsed.data.champions) {
+      for (const item of [...row.primary_bis, ...row.secondary_bis, ...row.special_bis]) used.add(item);
+    }
   }
   const rows = used.size
     ? must(
-        await getSupabase().from("items").select("api_name, components, grants_trait").in("api_name", [...used]),
+        await getSupabase().from("items").select("api_name, components, grants_trait, kind").in("api_name", [...used]),
         "bis items",
       )
     : [];
   const itemDetails: BisItemDetails = new Map(
-    rows.map((row) => [row.api_name, { components: row.components, grantsTrait: row.grants_trait }]),
+    rows.map((row) => [row.api_name, { components: row.components, grantsTrait: row.grants_trait, kind: row.kind }]),
   );
 
   const { bis, issues } = validateChampionBis({ file, text, refs: { names, itemDetails } });

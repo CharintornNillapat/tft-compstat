@@ -408,6 +408,34 @@ Approved task by task rather than as a whole phase.
     Early/Levelling/Positioning with no Items section; the item tooltip reads "Infinity Edge".
   - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items` and `/me` all 200.
 
+- [x] **Task 14 — Artifacts and radiants on `/bis`** (requested 2026-09-13)
+  - **Measured, like the rest of the page.** `unit_detail`'s per-item rows already carry every
+    artifact and radiant a champion held, with placements (Akali: Lich Bane 2,409 games, Radiant
+    Hand of Justice 259), so `sync:bis` ranks them rather than a hand-written list naming them.
+  - `special_bis` (optional, 0–3): best average placement among `artifact` + `radiant` items over
+    `--min-special-games` (100), ranked only against each other (architecture §7.4). Never decides
+    whether a champion has a row; `diffBis` counts a change to it.
+  - `BisBoard`: a third "Artifact / Radiant" group after Flex, a dash when empty; the tooltip adds
+    the kind, read from `items.kind` alongside the recipe.
+  - Tests: 7 new (`bis-sync` ranking, floor, emblem exclusion, YAML, diff; `bis` optional field,
+    kind resolution, duplicates and the max of 3).
+
+**Verified — Task 14 (2026-09-13):**
+- **Checks:** `pnpm check` (417 tests, up from 410) and `pnpm build` (fetch cache cleared) green;
+  `/bis` still **Static** at 1d / 1w, every other route unchanged.
+- **Data:** `pnpm sync:bis` (after one transient Supabase `Gateway Timeout` on `items`): 53 champions
+  with a build, 52 with artifacts/radiants — 51 with three, 1 with one, Cinderling none — **100
+  artifacts and 54 radiants**. The same run also picked up three days of drift the daily workflow
+  would have written: 24 primary builds and 41 flex lists moved; no champion added or removed.
+- **Local `pnpm start`, headless Edge** at 1280, 960 and 400px: 200, 53 rows, 52 with icons and one
+  dash, no horizontal overflow, zero console errors; hovering an artifact reads "Rapid Firecannon ·
+  Artifact". Three groups at 1280 and 960, stacked at 400.
+- **One defect found by screenshot and fixed:** at 960px three `flex-1` groups squeezed the BIS plate
+  until its third item wrapped, and the label broke over three lines. The plate is now `md:flex-none`
+  (every build is three items, so it also keeps the columns aligned), the champion column `md:w-44
+  lg:w-52`, the label `w-14`: 0 of 53 plates wrap at any width, label on two lines.
+- **Not deployed yet** — uncommitted, awaiting review.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

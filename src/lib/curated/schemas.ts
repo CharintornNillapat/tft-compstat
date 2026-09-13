@@ -253,6 +253,8 @@ export type BisRole = (typeof BIS_ROLES)[number];
 /** A full build is three items. Anything else is a half-built board, not a BIS. */
 export const BIS_PRIMARY_ITEMS = 3;
 export const BIS_SECONDARY_ITEMS = { min: 2, max: 3 } as const;
+/** Artifacts and radiants shown beside the flex items. Optional: not every unit is handed one. */
+export const BIS_SPECIAL_ITEMS = 3;
 
 export const championBisSchema = z.strictObject({
   api_name: apiName,
@@ -269,6 +271,11 @@ export const championBisSchema = z.strictObject({
     .array(apiName, { error: "must be a list of 2-3 item api_names" })
     .min(BIS_SECONDARY_ITEMS.min, `needs at least ${BIS_SECONDARY_ITEMS.min} alternatives`)
     .max(BIS_SECONDARY_ITEMS.max, `holds at most ${BIS_SECONDARY_ITEMS.max} alternatives`),
+  /** Best-placing artifacts and radiants, best first — what to take from an anvil or armory. */
+  special_bis: z
+    .array(apiName, { error: `must be a list of up to ${BIS_SPECIAL_ITEMS} item api_names` })
+    .max(BIS_SPECIAL_ITEMS, `holds at most ${BIS_SPECIAL_ITEMS} artifacts or radiants`)
+    .default([]),
   /** Hand-written guidance. `sync:bis` carries it across runs rather than clearing it. */
   notes: z.string().trim().min(1, "must not be empty").max(120, "must be at most 120 characters").optional(),
   /** Average placement of the primary build, when it came from measured games. */

@@ -1,5 +1,5 @@
 import { Document, parse } from "yaml";
-import { BIS_PRIMARY_ITEMS, BIS_SECONDARY_ITEMS, type BisRole } from "./schemas";
+import { BIS_PRIMARY_ITEMS, BIS_SECONDARY_ITEMS, BIS_SPECIAL_ITEMS, type BisRole } from "./schemas";
 import { averagePlacement, totalGames, type Placements } from "./meta-sync";
 
 /**
@@ -27,9 +27,11 @@ export type BisThresholds = {
   minBuildGames: number;
   /** Games a single item needs to be offered as an alternative. */
   minItemGames: number;
+  /** Games an artifact or radiant needs — lower, because they only drop a few times a game. */
+  minSpecialGames: number;
 };
 
-export const DEFAULT_THRESHOLDS: BisThresholds = { minBuildGames: 200, minItemGames: 500 };
+export const DEFAULT_THRESHOLDS: BisThresholds = { minBuildGames: 200, minItemGames: 500, minSpecialGames: 100 };
 
 /**
  * Item kinds a build may be made of — **completed items only**, which is narrower
@@ -44,6 +46,14 @@ export const DEFAULT_THRESHOLDS: BisThresholds = { minBuildGames: 200, minItemGa
  *   nobody can copy. They also have no components, which left the role unreadable.
  */
 export const BUILDABLE_KINDS = new Set(["completed"]);
+
+/**
+ * The kinds that are kept out of a build but still worth knowing per champion: what to
+ * take from an anvil or a radiant armory when one is offered. They are ranked only
+ * against each other, in their own group, so the bias that let them dominate a build
+ * (the boards holding them were already winning) applies to every candidate alike.
+ */
+export const SPECIAL_KINDS = new Set(["artifact", "radiant"]);
 
 /** Components that say what a build is for. Sparring Gloves and Spatula say nothing. */
 const AD_COMPONENTS = new Set(["DA_Component_BFSword", "DA_Component_RecurveBow"]);
@@ -91,6 +101,8 @@ export function classifyRole(components: readonly string[]): BisRole {
 export type BisBuild = {
   primary: string[];
   secondary: string[];
+  /** Best-placing artifacts and radiants, best first. May be empty. */
+  special: string[];
   role: BisRole;
   avgPlace: number;
   games: number;
@@ -109,6 +121,10 @@ export type BisSkip = { apiName: string; reason: string };
  * **Secondary** is the best single items the champion held that the primary build
  * doesn't already contain, which is what "flex" means in practice: the slot you
  * change when you can't find the third component.
+ *
+ * **Special** is the best artifacts and radiants the champion held, over their own
+ * lower floor. It never decides whether a champion gets a row: a unit nobody hands an
+ * artifact still has a build.
  */
 export function deriveBis(input: {
   apiName: string;
@@ -119,8 +135,23 @@ export function deriveBis(input: {
   thresholds?: BisThresholds;
 }): { build?: BisBuild; skip?: BisSkip } {
   const { apiName, itemInfo } = input;
-  const { minBuildGames, minItemGames } = input.thresholds ?? DEFAULT_THRESHOLDS;
+  const { minBuildGames, minItemGames, minSpecialGames } = { ...DEFAULT_THRESHOLDS, ...input.thresholds };
   const buildable = (item: string) => BUILDABLE_KINDS.has(itemInfo.get(item)?.kind ?? "");
+  const special = (item: string) => SPECIAL_KINDS.has(itemInfo.get(item)?.kind ?? "");
+
+  /** The best-placing single items that pass `keep` and the games floor, best first. */
+  const bestItems = (keep: (item: string) => boolean, minGames: number, max: number) =>
+    input.items
+      .flatMap((row) => {
+        if (!keep(row.apiName)) return [];
+        const games = totalGames(row.places);
+        const avgPlace = averagePlacement(row.places);
+        if (avgPlace === undefined || games < minGames) return [];
+        return [{ apiName: row.apiName, games, avgPlace }];
+      })
+      .sort((a, b) => a.avgPlace - b.avgPlace || b.games - a.games)
+      .slice(0, max)
+      .map((row) => row.apiName);
 
   const ranked = input.builds
     .flatMap((row) => {
@@ -144,17 +175,7 @@ export function deriveBis(input: {
   }
 
   const held = new Set(best.items);
-  const secondary = input.items
-    .flatMap((row) => {
-      if (held.has(row.apiName) || !buildable(row.apiName)) return [];
-      const games = totalGames(row.places);
-      const avgPlace = averagePlacement(row.places);
-      if (avgPlace === undefined || games < minItemGames) return [];
-      return [{ apiName: row.apiName, games, avgPlace }];
-    })
-    .sort((a, b) => a.avgPlace - b.avgPlace || b.games - a.games)
-    .slice(0, BIS_SECONDARY_ITEMS.max)
-    .map((row) => row.apiName);
+  const secondary = bestItems((item) => !held.has(item) && buildable(item), minItemGames, BIS_SECONDARY_ITEMS.max);
 
   if (secondary.length < BIS_SECONDARY_ITEMS.min) {
     return {
@@ -170,6 +191,7 @@ export function deriveBis(input: {
     build: {
       primary: best.items,
       secondary,
+      special: bestItems(special, minSpecialGames, BIS_SPECIAL_ITEMS),
       role: classifyRole(components),
       avgPlace: Math.round(best.avgPlace * 100) / 100,
       games: best.games,
@@ -217,6 +239,7 @@ export function buildChampionBisYaml(source: BisSource): string {
       role: entry.role,
       primary_bis: entry.primary,
       secondary_bis: entry.secondary,
+      ...(entry.special.length ? { special_bis: entry.special } : {}),
       avg_place: entry.avgPlace,
       games: entry.games,
       ...(entry.note ? { notes: entry.note } : {}),
@@ -265,7 +288,8 @@ export function diffBis(
   before: readonly BisEntry[],
   after: readonly BisEntry[],
 ): BisChange[] {
-  const signature = (entry: BisEntry) => [...entry.primary, "|", ...entry.secondary].join(",");
+  const signature = (entry: BisEntry) =>
+    [...entry.primary, "|", ...entry.secondary, "|", ...entry.special].join(",");
   const old = new Map(before.map((entry) => [entry.apiName, entry]));
   const changes: BisChange[] = [];
 

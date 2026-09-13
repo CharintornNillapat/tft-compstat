@@ -20,6 +20,8 @@ const names: NameBook = {
     DA_Component_BFSword: { name: "B.F. Sword", iconUrl: "bf.png" },
     DA_Component_RecurveBow: { name: "Recurve Bow", iconUrl: null },
     DA_18_EmblemInferno: { name: "Inferno Emblem", iconUrl: null },
+    DA_Artifact_LichBane: { name: "Lich Bane", iconUrl: null },
+    DA_InfinityEdgeRadiant: { name: "Radiant Infinity Edge", iconUrl: null },
   },
 };
 
@@ -28,6 +30,8 @@ const refs: BisReferences = {
   itemDetails: new Map([
     ["DA_GiantSlayer", { components: ["DA_Component_BFSword", "DA_Component_RecurveBow"], grantsTrait: null }],
     ["DA_18_EmblemInferno", { components: [], grantsTrait: "DA_18_Inferno" }],
+    ["DA_Artifact_LichBane", { components: [], grantsTrait: null, kind: "artifact" }],
+    ["DA_InfinityEdgeRadiant", { components: [], grantsTrait: null, kind: "radiant" }],
   ]),
 };
 
@@ -62,6 +66,26 @@ describe("validateChampionBis", () => {
     expect(champion!.primary.map((item) => item.name)).toEqual(["Giant Slayer", "Infinity Edge", "Red Buff"]);
     expect(champion!.primary[0]!.components.map((c) => c.name)).toEqual(["B.F. Sword", "Recurve Bow"]);
     expect(champion!.secondary.map((item) => item.name)).toEqual(["Quicksilver", "Deathblade"]);
+  });
+
+  it("treats special_bis as optional", () => {
+    expect(parse(VALID).bis?.champions[0]?.special).toEqual([]);
+  });
+
+  it("resolves artifacts and radiants with their kind", () => {
+    const yaml = VALID.replace("    avg_place:", "    special_bis: [DA_InfinityEdgeRadiant, DA_Artifact_LichBane]\n    avg_place:");
+    const special = parse(yaml).bis?.champions[0]?.special;
+    expect(special?.map((item) => [item.name, item.kind])).toEqual([
+      ["Radiant Infinity Edge", "radiant"],
+      ["Lich Bane", "artifact"],
+    ]);
+  });
+
+  it("rejects an artifact listed twice, and more than three", () => {
+    const twice = VALID.replace("    avg_place:", "    special_bis: [DA_Artifact_LichBane, DA_Artifact_LichBane]\n    avg_place:");
+    expect(messages(twice)).toEqual(["DA_Artifact_LichBane is listed twice in special_bis"]);
+    const four = VALID.replace("    avg_place:", `    special_bis: [${Array(4).fill("DA_Artifact_LichBane").join(", ")}]\n    avg_place:`);
+    expect(messages(four)).toEqual(["holds at most 3 artifacts or radiants"]);
   });
 
   it("resolves an emblem's trait for the tooltip", () => {

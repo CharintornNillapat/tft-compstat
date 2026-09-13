@@ -47,6 +47,10 @@ const itemInfo = new Map<string, BisItemInfo>([
   ["DA_GargoyleStoneplate", item("completed", C.vest, C.cloak)],
   ["DA_WarmogsArmor", item("completed", C.belt, C.belt)],
   ["DA_Artifact_LichBane", item("artifact")],
+  ["DA_Artifact_RapidFireCannon", item("artifact")],
+  ["DA_Artifact_Dawncore", item("artifact")],
+  ["DA_Artifact_Mittens", item("artifact")],
+  ["DA_InfinityEdgeRadiant", item("radiant")],
   ["DA_18_EmblemInferno", item("emblem", "DA_Component_Spatula")],
 ]);
 
@@ -114,6 +118,29 @@ describe("deriveBis", () => {
     expect(build?.primary).toEqual(["DA_GiantSlayer", "DA_InfinityEdge", "DA_RedBuff"]);
   });
 
+  it("ranks artifacts and radiants in their own group, over their own lower floor", () => {
+    const withSpecial = [
+      ...items,
+      { apiName: "DA_Artifact_LichBane", places: places(3.9, 2400) },
+      { apiName: "DA_InfinityEdgeRadiant", places: places(3.2, 150) },
+      { apiName: "DA_Artifact_RapidFireCannon", places: places(3.7, 1700) },
+      { apiName: "DA_Artifact_Dawncore", places: places(4.1, 1400) },
+      // Best of all, but under the 100-game floor.
+      { apiName: "DA_Artifact_Mittens", places: places(2.0, 60) },
+      // An emblem is neither an artifact nor a radiant.
+      { apiName: "DA_18_EmblemInferno", places: places(2.5, 900) },
+    ];
+    const { build } = deriveBis({ apiName: "DA_18_Ashe", builds, items: withSpecial, itemInfo });
+    expect(build?.special).toEqual(["DA_InfinityEdgeRadiant", "DA_Artifact_RapidFireCannon", "DA_Artifact_LichBane"]);
+    // And none of them leak into the flex items.
+    expect(build?.secondary).toEqual(["DA_Quicksilver", "DA_Deathblade", "DA_EdgeOfNight"]);
+  });
+
+  it("still gives a champion a row when no artifact or radiant clears the floor", () => {
+    const { build } = deriveBis({ apiName: "DA_18_Ashe", builds, items, itemInfo });
+    expect(build?.special).toEqual([]);
+  });
+
   it("skips a champion whose builds are all below the games floor, rather than guessing", () => {
     const thin = [{ items: ["DA_Deathblade", "DA_InfinityEdge", "DA_RedBuff"], places: places(3.0, 20) }];
     const { build, skip } = deriveBis({ apiName: "DA_Karma18", builds: thin, items, itemInfo });
@@ -145,9 +172,21 @@ describe("buildChampionBisYaml", () => {
     role: "AD Carry",
     primary: ["DA_GiantSlayer", "DA_InfinityEdge", "DA_RedBuff"],
     secondary: ["DA_Quicksilver", "DA_Deathblade"],
+    special: [],
     avgPlace: 3.1,
     games: 800,
   };
+
+  it("writes special_bis only for a champion that has some", () => {
+    const without = buildChampionBisYaml({ patch: "18.2", entries: [entry], provenance: [] });
+    expect(without).not.toContain("special_bis");
+    const withSpecial = buildChampionBisYaml({
+      patch: "18.2",
+      entries: [{ ...entry, special: ["DA_Artifact_LichBane"] }],
+      provenance: [],
+    });
+    expect(withSpecial).toContain("special_bis:\n      - DA_Artifact_LichBane");
+  });
 
   it("writes a file that says it is generated, and round-trips its notes", () => {
     const text = buildChampionBisYaml({
@@ -176,12 +215,17 @@ describe("diffBis", () => {
     role: "AD Carry",
     primary: ["DA_GiantSlayer", "DA_InfinityEdge", "DA_RedBuff"],
     secondary: ["DA_Quicksilver", "DA_Deathblade"],
+    special: [],
     avgPlace: 3.1,
     games: 800,
   };
 
   it("reports nothing when only the numbers moved, so a re-sync doesn't churn the file", () => {
     expect(diffBis([entry], [{ ...entry, avgPlace: 3.4, games: 1200 }])).toEqual([]);
+  });
+
+  it("reports a change to the artifacts and radiants", () => {
+    expect(diffBis([entry], [{ ...entry, special: ["DA_Artifact_LichBane"] }]).map((c) => c.kind)).toEqual(["changed"]);
   });
 
   it("reports a changed build, an added champion and a removed one", () => {

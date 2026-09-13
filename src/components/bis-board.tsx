@@ -76,7 +76,7 @@ type Tip = ReturnType<typeof useHoverTip<BisItem>>;
 function BisRow({ champion, tip }: { champion: BisChampion; tip: Tip }) {
   return (
     <li className="flex flex-col gap-2 p-2 md:flex-row md:items-center md:gap-3">
-      <div className="flex min-w-0 items-center gap-2 md:w-52 md:shrink-0">
+      <div className="flex min-w-0 items-center gap-2 md:w-44 md:shrink-0 lg:w-52">
         <ChampionIcon name={champion.name} cost={champion.cost} iconUrl={champion.iconUrl} size={36} alt="" />
         <div className="min-w-0">
           <p className="flex items-baseline gap-1.5">
@@ -91,6 +91,7 @@ function BisRow({ champion, tip }: { champion: BisChampion; tip: Tip }) {
 
       <ItemGroup label="Best in slot" items={champion.primary} tip={tip} primary />
       <ItemGroup label="Flex" items={champion.secondary} tip={tip} />
+      <ItemGroup label="Artifact / Radiant" items={champion.special} tip={tip} wideLabel />
 
       <div className="min-w-0 md:w-40 md:shrink-0 md:text-right">
         {champion.avgPlace !== null ? (
@@ -117,31 +118,44 @@ function BisRow({ champion, tip }: { champion: BisChampion; tip: Tip }) {
  * Three things carry the distinction, not just the colour — the plate, the larger
  * icons, and the "BIS" / "Flex" label — because a reader with a colour-vision
  * deficiency should not have to tell gold from nothing to read the page.
+ *
+ * An empty group keeps its slot with a dash, so the columns still line up down the page.
+ * The BIS plate never grows or shrinks: every build is three items, so a fixed plate keeps
+ * the Flex and Artifact / Radiant columns aligned, and with three groups sharing the row a
+ * flexible plate was squeezed until its third item wrapped at 960px.
  */
 function ItemGroup({
   label,
   items,
   tip,
   primary = false,
+  wideLabel = false,
 }: {
   label: string;
   items: BisItem[];
   tip: Tip;
   primary?: boolean;
+  /** For a label too long for the 2rem column, like "Artifact / Radiant". */
+  wideLabel?: boolean;
 }) {
   return (
     <div
-      className={`flex min-w-0 items-center gap-1.5 rounded md:flex-1 ${
-        primary ? "border border-accent/25 bg-accent/5 px-1.5 py-1" : "px-1.5 py-1"
+      className={`flex min-w-0 items-center gap-1.5 rounded ${
+        primary ? "border border-accent/25 bg-accent/5 px-1.5 py-1 md:flex-none" : "px-1.5 py-1 md:flex-1"
       }`}
     >
       <span
-        className={`w-8 shrink-0 text-[9px] leading-tight tracking-wider uppercase ${
+        className={`${wideLabel ? "w-14" : "w-8"} shrink-0 text-[9px] leading-tight tracking-wider uppercase ${
           primary ? "font-semibold text-accent" : "text-faint"
         }`}
       >
         {primary ? "BIS" : label}
       </span>
+      {items.length === 0 ? (
+        <span className="text-faint" title="No artifact or radiant reached the sync's games floor">
+          —
+        </span>
+      ) : null}
       <ul className="flex min-w-0 flex-wrap items-center gap-1">
         {items.map((item, index) => (
           <li key={`${item.apiName}-${index}`} className="flex">
@@ -155,11 +169,15 @@ function ItemGroup({
   );
 }
 
-/** Name, emblem trait and recipe — the same tooltip body `/tiers/items` shows. */
+const KIND_TAG: Partial<Record<string, string>> = { artifact: "Artifact", radiant: "Radiant" };
+
+/** Name, emblem trait and recipe — the same tooltip body `/tiers/items` shows — plus the artifact/radiant tag. */
 function ItemDetails({ item }: { item: BisItem }) {
+  const tag = item.kind ? KIND_TAG[item.kind] : undefined;
   return (
     <>
       <p className="font-semibold text-fg">{item.name}</p>
+      {tag ? <p className="text-muted">{tag}</p> : null}
       {item.grantsTrait ? <p className="text-muted">Grants {item.grantsTrait}</p> : null}
       {item.components.length ? (
         <p className="mt-1 flex flex-wrap items-center gap-1 text-muted">

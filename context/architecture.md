@@ -892,6 +892,14 @@ Task 3).
   radiants cannot be built on demand. Left in, artifacts dominated the ranking (they are
   rare, so the boards holding them were already winning) and produced builds nobody can
   copy — and having no components, they left the role unreadable.
+- **Artifacts / radiants** (`special_bis`, optional, 0–3; requested 2026-09-13) are the
+  champion's best-placing items of kind `artifact` or `radiant`, over their own lower floor
+  `--min-special-games` (100) — they drop a few times a game, not every game. They are
+  ranked **only against each other**, so the selection bias that disqualified them from a
+  build applies to every candidate alike. They never decide whether a champion gets a row,
+  and a change to them counts as a change in `diffBis`. `/bis` shows them as a third group
+  after Flex, labelled "Artifact / Radiant", with a dash when empty; the tooltip names the
+  kind (`items.kind`, now read alongside components and trait).
 - **Role** is read off the **components of the primary build**, not off the champion: four
   of six defensive components is a Main Tank, and otherwise the larger of AD/AP wins, with
   **damage beating defence on a tie** (Edge of Night + Infinity Edge + Quicksilver is two
@@ -907,7 +915,7 @@ The generated text is checked against `championBisFileSchema` — the same schem
 parses at build time — before anything is written, and a run that changes no build leaves
 the file alone so a re-sync does not churn git.
 
-**Flags:** `--dry-run`, `--rank`, `--days`, `--min-build-games`, `--min-item-games`, `--set`.
+**Flags:** `--dry-run`, `--rank`, `--days`, `--min-build-games`, `--min-item-games`, `--min-special-games`, `--set`.
 
 ---
 
