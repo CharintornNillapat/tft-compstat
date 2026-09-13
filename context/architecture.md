@@ -979,7 +979,9 @@ the file alone so a re-sync does not churn git.
 | `RIOT_GAME_NAME`, `RIOT_TAG_LINE`, `RIOT_PLATFORM` | server | Your account; regions are derived from the platform |
 | `CRON_SECRET` | server | Vercel Cron auth |
 | `REVALIDATE_SECRET` | server | Seed script → cache revalidation |
-| `SITE_URL` | local scripts only, optional | Site that `sync:static`/`seed:curated` revalidate after writing. Empty = skip with a warning. Not needed on Vercel. |
+| `SITE_URL` | local scripts and GitHub Actions, optional | Site that `sync:static`/`seed:curated` revalidate after writing. Empty = skip with a warning. Not needed on Vercel. |
+
+**GitHub Actions** (`.github/workflows/sync-meta.yml`, daily 03:00 UTC + manual): `sync:meta --seed` then `sync:bis`, then commits changes under `data/curated/` to `main` as `github-actions[bot]`. The push redeploys Vercel. Repository secrets: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `REVALIDATE_SECRET`. It runs Node 24 because `@supabase/supabase-js` requires Node >= 22.
 
 `src/lib/env.ts` validates **per scope**: `supabasePublicEnv()`, `supabaseAdminEnv()`, `riotEnv()`, `secretsEnv()`, and `revalidateEnv()` (`REVALIDATE_SECRET` + optional `SITE_URL`, used by `/api/revalidate` and the scripts). Each is lazy and memoized, so a consumer only needs its own variables. Error messages name the variable but never echo its value. The public and admin scopes also reject **swapped keys**: an anon/publishable key in `SUPABASE_SERVICE_ROLE_KEY`, or a service/secret key in the public anon variable.
 

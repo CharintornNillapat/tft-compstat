@@ -279,6 +279,8 @@ Approved task by task rather than as a whole phase.
   page — the blanks in a first screenshot were lazy-loading, not a data gap).
 - **Not seeded, and not scheduled.** `sync:bis` is a local script like `sync:meta`; the file is
   read at build time, so publishing a refresh means redeploying.
+- **Scheduled since 2026-09-13:** `.github/workflows/sync-meta.yml` runs `sync:meta --seed` and
+  `sync:bis` daily at 03:00 UTC and pushes changes under `data/curated/` to `main`, which redeploys.
 
 **Verified — Task 6 (2026-09-12):**
 - **Checks:** `pnpm check` (304 tests, up from 292 — 12 new for `validateOpeners`) and `pnpm build`

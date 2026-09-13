@@ -149,6 +149,17 @@ rather write the ratings yourself, just don't run this script; nothing else depe
 > appeared on, not a measurement of the unit: a 5-cost that shows up in games already won
 > reads better than it plays. Treat a synced list as a first draft.
 
+### Daily automation — GitHub Actions
+
+`.github/workflows/sync-meta.yml` runs `pnpm sync:meta --seed` and then `pnpm sync:bis` every day at
+03:00 UTC (10:00 Bangkok). You can also run it by hand from the Actions tab (**Run workflow**). If anything under
+`data/curated/` changed, `github-actions[bot]` commits `chore(auto): daily meta and bis sync`
+to `main`, and that push redeploys Vercel. A no-op run commits nothing and still passes.
+
+It needs these repository secrets (Settings → Secrets and variables → Actions):
+`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `REVALIDATE_SECRET`.
+`SITE_URL` and `REVALIDATE_SECRET` are for revalidation only. Without them the seed still lands, and the redeploy refreshes the pages.
+
 ### Cache revalidation
 
 Both scripts POST to `/api/revalidate` after writing, so the live pages update on the next request instead of waiting out the one-day `cacheLife`. This needs `SITE_URL` in `.env.local`:
@@ -380,6 +391,7 @@ TTFB is unchanged exactly as predicted — the static shell never depended on th
 | `pnpm sync:static` | CommunityDragon → static tables |
 | `pnpm seed:curated` | YAML → tier lists and comps |
 | `pnpm sync:meta` | MetaTFT ranked stats → the two tier-list YAML files, and the generated comps |
+| `pnpm sync:bis` | MetaTFT unit builds → `champion-bis.yaml` |
 | `pnpm riot:setup` | Riot ID → puuid; probe routing; seed `riot_accounts` + `sync_state` |
 | `pnpm riot:sync` | One sync locally |
 | `pnpm riot:backfill` | Deeper history |
@@ -389,7 +401,7 @@ Most accept `--dry-run`. Scripts run under `tsx --conditions=react-server --env-
 
 ### Environment variables
 
-All nine are set locally in `.env.local` and on Vercel, except `SITE_URL`, which is local-only. The full table is in [architecture §10](context/architecture.md). `src/lib/env.ts` validates **per scope** and lazily, so a seed script never needs a Riot key; it also rejects swapped Supabase keys and never echoes a value in an error message.
+All nine are set locally in `.env.local` and on Vercel, except `SITE_URL`, which is set only locally and as a GitHub Actions secret. The full table is in [architecture §10](context/architecture.md). `src/lib/env.ts` validates **per scope** and lazily, so a seed script never needs a Riot key; it also rejects swapped Supabase keys and never echoes a value in an error message.
 
 | Var | Scope |
 |---|---|
@@ -399,7 +411,7 @@ All nine are set locally in `.env.local` and on Vercel, except `SITE_URL`, which
 | `RIOT_GAME_NAME`, `RIOT_TAG_LINE`, `RIOT_PLATFORM` | server — `sg2` for this account |
 | `CRON_SECRET` | server — cron auth |
 | `REVALIDATE_SECRET` | server — seed scripts → cache revalidation |
-| `SITE_URL` | local scripts only, optional |
+| `SITE_URL` | local scripts and GitHub Actions, optional |
 
 **Any change to a Vercel variable needs a redeploy to take effect.**
 
