@@ -3,15 +3,15 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 635,936 games on patch 18.2, set 18. Feed updated 2026-09-12T14:28:57.532Z.
+# Sample: 802,952 games on patch 18.2, set 18. Feed updated 2026-09-13T05:59:36.115Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 8 to 4.04, A 17 to 4.57, B 19 to 4.72, C 11 to 5.43.
+# Where they fell, as size and worst average placement: S 8 to 4.05, A 17 to 4.57, B 19 to 4.73, C 11 to 5.44.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: champions-18.2
 kind: champion
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 635,936 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 802,952 games over the last 3 days."
 tiers:
   S:
     - DA_Lux18_Base
@@ -33,41 +33,41 @@ tiers:
     - DA_18_Soraka
     - DA_18_Ahri
     - DA_18_Aphelios
+    - DA_18_Morgana
     - DA_18_Alistar
     - DA_18_Varus
-    - DA_18_Morgana
     - DA_Vi18
     - DA_18_Zyra
     - DA_18_Sejuani
-    - DA_18_MasterYi_AD
-  B:
     - DA_18_Diana
-    - DA_18_Rengar
-    - DA_18_Malphite
+  B:
     - DA_18_Kayle
+    - DA_18_MasterYi_AD
+    - DA_18_Malphite
+    - DA_18_Rengar
     - DA_18_Akali_AD
     - DA_Fiddlesticks18
-    - DA_18_Lillia
     - DA_18_Azir
-    - DA_18_Teemo
+    - DA_18_Lillia
     - DA_18_Yorick
+    - DA_18_Teemo
     - DA_18_KhaZix
     - DA_Karma18
     - DA_18_LeBlanc
+    - DA_18_Leona
     - DA_18_Rammus
     - DA_18_RekSai
-    - DA_18_Leona
     - DA_18_Ornn
     - DA_18_Hecarim
     - DA_18_Camille
   C:
     - DA_18_Tristana
     - DA_18_Shen
-    - DA_18_Xayah
     - DA_18_Veigar
+    - DA_18_Xayah
     - DA_18_Rakan
-    - DA_18_Yunara
     - DA_18_Kobuko
+    - DA_18_Yunara
     - DA_18_Cassiopeia
     - DA_18_Caitlyn
     - DA_18_Warwick
