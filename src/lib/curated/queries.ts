@@ -12,6 +12,7 @@ import {
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import type { TierListKind } from "./schemas";
+import { buildTeamCode, type TeamCode } from "./team-code";
 import { buildTraitDetails, parseTraitEffects, pickTraitDetails, type TraitDetailBook } from "./trait-details";
 import { computeActiveTraits, isActive, type TraitCount, type TraitInfo } from "./traits";
 
@@ -284,10 +285,12 @@ export type CompDetail = Omit<CompSummary, "traits"> & {
   flexUnits: CompChampion[];
   /** Tooltip text and members for every trait in `traits`. */
   traitDetails: TraitDetailBook;
+  /** The in-client Team Planner import code; null when no unit has a planner id. */
+  teamCode: TeamCode | null;
 };
 
 // One literal, so supabase-js can infer the row type (the `!inner` join lets the list filter on the set).
-const COMP_COLUMNS = `slug, name, tier, style, difficulty, summary, patch, guide_md, updated_at, early_units, flex_units, is_gem, avg_place, top4_rate, pick_rate, level_recommended, set:tft_sets!inner(name, is_active), units:comp_units(champion_api_name, hex_row, hex_col, star_goal, is_carry, items, carry_priority)`;
+const COMP_COLUMNS = `slug, name, tier, style, difficulty, summary, patch, guide_md, updated_at, early_units, flex_units, is_gem, avg_place, top4_rate, pick_rate, level_recommended, set:tft_sets!inner(name, is_active, mutator), units:comp_units(champion_api_name, hex_row, hex_col, star_goal, is_carry, items, carry_priority)`;
 
 async function loadComps(db: Db, filter: { slug: string } | { activeSet: true }) {
   let query = db.from("comps").select(COMP_COLUMNS).eq("is_published", true);
@@ -301,7 +304,7 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
   );
   const itemNames = unique(rows.flatMap((row) => row.units.flatMap((unit) => unit.items)));
   const [championRows, itemRows] = await Promise.all([
-    db.from("champions").select("api_name, name, cost, traits, icon_url").in("api_name", championNames),
+    db.from("champions").select("api_name, name, cost, traits, icon_url, team_planner_code").in("api_name", championNames),
     itemNames.length ? db.from("items").select("api_name, name, icon_url, grants_trait").in("api_name", itemNames) : null,
   ]);
   const champions = new Map(must(championRows, "comp champions").map((row) => [row.api_name, row]));
@@ -414,6 +417,15 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
         traits: boardTraits,
         earlyUnits: toChampions(row.early_units),
         flexUnits: toChampions(row.flex_units),
+        // Built from the sorted units, so the carries lead the planner too.
+        teamCode: buildTeamCode(
+          units.map((unit) => ({
+            apiName: unit.apiName,
+            name: unit.name,
+            plannerCode: champions.get(unit.apiName)?.team_planner_code ?? null,
+          })),
+          row.set.mutator,
+        ),
       },
     };
   });

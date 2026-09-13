@@ -101,7 +101,7 @@ src/app/
   api/cron/sync/route.ts, api/revalidate/route.ts
 src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx), TierRow, CostFilter, ToggleGroup, HoverTip,
                              HexBoard, CompList, CompGuide, CompTraitList, CompItemBuilds, GuideTimeline, GuideMarkdown,
-                             CarryMark (comp-details.tsx),
+                             CarryMark (comp-details.tsx), CopyTeamCodeButton,
                              PlaystyleBadge, DifficultyBadge, ContestedBadge (comp-badges.tsx),
                              AugmentBoard, RarityPill, AugmentFace, AugmentDetails (augment-parts.tsx),
                              PlacementPill, StatTile, Sparkline, PlacementHistogram, Segmented, Skeleton, SyncNotice,
@@ -137,6 +137,7 @@ src/lib/
   curated/comp-badges.ts     Contested / difficulty / playstyle rules (pure, client-safe)
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
   curated/guide-sections.ts  splitGuide: a comp guide's markdown → labelled stage sections + footnote (pure, client-safe, §9)
+  curated/team-code.ts       buildTeamCode: a comp's units → the TFT client's Team Planner import code (pure, client-safe, §9)
 ```
 
 ---
@@ -180,7 +181,8 @@ create table champions (
   cost         smallint not null check (cost between 1 and 5),  -- playable units only; summons filtered out
   traits       text[] not null default '{}',     -- trait api_names
   icon_url     text,
-  is_shop_unit boolean not null default true     -- true for every playable unit, Riftbeasts included; §4.8
+  is_shop_unit boolean not null default true,    -- true for every playable unit, Riftbeasts included; §4.8
+  team_planner_code smallint check (team_planner_code between 1 and 4095)  -- client Team Planner id; §4.8, §9
 );
 
 create table items (
@@ -374,6 +376,7 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
   - **History.** From the Phase 4 pre-requisite until Task 12 the flag came from Riot's Data Dragon `tft-champion.json`, and units it omitted were stored `false`. Data Dragon 16.18.1 lists 64 of Set 18's 74 playable units, and the ten it omits are exactly the Riftbeasts, so they were treated as unbuyable and left off `/tiers/champions` and `/bis`. `sync:static` no longer fetches Data Dragon: the cost-and-traits test is the whole rule.
   - Migration `20260912120000_champion_shop_flag.sql` added the column; Set 18 went from 64 to 74 champions when the Data Dragon filter became a flag. The column and its readers (`shopUnits` in the tier-list and BIS syncs, the reroll rule) stay, but nothing sets it `false` today — a future set with unbuyable units needs a real source for it. The column's database comment still describes the old rule.
 - Element variants such as the nine Set 18 Lux forms stay as separate rows, because match data names them.
+- **Team Planner id** (Phase 6 Task 15, migration `20260914120000_champion_team_planner_code.sql`). `team_planner_code` is the client's own id for a unit in the Team Planner, from CommunityDragon's `plugins/rcp-be-lol-game-data/global/default/v1/tftchampions-teamplanner.json` in the **same pinned version directory** as `en_us.json`. That file is keyed by mutator (`TFTSet18`) and lists `character_id` — the `DA_…` api name — so it joins with no aliasing (`teamPlannerCodes` in `cdragon.ts`). Set 18: **65 of 74** champions, Riftbeasts included; the nine Lux forms other than `DA_Lux18_Base` are not in the planner, stay null and get one warning. An id outside 1–4095 (three hex digits) is dropped. When the file is unreachable the rows omit the column, as with `traits.kind`, so stored codes survive.
 - Champion `traits` in CommunityDragon are display names. They're mapped to trait api names within the set. When a name is shared (Set 17 has 8 "Stargazer" variants), the shortest api name wins and the sync warns.
 - `icon_url` uses `tileIcon` (128px face crop), falling back to `squareIcon`, then `icon`.
 
@@ -1124,6 +1127,10 @@ comps:                        # keyed by comp slug; a comp without an entry show
     - Chips all use **one accent tint** rather than a hue per stage, since every hue on this page already means something; the word names the stage and the rail dot gives its kind as a shape — **filled** for stages a game moves through (Early, Mid, Late, Levelling), **hollow** for reference (Positioning, Tips, anything else). Numbered dots were considered and dropped: "4" on Positioning implies an order it does not have.
     - The guide's **Items** section is omitted while the Item builds panel is shown — the generated guide repeats the board's items word for word.
     - Either column spans all 12 when the other is empty (no guide; or no items, augments, early or flex units).
+    - **Copy team code** (Phase 6 Task 15): `CopyTeamCodeButton` sits in the header's action slot beside "← All comps" and copies the code the TFT client's Team Planner imports. `getComp()` builds it on the server (`CompDetail.teamCode`, from the sorted units and `tft_sets.mutator`), so the client island receives only a string and a tooltip.
+      - **Format** (`curated/team-code.ts`), verified 2026-09-14 against tactics.tools' live Set 14–18 encoder/decoder and CommunityDragon ids: `02` + **ten** slots of three lowercase hex digits + the set mutator, 40 characters for `TFTSet18`. A slot is a unit's `team_planner_code` (Pebbles 1065 → `429`); unused slots are `000` at the end. Example, Riftbeast Pebbles: `0240f4294283f34194263f74013fc000TFTSet18`. The public gists' `01` + two-hex alphabetical index is the pre-id format and is not used.
+      - Units go in page order (carries first). A unit with no id (a non-Base Lux form) is skipped and one past ten is left out; both are named in the tooltip rather than guessed. No encodable unit, or a mutator that is not `TFTSet<N>`, means no button.
+      - `navigator.clipboard.writeText`, then a hidden-textarea copy; if both are refused the code is printed selectable. "Copied!" with a check glyph for 2s, announced via `aria-live`. `min-h-11` (44px) under `sm`, `min-h-8` above; the header already wraps, so the button drops to its own line on a phone rather than overflowing.
   - `PlacementPill` (always prints the digit, so colour is never the only channel), `StatTile`, `Sparkline`, `PlacementHistogram`, `Segmented` (single-select; `ToggleGroup` stays multi-select, and they share exported button classes so the two can't drift).
     - **Charts are inline SVG** (§2). The geometry lives in pure modules — `sparkline-geometry.ts`, `placement-styles.ts` — so it is unit-testable in the node-only suite, which has no DOM. `sparklineGeometry`'s `domain` is **required rather than derived**, which removes the divide-by-zero case: a run of identical placements sits at that value's height instead of an ambiguous mid-height.
     - `Sparkline` draws the line as stretched SVG but positions its dots as HTML, because an SVG circle inside `preserveAspectRatio="none"` stretches into an ellipse at the ~3× horizontal scale this renders at.

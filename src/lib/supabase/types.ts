@@ -22,6 +22,7 @@ export type Database = {
           is_shop_unit: boolean
           name: string
           set_id: number
+          team_planner_code: number | null
           traits: string[]
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           is_shop_unit?: boolean
           name: string
           set_id: number
+          team_planner_code?: number | null
           traits?: string[]
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           is_shop_unit?: boolean
           name?: string
           set_id?: number
+          team_planner_code?: number | null
           traits?: string[]
         }
         Relationships: [

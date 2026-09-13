@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { CompAugments } from "@/lib/curated/augment-tiers";
 import type { CompChampion, CompDetail } from "@/lib/curated/queries";
 import { isContested } from "@/lib/curated/comp-badges";
+import { teamCodeHint } from "@/lib/curated/team-code";
 import { AugmentFace } from "./augment-parts";
 import { ChampionIcon } from "./champion-icon";
 import { CONTESTED_TOOLTIP, ContestedBadge, DifficultyBadge, PlaystyleBadge } from "./comp-badges";
@@ -10,6 +11,7 @@ import { GEM_TOOLTIP, GemBadge } from "./comp-details";
 import { CompItemBuilds } from "./comp-item-builds";
 import { CompStatsRow } from "./comp-stats";
 import { CompTraitList } from "./comp-traits";
+import { CopyTeamCodeButton } from "./copy-team-code-button";
 import { GuideTimeline } from "./guide-timeline";
 import { HexBoard } from "./hex-board";
 import { PageHeader } from "./page-header";
@@ -56,9 +58,12 @@ export function CompGuide({ comp, augments = null }: { comp: CompDetail; augment
           </span>
         }
       >
-        <Link href="/comps" className="text-muted hover:text-fg">
-          ← All comps
-        </Link>
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+          {comp.teamCode ? <CopyTeamCodeButton code={comp.teamCode.code} hint={teamCodeHint(comp.teamCode)} /> : null}
+          <Link href="/comps" className="text-muted hover:text-fg">
+            ← All comps
+          </Link>
+        </div>
       </PageHeader>
       {comp.summary ? <p className="mb-2 text-fg">{comp.summary}</p> : null}
       <CompStatsRow stats={comp} className="mb-3 text-xs" />

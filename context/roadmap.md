@@ -442,6 +442,40 @@ Approved task by task rather than as a whole phase.
   - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me` and
     `/comps/riftbeast-pebbles` all 200.
 
+- [x] **Task 15 — "Copy team code" for the in-client Team Planner** (approved 2026-09-14)
+  - **The format was verified, not assumed.** The request suggested `TFTSet18_{names}` or base64
+    JSON; the client reads neither. tactics.tools' live bundle carries an encoder and decoder per set:
+    Sets 14–18 write `"02"` + **ten** slots of three hex digits + the mutator, and the decoder insists
+    on `length === 32 + "TFTSet18".length`. Its Set 18 roster stores Pebbles as `"429"` = 1065,
+    CommunityDragon's `team_planner_code`. The `01` + two-hex alphabetical index in the public gists
+    survives only in its Set 4 encoder (architecture §9).
+  - Migration `20260914120000_champion_team_planner_code.sql`: `champions.team_planner_code smallint`
+    (1–4095). `sync:static` reads `tftchampions-teamplanner.json` from the pinned version directory
+    (`teamPlannerCodes`); unreachable → column omitted, stored codes kept (architecture §4.8).
+  - `curated/team-code.ts`: `buildTeamCode(units, mutator)` → `{ code, units, skipped }` or null, and
+    `teamCodeHint`. Page order (carries first); no-id units (non-Base Lux forms) skipped and named, a
+    unit past ten left out and named; non-`TFTSet<N>` mutator or nothing encodable → no button.
+  - `getComp()` builds `CompDetail.teamCode` on the server; `CopyTeamCodeButton` (client) sits beside
+    "← All comps": inline clipboard/check SVG, "Copied!" for 2s via `aria-live`, textarea fallback, and
+    the code printed selectable if both copies are refused. 44px tall under `sm`, 32px above.
+  - Tests: 18 new (`team-code` real Set 18 boards, 1–10 and 11 units, order, Lux skip, invalid ids,
+    lowercase, null cases, hint; `cdragon` planner parse, bounds, pinned URL, snapshot column and warning).
+
+**Verified — Task 15 (2026-09-14):**
+- **Checks:** `pnpm check` (435 tests, up from 417) and `pnpm build` (fetch cache cleared) green;
+  every route keeps its shape and lifetime (`/comps/[slug]` still Partial Prerender, 1d / 1w).
+- **Data:** migration pushed, types regenerated; `pnpm sync:static` stored **65 of 74** codes — every
+  unit on all 28 curated boards, all ten Riftbeasts included — and warned once for the nine Lux forms
+  other than `DA_Lux18_Base`. Revalidated `static`.
+- **Round trip:** the three codes the browser copied were decoded back through CommunityDragon's
+  roster and match their YAML boards unit for unit (Riftbeast Pebbles 9, Draven Fast 9 9, Elderwood
+  Kayle 7 + three `000`).
+- **Local `pnpm start`, headless Edge** at 1280, 960 and 390px on three comps: 200, no horizontal
+  overflow, the button inside the viewport (32px tall, 44px at 390 where it wraps under the title),
+  Enter from the keyboard copies a 40-character code, "Copied!" shows and is announced, resets after
+  2s, the tooltip reads "Paste into the TFT Team Planner (Import)", zero console errors.
+- **Not verifiable here:** pasting into the TFT client itself — to be confirmed in-game after deploy.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

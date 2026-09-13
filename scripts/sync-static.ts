@@ -18,6 +18,8 @@ import {
   parseCdragonTft,
   pickSet,
   type StaticSnapshot,
+  teamPlannerCodes,
+  teamPlannerUrl,
 } from "@/lib/static/cdragon";
 import { ITEM_KINDS, CHAMPION_COSTS, TRAIT_KINDS, type TraitKind } from "@/lib/static/game";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
@@ -47,6 +49,23 @@ async function fetchKinds(setId: number): Promise<Map<string, TraitKind> | undef
   return undefined;
 }
 
+/**
+ * Team Planner ids from the client's planner roster, pinned to the same game-data
+ * directory as everything else. Undefined when unavailable, which leaves
+ * `champions.team_planner_code` untouched: the comp page's "Copy team code" keeps
+ * the codes it had, and nothing else depends on them.
+ */
+async function fetchPlannerCodes(patch: string, mutator: string): Promise<Map<string, number> | undefined> {
+  try {
+    const codes = teamPlannerCodes(await getJson(teamPlannerUrl(patch)), mutator);
+    if (codes.size) return codes;
+    console.warn(`The Team Planner file lists no ${mutator} champions; team_planner_code left as it was.`);
+  } catch (error) {
+    console.warn(`Team Planner codes unavailable (${(error as Error).message}); team_planner_code left as it was.`);
+  }
+  return undefined;
+}
+
 function countBy<T, K extends string | number>(rows: readonly T[], key: (row: T) => K, order: readonly K[]) {
   const counts = new Map<K, number>();
   for (const row of rows) counts.set(key(row), (counts.get(key(row)) ?? 0) + 1);
@@ -59,6 +78,9 @@ function printSummary({ set, traits, champions, items, warnings }: StaticSnapsho
   const kinds = typed.length ? `  (${countBy(typed, (t) => t.kind as TraitKind, TRAIT_KINDS)})` : "  (types unchanged)";
   console.log(`  traits     ${traits.length}${kinds}`);
   console.log(`  champions  ${champions.length}  (cost ${countBy(champions, (c) => c.cost, CHAMPION_COSTS)})`);
+  const planned = champions.filter((c) => c.team_planner_code != null).length;
+  const plannerNote = champions.some((c) => "team_planner_code" in c) ? `${planned} of ${champions.length}` : "unchanged";
+  console.log(`  planner    ${plannerNote}`);
   console.log(`  items      ${items.length}  (${countBy(items, (i) => i.kind, ITEM_KINDS)})`);
   if (warnings.length) console.log(`  warnings:\n${warnings.map((w) => `    - ${w}`).join("\n")}`);
 }
@@ -102,8 +124,9 @@ async function main() {
   const patch = cdragonPatch(version);
   console.log(`Fetching CommunityDragon TFT data for game version ${patch}…`);
   const data = parseCdragonTft(await getJson(`${CDRAGON_ORIGIN}/${patch}/cdragon/tft/en_us.json`));
-  const traitKinds = await fetchKinds(pickSet(data, setNumber).number);
-  const snapshot = buildStaticSnapshot(data, { patch, setNumber, traitKinds });
+  const picked = pickSet(data, setNumber);
+  const [traitKinds, plannerCodes] = await Promise.all([fetchKinds(picked.number), fetchPlannerCodes(patch, picked.mutator)]);
+  const snapshot = buildStaticSnapshot(data, { patch, setNumber, traitKinds, plannerCodes });
   printSummary(snapshot);
   if (values["dry-run"]) {
     console.log("\nDry run: nothing written.");

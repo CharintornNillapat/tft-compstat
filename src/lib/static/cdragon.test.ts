@@ -7,6 +7,8 @@ import {
   parseCdragonTft,
   pickSet,
   setDisplayName,
+  teamPlannerCodes,
+  teamPlannerUrl,
   traitBreakpoints,
 } from "./cdragon";
 
@@ -263,6 +265,19 @@ describe("buildStaticSnapshot", () => {
     expect(snapshot.warnings).not.toContainEqual(expect.stringMatching(/No trait type/));
   });
 
+  it("stores Team Planner codes when given, null for champions the planner lacks, with one warning", () => {
+    const [first, ...rest] = snapshot.champions;
+    const planned = buildStaticSnapshot(data, { patch: PATCH, plannerCodes: new Map([[first!.api_name, 1065]]) });
+    const codes = Object.fromEntries(planned.champions.map((c) => [c.api_name, c.team_planner_code]));
+    expect(codes[first!.api_name]).toBe(1065);
+    for (const champion of rest) expect(codes[champion.api_name]).toBeNull();
+    expect(planned.warnings.filter((w) => w.startsWith("No Team Planner code for"))).toHaveLength(rest.length ? 1 : 0);
+  });
+
+  it("leaves team_planner_code out of the rows without a source, so an upsert keeps stored codes", () => {
+    expect(snapshot.champions.every((c) => !("team_planner_code" in c))).toBe(true);
+  });
+
   it("classifies items by tag, then by api name and recipe", () => {
     const kinds = Object.fromEntries(snapshot.items.map((i) => [i.api_name, i.kind]));
     expect(kinds).toEqual({
@@ -305,6 +320,41 @@ describe("buildStaticSnapshot", () => {
     const broken = { ...fixture, setData: [{ ...set18, champions: [{ apiName: "X", cost: "5" }] }] };
     expect(() => buildStaticSnapshot(parseCdragonTft(broken), { patch: PATCH })).toThrowError(
       /Unexpected CommunityDragon format \(TFTSet18\)[\s\S]*champions/,
+    );
+  });
+});
+
+describe("teamPlannerCodes", () => {
+  const planner = {
+    TFTSet17: [{ character_id: "TFT17_Ahri", team_planner_code: 900 }],
+    TFTSet18: [
+      { character_id: "DA_18_Sentry", team_planner_code: 1065, display_name: "Pebbles" },
+      { character_id: "DA_Lux18_Base", team_planner_code: 1029 },
+      { character_id: "DA_18_NoCode" },
+      { character_id: "DA_18_Zero", team_planner_code: 0 },
+      { character_id: "DA_18_TooBig", team_planner_code: 4096 },
+      { character_id: "DA_18_Fraction", team_planner_code: 10.5 },
+    ],
+  };
+
+  it("maps character ids to codes for the requested set only", () => {
+    expect(teamPlannerCodes(planner, "TFTSet18")).toEqual(
+      new Map([
+        ["DA_18_Sentry", 1065],
+        ["DA_Lux18_Base", 1029],
+      ]),
+    );
+    expect(teamPlannerCodes(planner, "TFTSet17")).toEqual(new Map([["TFT17_Ahri", 900]]));
+  });
+
+  it("is empty for a set the file does not list, and throws on a malformed file", () => {
+    expect(teamPlannerCodes(planner, "TFTSet19").size).toBe(0);
+    expect(() => teamPlannerCodes({ TFTSet18: "nope" }, "TFTSet18")).toThrow();
+  });
+
+  it("builds the pinned URL", () => {
+    expect(teamPlannerUrl(PATCH)).toBe(
+      "https://raw.communitydragon.org/16.18/plugins/rcp-be-lol-game-data/global/default/v1/tftchampions-teamplanner.json",
     );
   });
 });

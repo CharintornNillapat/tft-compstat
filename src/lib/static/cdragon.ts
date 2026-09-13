@@ -215,6 +215,36 @@ export function cleanItemName(name: string | null | undefined, apiName: string):
   return clean || apiName;
 }
 
+// ─── Team Planner ids ───────────────────────────────────────────────────────
+
+/** Largest id a team code slot holds: three hex digits (`curated/team-code.ts`). */
+export const MAX_TEAM_PLANNER_CODE = 0xfff;
+
+const teamPlannerSchema = z.record(
+  z.string(),
+  z.array(z.object({ character_id: z.string(), team_planner_code: z.number().nullish() })),
+);
+
+/** `<version>/plugins/rcp-be-lol-game-data/global/default/v1/tftchampions-teamplanner.json`. */
+export function teamPlannerUrl(patch: string): string {
+  return `${CDRAGON_ORIGIN}/${patch}/plugins/rcp-be-lol-game-data/global/default/v1/tftchampions-teamplanner.json`;
+}
+
+/**
+ * The client's Team Planner roster → id by champion api name, for one set mutator
+ * ("TFTSet18"). The file is keyed by mutator and lists `character_id`, the same
+ * `DA_…` name as `champions.api_name`. An id that is not an integer a slot can hold
+ * is dropped, so a bad row costs that unit its code rather than corrupting every code.
+ */
+export function teamPlannerCodes(json: unknown, mutator: string): Map<string, number> {
+  const roster = teamPlannerSchema.parse(json)[mutator] ?? [];
+  const codes = new Map<string, number>();
+  for (const { character_id, team_planner_code: code } of roster) {
+    if (Number.isInteger(code) && code! >= 1 && code! <= MAX_TEAM_PLANNER_CODE) codes.set(character_id, code!);
+  }
+  return codes;
+}
+
 // ─── Snapshot ───────────────────────────────────────────────────────────────
 
 export type StaticSnapshot = {
@@ -236,6 +266,12 @@ export type SnapshotOptions = {
    * survive. A trait the map lacks gets null and one warning for all of them.
    */
   traitKinds?: ReadonlyMap<string, TraitKind>;
+  /**
+   * Team Planner id by champion api name (`teamPlannerCodes`). Undefined when the planner
+   * file is unavailable: `team_planner_code` is then left out of the rows, so stored codes
+   * survive. A champion the map lacks gets null and one warning for all of them.
+   */
+  plannerCodes?: ReadonlyMap<string, number>;
 };
 
 export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions): StaticSnapshot {
@@ -279,6 +315,7 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
   // trait excludes the traitless legacy summons and the cost-8/11 anvils. Data Dragon's
   // shop list is not consulted: it omits Set 18's Riftbeasts, which the shop sells at
   // their costs like any other champion (§4.8).
+  const { plannerCodes } = options;
   const playable = cdSet.champions.filter((c) => c.cost >= 1 && c.cost <= 5 && c.traits.length > 0);
   const champions = playable.map((c) => ({
     api_name: c.apiName,
@@ -293,7 +330,15 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
     icon_url: cdragonAssetUrl(c.tileIcon ?? c.squareIcon ?? c.icon, patch),
     // Explicit rather than the column default, so an upsert clears a stale false.
     is_shop_unit: true,
+    // Omitted rather than null without a source, the same rule as `traits.kind`.
+    ...(plannerCodes ? { team_planner_code: plannerCodes.get(c.apiName) ?? null } : {}),
   }));
+  if (plannerCodes) {
+    const unplanned = champions.filter((c) => c.team_planner_code === null).map((c) => c.api_name);
+    if (unplanned.length) {
+      warnings.push(`No Team Planner code for ${unplanned.join(", ")}; team codes skip them.`);
+    }
+  }
 
   // Items: everything the set's pool references. Emblems name their trait: "Coven Emblem".
   const rawItems = new Map(data.items.map((item) => [item.apiName, item]));
