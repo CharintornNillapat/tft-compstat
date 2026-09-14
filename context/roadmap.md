@@ -520,6 +520,12 @@ Approved task by task rather than as a whole phase.
     the name as typed and Save cleans it (a test pins both).
 - **Also seen, not changed:** at 390px the site nav already scrolls inside its own `overflow-x-auto` strip, so
   Planner and Me sit off to its right, as BIS / Augments / Me did before; the document itself never overflows.
+- **Deployed (2026-09-14, commit `7878226`)**: `dpl_6Ag2cMQQrFVVFr3sAxci6UcPxfMP`, aliased to
+  https://tft-compstat.vercel.app.
+  - **The same headless-Edge planner run against production** at 1280, 960 and 390px: every check passed,
+    including the auto-scroll drag at 960×650 (board at y −160, Taric dropped on his hex); zero console errors.
+  - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me`, `/planner` and
+    `/comps/riftbeast-pebbles` all 200.
 
 - [ ] Further tasks — not yet specified.
 
