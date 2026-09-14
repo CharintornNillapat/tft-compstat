@@ -1117,7 +1117,11 @@ comps:                        # keyed by comp slug; a comp without an entry show
   - Constants a client component needs live in `static/game.ts`, and `schemas.ts` says so at the top. Type-only imports from
     it are fine: they are erased.
   - `planner/saved-comps.ts`, the one module that has to validate in the browser, uses `zod/mini` (79.4 KB raw / 25.1 KB
-    gzipped of the planner's JavaScript).
+    gzipped of the planner's JavaScript). **Kept deliberately** (decided 2026-09-14): hand-written guards would save about
+    20 KB more, and 44.6 KB is fine for a full builder; the declarative storage schema is worth more.
+  - **`/comps` keeps its trait member lists** (24 KB raw, 16 KB gzipped for the whole payload), also decided 2026-09-14.
+    Deduplicating them would change the `TraitDetail` shape the list, the guide and the planner tooltips share. Only
+    `/planner` builds the book in the browser, because only it already ships every member in its catalog.
   - Measured from each route's `page_client-reference-manifest.js` (`entryJSFiles`), since Next 16's build output no longer
     prints first-load JS. Page JavaScript, gzipped: `/planner` 116.1 → 44.6 KB, `/bis` 106.0 → 16.7 KB, `/augments` 16.3 KB;
     every other route 13–20 KB and unchanged. `knip.json` (`ignoreExportsUsedInFile`) keeps `pnpm dlx knip` to real dead code.

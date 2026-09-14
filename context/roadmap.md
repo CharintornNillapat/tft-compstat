@@ -527,7 +527,7 @@ Approved task by task rather than as a whole phase.
   - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me`, `/planner` and
     `/comps/riftbeast-pebbles` all 200.
 
-- [ ] **Task 17 — Codebase audit: dead code, bundles, payloads, storage edge cases** (requested 2026-09-14)
+- [x] **Task 17 — Codebase audit: dead code, bundles, payloads, storage edge cases** (requested 2026-09-14)
   - **Dead code** (`pnpm dlx knip`, now configured by `knip.json` with `ignoreExportsUsedInFile`, so an export its own
     module uses is not reported): removed `components/placeholder.tsx` (the Phase 1 stub, imported nowhere),
     `BOARD_HEXES`, `EMPTY_NAME_BOOK` and six unused `*File` types in `schemas.ts`. No unused dependencies, and nothing
@@ -568,7 +568,18 @@ Approved task by task rather than as a whole phase.
   or full storage, placing and saving still work, Save reads "Saved “…” for this tab only." and the notice shows once.
   Zero console errors in all three. `/`, `/comps`, `/comps/riftbeast-pebbles`, `/bis`, `/augments` and both tier lists 200.
 - **Found while verifying and fixed:** the first "tab only" status repeated the notice beside it word for word.
-- **Not committed or deployed**, pending review.
+- **Decisions at review (2026-09-14):** keep `zod/mini` on `/planner` — 44.6 KB gzipped is fine for a full builder, and
+  the declarative schema is worth more than the ~20 KB hand-written guards would save; keep the trait member lists in
+  the `/comps` payload (16 KB gzipped), so every trait tooltip reads one shared `TraitDetail` shape.
+- **Deployed (2026-09-14, commit `4cb9e76`)**: `dpl_9jKPoWdQGSeTrXmhze45RALUfJDU` built first time, Ready in ~31s in
+  `icn1` and aliased to https://tft-compstat.vercel.app.
+  - **The same headless-Edge planner run against production**, with working, blocked and full storage: 22 of 22 checks,
+    zero console errors.
+  - **Live bundles** (every script each page loads, framework included): zod appears only on `/planner`, in its 79.3 KB
+    `zod/mini` chunk. `/bis` and `/augments` load 183.6 and 183.2 KB gzipped, in line with `/` at 179.9 KB; `/planner`
+    loads 211.6 KB. The live `/planner` HTML carries no `traitDetails`.
+  - **Routes:** `/`, `/comps`, `/comps/riftbeast-pebbles`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`,
+    `/me` and `/planner` all 200.
 
 - [ ] Further tasks — not yet specified.
 
