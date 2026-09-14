@@ -61,6 +61,19 @@ export type TraitBreakpoint = { min: number; style: TraitStyle };
 /** One `traits.effects` entry: the bonus text at `min` units, placeholders resolved. Sorted by `min`. */
 export type TraitEffect = { min: number; text: string };
 
+/**
+ * What a champion's items are *for* on `/bis`. Derived by `sync:bis` from the component
+ * composition of the primary build (a build of two Chain Vests and a Negatron Cloak is a
+ * tank's), so it is a label on the data rather than an opinion — but it stays in the file
+ * so it can be corrected by hand.
+ */
+export const BIS_ROLES = ["AP Carry", "AD Carry", "Main Tank", "Utility / Bruiser"] as const;
+export type BisRole = (typeof BIS_ROLES)[number];
+
+/** Augment rarity, in the order `/augments` and a comp's picks list them. */
+export const AUGMENT_RARITIES = ["Silver", "Gold", "Prismatic"] as const;
+export type AugmentRarity = (typeof AUGMENT_RARITIES)[number];
+
 /** Item kinds in the order the item tier list shows them. */
 export const ITEM_KIND_LABELS = {
   completed: "Completed",

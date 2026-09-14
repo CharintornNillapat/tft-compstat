@@ -527,6 +527,49 @@ Approved task by task rather than as a whole phase.
   - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me`, `/planner` and
     `/comps/riftbeast-pebbles` all 200.
 
+- [ ] **Task 17 — Codebase audit: dead code, bundles, payloads, storage edge cases** (requested 2026-09-14)
+  - **Dead code** (`pnpm dlx knip`, now configured by `knip.json` with `ignoreExportsUsedInFile`, so an export its own
+    module uses is not reported): removed `components/placeholder.tsx` (the Phase 1 stub, imported nowhere),
+    `BOARD_HEXES`, `EMPTY_NAME_BOOK` and six unused `*File` types in `schemas.ts`. No unused dependencies, and nothing
+    left over from the `HexUnitFace` extraction or the earlier filters. A doc comment named `use-saved-comps.ts`, which
+    never existed; the hook is `use-stored-value.ts`.
+  - **Zod was in three client bundles.** `BisBoard` and `AugmentBoard` imported `BIS_ROLES` / `AUGMENT_RARITIES` from
+    `schemas.ts`, whose top-level schemas cannot be tree-shaken, and `saved-comps.ts` used full zod: one 389 KB chunk
+    on `/bis`, `/augments` and `/planner`. The constants moved to `static/game.ts` and `saved-comps.ts` uses `zod/mini`
+    (architecture §8). Page JavaScript, gzipped: `/planner` 116.1 → 44.6 KB, `/bis` 106.0 → 16.7 KB, `/augments` 16.3 KB.
+  - **Payloads.** `/planner` sent each trait's member list although every member is in its catalog — 25.7 KB of a
+    91.4 KB RSC payload. `plannerTraitDetails` builds the tooltips in the browser instead: RSC 91.4 → 63.4 KB, HTML
+    205.4 → 174.7 KB; `set.id` is no longer sent. `summary` moved from `CompSummary` to `CompDetail`, since only the
+    guide page shows it (`/comps` RSC 209.4 → 206.2 KB). Everything else in the comp payloads is read by a row, a
+    tooltip or the search.
+  - **localStorage.** `use-stored-value.ts` already guarded every access, but Save announced "Saved … to My Planner"
+    when the write had failed; it now says "for this tab only". 7 tests against a stub window: quota exceeded, blocked
+    storage, another tab's write and clear, unsubscribe.
+  - **`next/image`: no change.** A fixed `width`/`height` with no `sizes` is right for fixed-size icons (`1x`/`2x`
+    candidates); the sources are square (128×128, trait icons 32×32) and drawn with `object-cover` (architecture §8).
+
+**Verified — Task 17 (2026-09-14):**
+- **Checks:** `pnpm check` (487 tests, up from 479: 7 for the storage store, 1 for `plannerTraitDetails`), `pnpm dlx knip`
+  (no findings) and `pnpm build` (fetch cache cleared) green; every route keeps its shape and lifetime.
+- **Measured before and after** from each route's client reference manifest and prerendered payload:
+
+  | | before | after |
+  |---|---|---|
+  | `/planner` page JS (gzipped) | 116.1 KB | 44.6 KB |
+  | `/bis` page JS (gzipped) | 106.0 KB | 16.7 KB |
+  | `/planner` RSC / HTML (raw) | 91.4 / 205.4 KB | 63.4 / 174.7 KB |
+  | `/comps` RSC (raw) | 209.4 KB | 206.2 KB |
+
+  No other route's JavaScript moved (13–20 KB gzipped), and no route but `/planner` ships zod.
+- **Local `pnpm start`, headless Edge at 1280px**, a fresh profile for each of working, blocked (`localStorage` throws
+  `SecurityError`) and full (`setItem` throws `QuotaExceededError`) storage — 22 of 22 checks: 74 tiles and 28 hexes;
+  Sivir and Ashe placed; the Hunter tooltip lists its five members, built in the browser, with the two fielded ones
+  marked "on this board"; Save stores a version-1 document; the draft and the saved list survive a reload. With blocked
+  or full storage, placing and saving still work, Save reads "Saved “…” for this tab only." and the notice shows once.
+  Zero console errors in all three. `/`, `/comps`, `/comps/riftbeast-pebbles`, `/bis`, `/augments` and both tier lists 200.
+- **Found while verifying and fixed:** the first "tab only" status repeated the notice beside it word for word.
+- **Not committed or deployed**, pending review.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

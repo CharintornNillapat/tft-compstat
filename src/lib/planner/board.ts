@@ -51,8 +51,6 @@ export type BoardUnit = Hex & { apiName: string; star: Star; items: readonly str
 export type Board = readonly BoardUnit[];
 export type BoardResult = { board: Board; error: string | null };
 
-export const BOARD_HEXES = BOARD_ROWS * BOARD_COLS;
-
 const ok = (board: Board): BoardResult => ({ board, error: null });
 const fail = (board: Board, error: string): BoardResult => ({ board, error });
 

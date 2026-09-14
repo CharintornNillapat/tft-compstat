@@ -2,8 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import type { Augment } from "@/lib/curated/augment-tiers";
-import { AUGMENT_RARITIES, type AugmentRarity } from "@/lib/curated/schemas";
-import { TIER_RANKS, type TierRank } from "@/lib/static/game";
+import { AUGMENT_RARITIES, TIER_RANKS, type AugmentRarity, type TierRank } from "@/lib/static/game";
 import { AugmentDetails, AugmentFace } from "./augment-parts";
 import { EmptyState } from "./empty-state";
 import { HoverTip, useHoverTip } from "./hover-tip";

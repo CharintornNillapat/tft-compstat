@@ -1,5 +1,5 @@
-import type { TierRank } from "@/lib/static/game";
-import { augmentTiersFileSchema, type AugmentRarity } from "./schemas";
+import type { AugmentRarity, TierRank } from "@/lib/static/game";
+import { augmentTiersFileSchema } from "./schemas";
 import { parseYaml, type SeedIssue } from "./validate";
 
 /**

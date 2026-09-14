@@ -1,5 +1,6 @@
 import { Document, parse } from "yaml";
-import { BIS_PRIMARY_ITEMS, BIS_SECONDARY_ITEMS, BIS_SPECIAL_ITEMS, type BisRole } from "./schemas";
+import type { BisRole } from "@/lib/static/game";
+import { BIS_PRIMARY_ITEMS, BIS_SECONDARY_ITEMS, BIS_SPECIAL_ITEMS } from "./schemas";
 import { averagePlacement, totalGames, type Placements } from "./meta-sync";
 
 /**

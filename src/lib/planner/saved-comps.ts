@@ -1,4 +1,6 @@
-import { z } from "zod";
+// zod/mini, not zod: this module runs in the browser, where full zod would be most of
+// the planner's JavaScript (architecture §8).
+import * as z from "zod/mini";
 import { MAX_UNIT_ITEMS } from "@/lib/static/game";
 import { sanitizeBoard, type Board, type PlannerCatalog } from "./board";
 
@@ -7,7 +9,7 @@ import { sanitizeBoard, type Board, type PlannerCatalog } from "./board";
  * localStorage — the site has no accounts (§0) — so this module is the whole storage
  * contract: a versioned JSON document, read defensively because anything can be in
  * localStorage, and rebuilt through the board rules so a stored board never holds
- * what the editor would refuse. Pure; `use-saved-comps.ts` does the reading and writing.
+ * what the editor would refuse. Pure; `components/planner/use-stored-value.ts` does the reading and writing.
  */
 
 export const SAVED_COMPS_KEY = "tft-compstat:planner:v1";
@@ -30,18 +32,18 @@ export type SavedComp = {
 // ─── Storage format ─────────────────────────────────────────────────────────
 
 const storedUnitSchema = z.object({
-  apiName: z.string().min(1),
+  apiName: z.string().check(z.minLength(1)),
   // Range is checked by `sanitizeBoard`, so one bad hex drops a unit, not the comp.
   hex: z.object({ row: z.number(), col: z.number() }),
   star: z.number(),
-  items: z.array(z.string()).max(MAX_UNIT_ITEMS),
+  items: z.array(z.string()).check(z.maxLength(MAX_UNIT_ITEMS)),
 });
 
 const storedCompSchema = z.object({
-  id: z.string().min(1),
+  id: z.string().check(z.minLength(1)),
   name: z.string(),
-  set: z.string().min(1),
-  isFavorite: z.boolean().optional(),
+  set: z.string().check(z.minLength(1)),
+  isFavorite: z.optional(z.boolean()),
   units: z.array(storedUnitSchema),
   updatedAt: z.string(),
 });
@@ -193,7 +195,7 @@ export function serializeDraft(draft: Draft, set: string): string {
 const draftSchema = z.object({
   version: z.literal(1),
   set: z.string(),
-  id: z.string().nullable(),
+  id: z.nullable(z.string()),
   name: z.string(),
   units: z.array(storedUnitSchema),
 });

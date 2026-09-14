@@ -11,12 +11,14 @@ import { useSyncExternalStore } from "react";
  * Every access is guarded: storage can be blocked (private windows, disabled site
  * data) or full. Writes always land in an in-memory copy first, so the planner keeps
  * working for the life of the tab and `writeStored` reports that nothing persisted.
+ * `use-stored-value.test.ts` drives both failures against a stub window.
  */
 
 const memory = new Map<string, string>();
 const listeners = new Set<() => void>();
 
-function read(key: string): string | null {
+/** This tab's copy when it has one, else storage; null when unset or storage is unreadable. */
+export function readStored(key: string): string | null {
   if (memory.has(key)) return memory.get(key) ?? null;
   try {
     return window.localStorage.getItem(key);
@@ -25,7 +27,7 @@ function read(key: string): string | null {
   }
 }
 
-function subscribe(onChange: () => void) {
+export function subscribeStored(onChange: () => void) {
   listeners.add(onChange);
   // Another tab wrote: drop our copy so the next read goes back to storage.
   const onStorage = (event: StorageEvent) => {
@@ -43,8 +45,8 @@ function subscribe(onChange: () => void) {
 /** The stored string, null when unset, and undefined until hydrated (the server has no storage). */
 export function useStoredValue(key: string): string | null | undefined {
   return useSyncExternalStore(
-    subscribe,
-    () => read(key),
+    subscribeStored,
+    () => readStored(key),
     () => undefined,
   );
 }

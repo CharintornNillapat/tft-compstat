@@ -1,6 +1,6 @@
 import { Document, isSeq, parse } from "yaml";
-import { TIER_RANKS, type TierRank } from "@/lib/static/game";
-import { AUGMENT_RARITIES, COMP_AUGMENTS, type AugmentRarity } from "./schemas";
+import { AUGMENT_RARITIES, TIER_RANKS, type AugmentRarity, type TierRank } from "@/lib/static/game";
+import { COMP_AUGMENTS } from "./schemas";
 
 /**
  * Pure: MetaTFT's augment grades + CommunityDragon's augment data → the generated

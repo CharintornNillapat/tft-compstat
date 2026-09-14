@@ -1,6 +1,6 @@
-import type { ItemKind } from "@/lib/static/game";
+import type { ItemKind, TraitEffect, TraitKind } from "@/lib/static/game";
 import { normalize } from "@/lib/curated/comp-filter";
-import type { TraitDetailBook } from "@/lib/curated/trait-details";
+import { buildTraitDetails, type TraitDetailBook } from "@/lib/curated/trait-details";
 import type { TraitInfo } from "@/lib/curated/traits";
 import {
   PLANNER_ITEM_KINDS,
@@ -15,14 +15,31 @@ import {
  * and the champion and item filters. Pure and client-safe.
  */
 
+/** A trait as `/planner` receives it: what `computeActiveTraits` needs, plus its tooltip text. */
+export type PlannerTrait = TraitInfo & { description: string | null; effects: TraitEffect[]; kind: TraitKind | null };
+
 /** What `/planner` receives from `getPlannerData()` (server), declared here so client code can import it. */
 export type PlannerData = {
-  set: { id: number; name: string; mutator: string };
+  set: { name: string; mutator: string };
   catalog: PlannerCatalog;
-  /** `TraitInfo` by api name; the client turns it into the Map `computeActiveTraits` takes. */
-  traits: Record<string, TraitInfo>;
-  traitDetails: TraitDetailBook;
+  /** By api name; the client turns it into the Map `computeActiveTraits` takes. */
+  traits: Record<string, PlannerTrait>;
 };
+
+/**
+ * The trait tooltips, built in the browser. Every member of a trait is already in the
+ * catalog, so a book built on the server would send each champion a second time —
+ * a quarter of the page's payload.
+ */
+export function plannerTraitDetails(
+  traits: Record<string, PlannerTrait>,
+  champions: Record<string, PlannerChampion>,
+): TraitDetailBook {
+  return buildTraitDetails({
+    traits: Object.entries(traits).map(([apiName, trait]) => ({ apiName, ...trait })),
+    champions: Object.values(champions),
+  });
+}
 
 /**
  * Tile captions. A name shared by several forms (Set 18's Lux elements) gets the trait

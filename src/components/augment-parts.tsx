@@ -1,5 +1,5 @@
 import type { Augment } from "@/lib/curated/augment-tiers";
-import type { AugmentRarity } from "@/lib/curated/schemas";
+import type { AugmentRarity } from "@/lib/static/game";
 import { ItemIcon } from "./item-icon";
 import { TIER_TEXT } from "./tier-row";
 

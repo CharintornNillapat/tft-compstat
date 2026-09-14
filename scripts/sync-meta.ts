@@ -78,7 +78,6 @@ import {
 } from "@/lib/curated/augment-sync";
 import { parseAugmentTiers } from "@/lib/curated/augment-tiers";
 import {
-  AUGMENT_RARITIES,
   AUGMENT_TIERS_FILE,
   COMPS_DIR,
   TIER_LIST_FILES,
@@ -94,7 +93,7 @@ import {
   type SeedIssue,
 } from "@/lib/curated/validate";
 import { CDRAGON_ORIGIN, cdragonAssetUrl, cleanItemName } from "@/lib/static/cdragon";
-import { ITEM_KINDS, TIER_RANKS, type CompStyle, type TierRank } from "@/lib/static/game";
+import { AUGMENT_RARITIES, ITEM_KINDS, TIER_RANKS, type CompStyle, type TierRank } from "@/lib/static/game";
 import { augmentText } from "@/lib/static/trait-text";
 import {
   COMPS_ORIGIN,

@@ -17,7 +17,7 @@ import {
   type BoardResult,
   type Hex,
 } from "@/lib/planner/board";
-import type { PlannerData } from "@/lib/planner/catalog";
+import { plannerTraitDetails, type PlannerData } from "@/lib/planner/catalog";
 import {
   cleanCompName,
   deleteComp,
@@ -76,6 +76,7 @@ export function PlannerApp({ data }: { data: PlannerData }) {
   const { catalog } = data;
   const mutator = data.set.mutator;
   const traitMap = useMemo(() => new Map(Object.entries(data.traits)), [data.traits]);
+  const traitDetails = useMemo(() => plannerTraitDetails(data.traits, catalog.champions), [data.traits, catalog.champions]);
   const champions = useMemo(() => Object.values(catalog.champions), [catalog]);
   const items = useMemo(() => Object.values(catalog.items), [catalog]);
 
@@ -94,11 +95,16 @@ export function PlannerApp({ data }: { data: PlannerData }) {
   const [notPersisted, setNotPersisted] = useState(false);
 
   const nameOf = (apiName: string) => catalog.champions[apiName]?.name ?? apiName;
+  // Both return whether the write persisted; blocked or full storage keeps it for this tab only.
   const commitDraft = (next: Draft) => {
-    if (!writeStored(DRAFT_KEY, serializeDraft(next, mutator))) setNotPersisted(true);
+    const persisted = writeStored(DRAFT_KEY, serializeDraft(next, mutator));
+    if (!persisted) setNotPersisted(true);
+    return persisted;
   };
   const commitSaved = (comps: readonly SavedComp[]) => {
-    if (!writeStored(SAVED_COMPS_KEY, serializeSavedComps(comps))) setNotPersisted(true);
+    const persisted = writeStored(SAVED_COMPS_KEY, serializeSavedComps(comps));
+    if (!persisted) setNotPersisted(true);
+    return persisted;
   };
   const apply = (result: BoardResult, success: string): boolean => {
     if (result.error) {
@@ -197,9 +203,14 @@ export function PlannerApp({ data }: { data: PlannerData }) {
       return;
     }
     const name = cleanCompName(draft.name);
-    commitSaved(result.comps);
+    const persisted = commitSaved(result.comps);
     commitDraft({ ...draft, id, name });
-    setStatus({ tone: "ok", text: `Saved “${name}” to My Planner.` });
+    // When storage refused the write, the notice beside the view toggle already says why.
+    setStatus(
+      persisted
+        ? { tone: "ok", text: `Saved “${name}” to My Planner.` }
+        : { tone: "error", text: `Saved “${name}” for this tab only.` },
+    );
   };
 
   const resetEditor = (next: Draft, text: string) => {
@@ -377,7 +388,7 @@ export function PlannerApp({ data }: { data: PlannerData }) {
             className="order-3 md:order-2 md:col-span-5"
           >
             {traits.length ? (
-              <CompTraitList traits={traits} details={data.traitDetails} board={board.map((unit) => nameOf(unit.apiName))} />
+              <CompTraitList traits={traits} details={traitDetails} board={board.map((unit) => nameOf(unit.apiName))} />
             ) : (
               <p className="text-muted">Place champions to see their traits.</p>
             )}

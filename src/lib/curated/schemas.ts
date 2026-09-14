@@ -1,9 +1,22 @@
 import { z } from "zod";
-import { BOARD_COLS, BOARD_ROWS, COMP_STYLES, MAX_UNIT_ITEMS, TIER_RANKS, type TierRank } from "@/lib/static/game";
+import {
+  AUGMENT_RARITIES,
+  BIS_ROLES,
+  BOARD_COLS,
+  BOARD_ROWS,
+  COMP_STYLES,
+  MAX_UNIT_ITEMS,
+  TIER_RANKS,
+  type TierRank,
+} from "@/lib/static/game";
 
 /**
  * Curated YAML formats (architecture §7). Shape is checked here; references to
  * the static tables are checked in `validate.ts`.
+ *
+ * Server and scripts only. Top-level zod schemas cannot be tree-shaken, so a client
+ * component importing any *value* from this file ships all of zod (~90 KB gzipped);
+ * constants the UI needs live in `static/game.ts` (architecture §8).
  */
 
 export const TIER_LIST_KINDS = ["champion", "item"] as const;
@@ -97,8 +110,6 @@ export const tierListFileSchema = z.strictObject({
   notes: z.record(apiName, z.string().trim().min(1, "must not be empty")).default({}),
 });
 
-export type TierListFile = z.infer<typeof tierListFileSchema>;
-
 const boardUnitSchema = z.strictObject({
   unit: apiName,
   row: intIn(0, BOARD_ROWS - 1, `must be a row from 0 (front) to ${BOARD_ROWS - 1} (back)`),
@@ -149,8 +160,6 @@ export const compFileSchema = z.strictObject({
   guide: z.string().trim().min(1).optional(),
 });
 
-export type CompFile = z.infer<typeof compFileSchema>;
-
 /**
  * One glanceable line of a patch brief. Capped so it stays a single badge on a
  * second monitor: a sentence here would wrap the card instead of being scanned.
@@ -181,8 +190,6 @@ export const metaNotesFileSchema = z
   .refine((file) => file.buffs.length + file.nerfs.length > 0 || file.tip, {
     error: "needs at least one buff, nerf or tip; an empty brief would render an empty card",
   });
-
-export type MetaNotesFile = z.infer<typeof metaNotesFileSchema>;
 
 /**
  * Openers are rated on early-board strength and streak potential alone, so the
@@ -239,17 +246,6 @@ export const openersFileSchema = z.strictObject({
     .max(MAX_OPENERS, `at most ${MAX_OPENERS} fit before the section stops being a glance`),
 });
 
-export type OpenersFile = z.infer<typeof openersFileSchema>;
-
-/**
- * What a champion's items are *for*. Derived by `sync:bis` from the component
- * composition of the primary build (a build of two Chain Vests and a Negatron
- * Cloak is a tank's), so it is a label on the data rather than an opinion — but
- * it stays in the file so it can be corrected by hand.
- */
-export const BIS_ROLES = ["AP Carry", "AD Carry", "Main Tank", "Utility / Bruiser"] as const;
-export type BisRole = (typeof BIS_ROLES)[number];
-
 /** A full build is three items. Anything else is a half-built board, not a BIS. */
 export const BIS_PRIMARY_ITEMS = 3;
 export const BIS_SECONDARY_ITEMS = { min: 2, max: 3 } as const;
@@ -298,8 +294,6 @@ export const championBisFileSchema = z.strictObject({
     .min(1, "needs at least one champion; an empty file would render an empty page"),
 });
 
-export type ChampionBisFile = z.infer<typeof championBisFileSchema>;
-
 /**
  * The augment tier list at `/augments` and each comp's best augments:
  * `data/curated/<setId>/augment-tiers.yaml` (§7.5). **Generated** by `pnpm sync:meta`
@@ -308,9 +302,6 @@ export type ChampionBisFile = z.infer<typeof championBisFileSchema>;
  * schema is the whole contract: the sync checks it before writing, the site at build.
  */
 export const AUGMENT_TIERS_FILE = "augment-tiers.yaml";
-
-export const AUGMENT_RARITIES = ["Silver", "Gold", "Prismatic"] as const;
-export type AugmentRarity = (typeof AUGMENT_RARITIES)[number];
 
 /** A comp's picks: fewer is a stub guide, more stops being a short list. */
 export const COMP_AUGMENTS = { min: 4, max: 6 } as const;
@@ -361,5 +352,3 @@ export const augmentTiersFileSchema = z.strictObject({
     )
     .default({}),
 });
-
-export type AugmentTiersFile = z.infer<typeof augmentTiersFileSchema>;

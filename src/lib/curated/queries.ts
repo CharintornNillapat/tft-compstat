@@ -266,7 +266,6 @@ export type CompSummary = CompStats & {
   isGem: boolean;
   style: CompStyle;
   difficulty: number | null;
-  summary: string | null;
   patch: string;
   /** ISO timestamp of the last seed. */
   updatedAt: string;
@@ -278,6 +277,8 @@ export type CompSummary = CompStats & {
 
 export type CompDetail = Omit<CompSummary, "traits"> & {
   setName: string | null;
+  /** Only the guide page shows it, so `/comps` does not ship it to its client list. */
+  summary: string | null;
   guide: string | null;
   /** Every trait on the board: active first, then inactive. */
   traits: TraitCount[];
@@ -403,7 +404,6 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
         tier: row.tier,
         style: row.style,
         difficulty: row.difficulty,
-        summary: row.summary,
         patch: row.patch,
         updatedAt: row.updated_at,
         isGem: row.is_gem,
@@ -413,6 +413,7 @@ async function loadComps(db: Db, filter: { slug: string } | { activeSet: true })
       } satisfies CompSummary,
       detail: {
         setName: row.set.name,
+        summary: row.summary,
         guide: row.guide_md,
         traits: boardTraits,
         earlyUnits: toChampions(row.early_units),

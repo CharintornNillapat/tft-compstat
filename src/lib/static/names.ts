@@ -18,8 +18,6 @@ export type NameBook = {
   items: Record<string, NameRef>;
 };
 
-export const EMPTY_NAME_BOOK: NameBook = { champions: {}, traits: {}, items: {} };
-
 /**
  * Lookups never throw and never render blank. An api name missing from the static
  * tables falls back to itself, which is ugly but honest and easy to spot — a match

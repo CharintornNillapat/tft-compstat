@@ -110,12 +110,13 @@ src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx),
                              MeDashboard, MeMatchHistory, MeFavoriteComps, CarryCell (me-comp-cell.tsx),
                              Shortcuts, and the pure helpers placement-styles.ts, sparkline-geometry.ts, shortcut-match.ts
   planner/                   PlannerApp, PlannerBoard, ChampionPicker, ItemPicker, UnitInspector, SavedCompList,
-                             ConfirmButton; hooks use-stored-value.ts (localStorage store), use-pointer-drag.ts
+                             ConfirmButton; hooks use-stored-value.ts (localStorage store, with quota and blocked-storage tests), use-pointer-drag.ts
 src/lib/
   env.ts                     Zod-validated env
   cache-tags.ts              the cache tags /api/revalidate accepts
   supabase/{server,admin,types,result}.ts   admin = service role, `import 'server-only'`; result = `must()`
-  static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds, queue ids)
+  static/game.ts             client-safe game constants (tiers, costs, trait styles, item kinds, queue ids, BIS roles,
+                             augment rarities — kept out of curated/schemas.ts so no client component imports zod, §8)
   static/cdragon.ts          pure CommunityDragon → rows transform
   static/trait-text.ts       pure: trait markup + hashed variables → plain text (§4.8)
   static/names.ts            NameBook: api name → display name/icon/cost (pure, client-safe) + pickNames
@@ -144,9 +145,10 @@ src/lib/
   curated/team-code.ts       buildTeamCode: a comp's units → the TFT client's Team Planner import code (pure, client-safe, §9)
   planner/board.ts           the planner board: place/move/swap/remove, stars, item + emblem rules, sanitizeBoard,
                              team-code order and trait adapters (pure, client-safe, §9)
-  planner/saved-comps.ts     "My Planner" localStorage contract: versioned JSON, defensive parse, save/duplicate/
-                             delete/favourite, draft (pure, client-safe, §8)
-  planner/catalog.ts         item pool, champion/item filters, tile labels, the PlannerData type (pure, client-safe)
+  planner/saved-comps.ts     "My Planner" localStorage contract: versioned JSON, defensive parse (zod/mini), save/
+                             duplicate/delete/favourite, draft (pure, client-safe, §8)
+  planner/catalog.ts         item pool, champion/item filters, tile labels, the PlannerData type, and plannerTraitDetails
+                             (the trait tooltips, built in the browser from the catalog, §8) (pure, client-safe)
   planner/planner-data.ts    getPlannerData(): the active set's champions, items and traits, `use cache` + `static` (§8)
 ```
 
@@ -1083,6 +1085,11 @@ comps:                        # keyed by comp slug; a comp without an entry show
   `cacheTag("static")` — every name, icon, cost, trait and planner code on it comes from the static tables, so
   `pnpm sync:static` must be able to refresh it, the `/bis` rule. It ships the active set's 74 champions, the
   holdable items and all 36 traits with tooltip text; everything else happens in one client island, `PlannerApp`.
+  - **Trait tooltips are built in the browser** (`plannerTraitDetails`, codebase audit 2026-09-14). A server-built
+    `TraitDetailBook` lists every trait's members, and on this page each member is already in the catalog: the
+    repeat was 25.7 KB of a 91.4 KB RSC payload. The page now sends each trait's text once and rebuilds the book with
+    the same pure `buildTraitDetails` (63.4 KB payload). `/comps` and the guide pages keep the server-built book, since
+    they ship no champion catalog. `set.id` is no longer sent either; the client only uses `name` and `mutator`.
   - **Saved comps live in `localStorage`, not Supabase.** §0 has no accounts and every DB write is server-side
     with the service role; a public write path for anonymous comps would be the first thing on the site anyone
     could write to, with nothing to scope it by. A theorycraft board is a per-browser scratchpad, so the page says
@@ -1098,13 +1105,31 @@ comps:                        # keyed by comp slug; a comp without an entry show
     The server snapshot is `undefined`, so the prerendered page is an empty board and Save stays disabled until the
     saved list has been read — saving before hydration would have overwritten it with an empty list.
   - Storage can be blocked or full, so every access is guarded and writes land in an in-memory copy first: the
-    planner still works for the tab's lifetime and says that nothing is being kept.
+    planner still works for the tab's lifetime and says that nothing is being kept. A Save that did not persist says
+    "for this tab only" rather than "to My Planner". `use-stored-value.test.ts` pins both failures — `QuotaExceededError`
+    on write, `SecurityError` on touching `localStorage` at all — and another tab's `storage` event, against a stub window.
   - **`NAV_ITEMS` gained an eighth entry** after Augments, so `7` is now Planner and `Me` moved to `8`.
   - **`refreshMyMatches` calls `refresh()`**, unconditionally. `refresh()` (Next 16, Server-Action-only) re-runs a route's *uncached* server content, which is exactly what a sync changes. The Phase 4 code called `revalidatePath("/me")` and only when `newMatches > 0`, which was wrong twice over: a "you're up to date" refresh never re-rendered, so the sync badge and cooldown countdown kept showing pre-sync values; and what `revalidatePath` invalidates is the prerendered shell, the one part that didn't change. Every `SyncResult` variant also carries `nextAllowedAt` now, so `RefreshButton` starts its countdown from the action's return value instead of waiting for the re-render.
+- **Client bundles and zod** (codebase audit 2026-09-14). Top-level zod schemas cannot be tree-shaken, so a client component
+  importing any *value* from a module that builds them ships all of zod. `BisBoard` and `AugmentBoard` imported `BIS_ROLES` /
+  `AUGMENT_RARITIES` from `curated/schemas.ts`, and `PlannerApp` validated storage with full zod: one 389 KB chunk (≈90 KB
+  gzipped) on `/bis`, `/augments` and `/planner`.
+  - Constants a client component needs live in `static/game.ts`, and `schemas.ts` says so at the top. Type-only imports from
+    it are fine: they are erased.
+  - `planner/saved-comps.ts`, the one module that has to validate in the browser, uses `zod/mini` (79.4 KB raw / 25.1 KB
+    gzipped of the planner's JavaScript).
+  - Measured from each route's `page_client-reference-manifest.js` (`entryJSFiles`), since Next 16's build output no longer
+    prints first-load JS. Page JavaScript, gzipped: `/planner` 116.1 → 44.6 KB, `/bis` 106.0 → 16.7 KB, `/augments` 16.3 KB;
+    every other route 13–20 KB and unchanged. `knip.json` (`ignoreExportsUsedInFile`) keeps `pnpm dlx knip` to real dead code.
 - Icons come from CommunityDragon URLs via `next/image`.
   - `remotePatterns` allows only `https://raw.communitydragon.org/*/game/assets/**` with no query string.
   - `minimumCacheTTL` is 31 days, because a version-pinned URL's content never changes.
   - Next 16's default `imageSizes` start at 32, so a 16px icon is served as the 32px variant.
+  - Every icon has a fixed `width`/`height` and no `sizes`, which is right for fixed-size images: they get `1x`/`2x` density
+    candidates (a 36px portrait asks for `w=48` and `w=96`), where `sizes` would switch them to width candidates across
+    every device size. The sources are square — champion, item and augment icons 128×128, trait icons 32×32 (checked
+    2026-09-14) — and each is drawn square with `object-cover`, so nothing stretches; the hex portrait's `width={64}` asks
+    for `w=64` / `w=128`, the source size.
   - The icons can be mirrored to Supabase Storage later if needed.
 
 ---

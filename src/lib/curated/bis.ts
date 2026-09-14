@@ -5,8 +5,8 @@ import type { NameBook } from "@/lib/static/names";
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import { readNewestCuratedFile } from "./curated-files";
-import type { ItemKind } from "@/lib/static/game";
-import { CHAMPION_BIS_FILE, championBisFileSchema, type BisRole } from "./schemas";
+import type { BisRole, ItemKind } from "@/lib/static/game";
+import { CHAMPION_BIS_FILE, championBisFileSchema } from "./schemas";
 import { formatIssue, parseYaml, suggestApiNames, type SeedIssue } from "./validate";
 
 /**

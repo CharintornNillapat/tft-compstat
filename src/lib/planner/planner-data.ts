@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import { buildTraitDetails, parseTraitEffects } from "@/lib/curated/trait-details";
+import { parseTraitEffects } from "@/lib/curated/trait-details";
 import { isTraitKind, type TraitBreakpoint } from "@/lib/static/game";
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
@@ -11,7 +11,9 @@ import { plannerItemPool, type PlannerData } from "./catalog";
  * Everything `/planner` needs, read once per `static` revalidation (architecture §8):
  * the active set's champions, the holdable items, and its traits with tooltip text.
  * Nothing here depends on the request, so the page prerenders static and the
- * builder runs entirely in the browser.
+ * builder runs entirely in the browser — the trait tooltips included, whose member
+ * lists `plannerTraitDetails` rebuilds from the catalog rather than this sending every
+ * champion a second time.
  */
 
 export async function getPlannerData(): Promise<PlannerData | null> {
@@ -37,11 +39,8 @@ export async function getPlannerData(): Promise<PlannerData | null> {
   const traits = must(traitRows, "planner traits");
   const items = plannerItemPool(must(itemRows, "planner items"));
 
-  // sync-static writes breakpoints in exactly this shape (architecture §4.8).
-  const breakpointsOf = (row: (typeof traits)[number]) => row.breakpoints as TraitBreakpoint[];
-
   return {
-    set,
+    set: { name: set.name, mutator: set.mutator },
     catalog: {
       champions: Object.fromEntries(
         champions.map((row) => [
@@ -60,23 +59,18 @@ export async function getPlannerData(): Promise<PlannerData | null> {
       traitNames: Object.fromEntries(traits.map((row) => [row.api_name, row.name])),
     },
     traits: Object.fromEntries(
-      traits.map((row) => [row.api_name, { name: row.name, iconUrl: row.icon_url, breakpoints: breakpointsOf(row) }]),
+      traits.map((row) => [
+        row.api_name,
+        {
+          name: row.name,
+          iconUrl: row.icon_url,
+          // sync-static writes breakpoints in exactly this shape (architecture §4.8).
+          breakpoints: row.breakpoints as TraitBreakpoint[],
+          description: row.description,
+          effects: parseTraitEffects(row.effects),
+          kind: isTraitKind(row.kind) ? row.kind : null,
+        },
+      ]),
     ),
-    traitDetails: buildTraitDetails({
-      traits: traits.map((row) => ({
-        apiName: row.api_name,
-        breakpoints: breakpointsOf(row),
-        description: row.description,
-        effects: parseTraitEffects(row.effects),
-        kind: isTraitKind(row.kind) ? row.kind : null,
-      })),
-      champions: champions.map((row) => ({
-        apiName: row.api_name,
-        name: row.name,
-        cost: row.cost,
-        iconUrl: row.icon_url,
-        traits: row.traits,
-      })),
-    }),
   };
 }

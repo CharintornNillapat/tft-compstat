@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { CATALOG } from "./catalog.fixture";
-import { championLabels, filterChampions, filterItems, plannerItemPool, traitOptions, type ItemRow } from "./catalog";
+import {
+  championLabels,
+  filterChampions,
+  filterItems,
+  plannerItemPool,
+  plannerTraitDetails,
+  traitOptions,
+  type ItemRow,
+} from "./catalog";
 
 const row = (api_name: string, name: string, kind: ItemRow["kind"], grants_trait: string | null = null): ItemRow => ({
   api_name,
@@ -8,6 +16,40 @@ const row = (api_name: string, name: string, kind: ItemRow["kind"], grants_trait
   icon_url: null,
   kind,
   grants_trait,
+});
+
+describe("plannerTraitDetails", () => {
+  it("builds each tooltip from the catalog: members cheapest first, text joined to breakpoints", () => {
+    const book = plannerTraitDetails(
+      {
+        DA_18_Hunter: {
+          name: "Hunter",
+          iconUrl: null,
+          breakpoints: [
+            { min: 2, style: "bronze" },
+            { min: 3, style: "silver" },
+          ],
+          description: "Hunters gain Attack Damage.",
+          effects: [{ min: 2, text: "20% Attack Damage" }],
+          kind: "class",
+        },
+      },
+      CATALOG.champions,
+    );
+    expect(Object.keys(book)).toEqual(["DA_18_Hunter"]);
+    expect(book.DA_18_Hunter).toEqual({
+      kind: "class",
+      description: "Hunters gain Attack Damage.",
+      tiers: [
+        { min: 2, style: "bronze", text: "20% Attack Damage" },
+        { min: 3, style: "silver", text: null },
+      ],
+      members: [
+        { apiName: "DA_18_Sivir", name: "Sivir", cost: 4, iconUrl: null },
+        { apiName: "DA_18_Ashe", name: "Ashe", cost: 5, iconUrl: null },
+      ],
+    });
+  });
 });
 
 describe("plannerItemPool", () => {

@@ -2,8 +2,7 @@
 
 import { Fragment, useMemo, useState } from "react";
 import type { BisChampion, BisItem } from "@/lib/curated/bis";
-import { BIS_ROLES, type BisRole } from "@/lib/curated/schemas";
-import { isChampionCost, type ChampionCost } from "@/lib/static/game";
+import { BIS_ROLES, isChampionCost, type BisRole, type ChampionCost } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
 import { CostFilter } from "./cost-filter";
 import { COST_TEXT } from "./cost-styles";
