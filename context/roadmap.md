@@ -666,6 +666,13 @@ Approved task by task rather than as a whole phase.
     BIS (Edge of Night: "10% AD · 10% AP · 20 Armor · 15% Attack Speed") tooltips each show their text and "Values from
     PBE data", in the wide tooltip.
   - No horizontal overflow at 400px on `/`, `/tiers/champions`, `/tiers/items` or `/bis`; zero page errors.
+- **Deployed (2026-09-14, commit `18516a8`)**: `dpl_3m4dLsz1zju85s9ueDymSHHxos5w` built first time, Ready in `icn1`
+  and aliased to https://tft-compstat.vercel.app.
+  - **The same headless-Edge run against production** gave identical results: "Me" ends at 360px where the fade
+    begins; the Pebbles, Tacticians Shield and Edge of Night tooltips show their text and "Values from PBE data"; no
+    horizontal overflow at 400px on the four touched pages; zero page errors.
+  - **Routes:** `/`, `/comps`, `/comps/riftbeast-pebbles`, `/bis`, `/augments`, `/tiers/champions`, `/tiers/items`,
+    `/me` and `/planner` all 200.
 
 - [ ] Further tasks — not yet specified.
 
