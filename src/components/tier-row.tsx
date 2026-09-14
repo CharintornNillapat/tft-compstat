@@ -9,8 +9,8 @@ const TIER_BG: Record<TierRank, string> = {
 };
 
 /**
- * Tier as a text colour, for places a filled badge would shout — the pivot pills on
- * the overview's opener cards, where the tier is context rather than the subject.
+ * Tier as a text colour, for places a filled badge would shout — the tier letter on
+ * the overview's opener pivot pills, where the tier is context rather than the subject.
  */
 export const TIER_TEXT: Record<TierRank, string> = {
   S: "text-tier-s",

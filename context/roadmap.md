@@ -581,6 +581,37 @@ Approved task by task rather than as a whole phase.
   - **Routes:** `/`, `/comps`, `/comps/riftbeast-pebbles`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`,
     `/me` and `/planner` all 200.
 
+- [x] **Task 18 — Overview (`/`) UI pass** (approved 2026-09-14: suggestions A, B, C and D)
+  - **A — top of the page.** The grid is two columns. Rank and "Last 10 placements" are one "Ranked" card that adds
+    avg place and a top-4 count (`summarize()` over the same 10 rows) and "Last game … ago" from the newest row. The
+    header's dev note is replaced by `PatchLine` ("Enchanted Wilds · Patch 18.2"), and the patch no longer repeats on
+    Top comps, the brief and the openers (it was printed 6 times).
+  - **B — Top comps.** `getComps().slice(0, 3)` (tier-ordered, so it falls back to A-tier on its own), each with up to
+    three carry portraits, the avg / top-4 `CompStatsRow` and an "All N →" link. No new query.
+  - **C — openers.** Pivot pills are neutral with only the tier letter coloured. Cards sit on a `grid-rows-subgrid`, so
+    rows line up across a row. Under `md` only the top tier shows, and a native `<details>` reveals the rest — no JS.
+    **Changed while verifying:** per-tier grids with headings made the 960px page ~390px *taller* (2 + 3 + 3 cards left
+    empty slots), so the cards stay in one tier-sorted grid, each with its badge (architecture §8).
+  - **D — hierarchy.** Every panel is an `OverviewPanel` (`src/app/overview-panel.tsx`) with one stronger heading
+    style, and the brief's tip moved to the top as an accent callout.
+  - **Not done:** the nav bar's right-edge fade on phones — it was a side note, not one of A–D.
+
+**Verified — Task 18 (2026-09-14):**
+- **Checks:** `pnpm check` (487 tests) and `pnpm build` green; `/` stays Partial Prerender (1d / 1w).
+- **Local `pnpm start`, headless Edge:** no horizontal overflow at 400, 960 or 1280px; zero console errors.
+
+  | page height | before | after |
+  |---|---|---|
+  | 400px | 2,683px | 1,377px |
+  | 960px | 1,260px | 1,403px |
+  | 1280px | — | 1,128px |
+
+  At 960 and 1280 all 8 opener cards show, their "Into" rows share a top in every grid row, and every card's slam
+  chips sit level with the label (0px). At 400, 2 of 8 cards show; "Show 6 more (A, B tier)" reveals 8 and "Show
+  fewer" folds back to 2.
+- **Found while verifying and fixed:** subgrid rows taller than their chips spread the chips down the row, away from
+  their label — `content-start` on the row list.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

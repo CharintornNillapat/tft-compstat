@@ -1,4 +1,5 @@
 import { getMetaBrief } from "@/lib/curated/meta-brief";
+import { OverviewPanel } from "./overview-panel";
 
 /**
  * Patch context before you queue up (architecture §8). Cached from the repo's
@@ -6,32 +7,26 @@ import { getMetaBrief } from "@/lib/curated/meta-brief";
  * and sits outside the page's Suspense boundary.
  *
  * Spans the full grid row: the badge lists wrap, and a wide row keeps them on one
- * or two lines instead of a tall column next to the three glance panels.
+ * or two lines. The tip comes first because it is the one line you can act on.
  */
 export async function MetaBrief() {
   const brief = await getMetaBrief();
   if (!brief) return null;
 
   return (
-    <section className="rounded-md border border-line bg-panel p-3 md:col-span-3">
-      <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-        <h2 className="text-[11px] tracking-wider text-faint uppercase">Meta brief</h2>
-        <span className="min-w-0 truncate text-muted">{brief.title}</span>
-        <span className="ml-auto shrink-0 text-faint tabular-nums">Patch {brief.patch}</span>
-      </div>
+    <OverviewPanel title="Meta brief" subtitle={brief.title} className="md:col-span-2">
+      {brief.tip && (
+        <p className="mb-2.5 rounded border border-accent/25 bg-accent/5 px-2 py-1.5">
+          <span className="font-semibold text-accent">Tip · </span>
+          {brief.tip}
+        </p>
+      )}
 
       <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-3">
         <BadgeList kind="buff" label="Buffed" entries={brief.buffs} />
         <BadgeList kind="nerf" label="Nerfed" entries={brief.nerfs} />
       </div>
-
-      {brief.tip && (
-        <p className="mt-2 border-t border-line pt-2 text-muted">
-          <span className="text-faint">Tip · </span>
-          {brief.tip}
-        </p>
-      )}
-    </section>
+    </OverviewPanel>
   );
 }
 
