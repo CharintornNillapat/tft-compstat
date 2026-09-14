@@ -1,9 +1,18 @@
 # Daily MetaTFT → data/curated sync (README "Tier lists and comps from the live meta").
 #
 # Runs `pnpm sync:meta --seed` (tier lists + comps, then seed:curated into Supabase, plus
-# augment-tiers.yaml) and `pnpm sync:bis` (champion-bis.yaml), then commits whatever changed
-# under data/curated/ straight to main. That push is what redeploys Vercel, which is how the
-# build-time files (augment-tiers.yaml, champion-bis.yaml) reach the site.
+# augment-tiers.yaml) and `pnpm sync:bis` (champion-bis.yaml). If that changed anything under
+# data/curated/, `pnpm build` must pass against the new files before they are committed — a
+# generated file the site can't prerender (the openers.yaml pivots a sync-meta.ts warning now
+# calls out, or anything else) fails the job instead of landing on main. The push that follows
+# is what redeploys Vercel, which is how the build-time files (augment-tiers.yaml,
+# champion-bis.yaml) reach the site.
+#
+# Note: `sync:meta --seed` writes tier lists and comps straight to Supabase and revalidates the
+# live site *before* this build gate runs, so a failure here stops a bad commit from landing on
+# main but does not undo that live write. In practice the build-breaking case is a stale
+# openers.yaml pivot, and getOpeners() now degrades that to a hidden pill rather than a 404
+# (architecture §7, §8), so this gate is a backstop rather than the primary fix.
 
 name: Sync meta and BIS
 
@@ -29,6 +38,10 @@ jobs:
       # Read by src/lib/env.ts (supabaseAdminEnv): scripts/lib/references.ts and seed-curated.
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Read by supabasePublicEnv(): the anon client the build-time prerender uses to read
+      # the tables the changed files feed into (architecture §8). Only needed by the build
+      # gate below, but declaring it once here is simplest.
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       # Read by scripts/lib/revalidate.ts after the seed. Unset SITE_URL = skip with a warning.
       SITE_URL: ${{ secrets.SITE_URL }}
       REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
@@ -56,13 +69,27 @@ jobs:
       - name: Sync best-in-slot builds
         run: pnpm sync:bis
 
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet -- data/curated; then
+            echo "data/curated is unchanged; nothing to build or commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Gate the commit on a real build, not just the generators' own schema checks — those
+      # validate each file in isolation and don't know about openers.yaml's pivots or anything
+      # else the site resolves at prerender time.
+      - name: Build against the changed files
+        if: steps.diff.outputs.changed == 'true'
+        run: pnpm build
+
       - name: Commit and push data/curated changes
+        if: steps.diff.outputs.changed == 'true'
         run: |
           git add data/curated
-          if git diff --cached --quiet; then
-            echo "data/curated is unchanged; nothing to commit."
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(auto): daily meta and bis sync"

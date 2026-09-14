@@ -11,7 +11,7 @@ import {
 } from "@/lib/static/game";
 import { toItemText, type ChampionAbility, type ItemText } from "@/lib/static/tooltip-text";
 import { must } from "@/lib/supabase/result";
-import { getSupabase } from "@/lib/supabase/server";
+import { getCachedSupabase } from "@/lib/supabase/server";
 import type { TierListKind } from "./schemas";
 import { buildTeamCode, type TeamCode } from "./team-code";
 import { buildTraitDetails, parseTraitEffects, pickTraitDetails, type TraitDetailBook } from "./trait-details";
@@ -69,7 +69,7 @@ export type ItemTierEntry = {
 /** Only kinds and tiers that have entries, in display order. */
 export type ItemTierList = TierListMeta & { groups: { kind: ItemKind; tiers: TierGroup<ItemTierEntry>[] }[] };
 
-type Db = ReturnType<typeof getSupabase>;
+type Db = ReturnType<typeof getCachedSupabase>;
 
 /**
  * `numeric` columns → numbers, with null for anything that isn't one.
@@ -140,7 +140,7 @@ export async function getChampionTierList(): Promise<ChampionTierList | null> {
   cacheTag("tiers", "static");
   cacheLife("days");
 
-  const db = getSupabase();
+  const db = getCachedSupabase();
   const list = await loadCurrentList(db, "champion");
   if (!list) return null;
 
@@ -185,7 +185,7 @@ export async function getItemTierList(): Promise<ItemTierList | null> {
   cacheTag("tiers", "static");
   cacheLife("days");
 
-  const db = getSupabase();
+  const db = getCachedSupabase();
   const list = await loadCurrentList(db, "item");
   if (!list) return null;
 
@@ -456,7 +456,7 @@ export async function getComps(): Promise<{
   cacheTag("comps", "static");
   cacheLife("days");
 
-  const { comps, traitDetails } = await loadComps(getSupabase(), { activeSet: true });
+  const { comps, traitDetails } = await loadComps(getCachedSupabase(), { activeSet: true });
   const summaries = comps.map((comp) => comp.summary);
   return {
     setName: comps[0]?.detail.setName ?? null,
@@ -477,7 +477,7 @@ export async function getComp(slug: string): Promise<CompDetail | null> {
   const {
     comps: [comp],
     traitDetails,
-  } = await loadComps(getSupabase(), { slug });
+  } = await loadComps(getCachedSupabase(), { slug });
   if (!comp) return null;
   return {
     ...comp.summary,
@@ -492,6 +492,6 @@ export async function getCompSlugs(): Promise<string[]> {
   cacheTag("comps");
   cacheLife("days");
 
-  const rows = must(await getSupabase().from("comps").select("slug").eq("is_published", true), "comp slugs");
+  const rows = must(await getCachedSupabase().from("comps").select("slug").eq("is_published", true), "comp slugs");
   return rows.map((row) => row.slug);
 }

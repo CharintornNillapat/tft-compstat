@@ -4,7 +4,7 @@ import { getStaticNames } from "@/lib/static/lookup";
 import type { NameBook } from "@/lib/static/names";
 import { toItemText, type ItemText } from "@/lib/static/tooltip-text";
 import { must } from "@/lib/supabase/result";
-import { getSupabase } from "@/lib/supabase/server";
+import { getCachedSupabase } from "@/lib/supabase/server";
 import { readNewestCuratedFile } from "./curated-files";
 import type { BisRole, ItemKind } from "@/lib/static/game";
 import { CHAMPION_BIS_FILE, championBisFileSchema } from "./schemas";
@@ -220,7 +220,7 @@ export async function getChampionBis(): Promise<ChampionBis | null> {
   }
   const rows = used.size
     ? must(
-        await getSupabase()
+        await getCachedSupabase()
           .from("items")
           .select("api_name, components, grants_trait, kind, description, stats, text_source")
           .in("api_name", [...used]),

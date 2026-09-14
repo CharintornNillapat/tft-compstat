@@ -28,6 +28,22 @@ type Db = SupabaseClient<Database>;
 
 /** Cooldown after a successful run (§5.2 layer 3). */
 export const COOLDOWN_S = 120;
+/**
+ * Cooldown after an `AuthError` (a dead or expired Riot key), for the
+ * `cron` and `stale-read` triggers only. Unlike a rate limit or a transient
+ * network/Supabase error, an invalid key doesn't heal itself before the next
+ * tick, and `stale-read` fires on every `/me` page load once `isStale()` is
+ * true — at the old `COOLDOWN_S` that meant a failing key got re-tried on
+ * essentially every visit past the first two minutes. A day matches the
+ * daily cron, so an unattended key gets one real retry a day instead of one
+ * every couple of minutes.
+ *
+ * `manual` (the refresh button, and `pnpm riot:sync`'s default trigger)
+ * keeps the short `COOLDOWN_S` on purpose: it's the trigger someone reaches
+ * for right after rotating the key, and the README's own verification steps
+ * assume it isn't gated for a day behind the failure that prompted the fix.
+ */
+export const AUTH_ERROR_COOLDOWN_S = 24 * 60 * 60;
 /** How long a crashed instance can hold the lock before it expires on its own. */
 export const LOCK_S = 90;
 /** `/me` schedules a background sync when the last success is older than this. */
@@ -191,8 +207,11 @@ export async function syncPlayer(
     }
 
     const message = error instanceof AuthError ? "Riot key invalid/expired" : (error as Error).message;
-    // Still cool down: a failing key shouldn't be retried on every page view.
-    const nextAllowedAt = new Date(Date.now() + COOLDOWN_S * 1000).toISOString();
+    // Still cool down: a failing sync shouldn't be retried on every page view.
+    // An AuthError from an unattended trigger (cron, stale-read) gets the long
+    // cooldown above; a person-initiated `manual` retry does not.
+    const cooldownS = error instanceof AuthError && trigger !== "manual" ? AUTH_ERROR_COOLDOWN_S : COOLDOWN_S;
+    const nextAllowedAt = new Date(Date.now() + cooldownS * 1000).toISOString();
     await finish({ status: "error", next_allowed_at: nextAllowedAt, last_error: message.slice(0, 500) });
     return { status: "error", message, newMatches, calls: client.calls, nextAllowedAt };
   }

@@ -486,6 +486,7 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 | 5. 429 handling | Read `Retry-After`. If ≤3s and the budget allows, retry once. Otherwise stop, keep partial progress (each match commits individually), set `status='rate_limited'` and `next_allowed_at = now()+Retry-After` | No retry storms in serverless |
 | 6. Observability | Parse `X-App-Rate-Limit-Count` / `X-Method-Rate-Limit-Count` into `sync_state.last_rate_limit`; log call count | Headroom is visible on the dashboard |
 | 7. Auth errors | 401/403 → `status='error'` with the message "Riot key invalid/expired"; the UI shows a banner; cached data is still served | Dev-key expiry never breaks the page |
+| 8. Auth-error cooldown | An `AuthError` from `cron` or `stale-read` sets `next_allowed_at = now() + 24h` (`AUTH_ERROR_COOLDOWN_S`) instead of the usual 120s — a dead key doesn't heal itself, so those unattended triggers would otherwise retry, and fail, on nearly every cron tick or stale `/me` visit. A `manual` failure keeps the 120s cooldown; `pnpm riot:sync --force` clears the row outright for verifying a fix (README "Rotating the Riot API key") | An unattended dead key gets one real retry a day, not one every 2 minutes, without blocking the person fixing it |
 
 > **Key note:** a Riot **Development key expires every 24h**, so the daily cron would fail unless you renew it. The recommendation is to apply for a free **Personal API Key** at developer.riotgames.com. It has the same limits and doesn't expire. The design works with either key.
 
@@ -503,7 +504,9 @@ syncPlayer(puuid, trigger: 'cron' | 'manual' | 'stale-read'):
     if trigger='cron': GET summoner → update riot_accounts               # ≤1 call/day
     set status='ok', last_success_at=now(), next_allowed_at=now()+120s, last_call_count
   catch RateLimited(retryAfter) → status='rate_limited', next_allowed_at=now()+retryAfter
-  catch AuthError               → status='error', last_error
+  catch AuthError               → status='error', last_error,
+                                   next_allowed_at=now()+(trigger='manual' ? 120s : 24h)  # §5.2 layer 8
+  catch (other)                  → status='error', last_error, next_allowed_at=now()+120s
   finally lock_until = null
 ```
 

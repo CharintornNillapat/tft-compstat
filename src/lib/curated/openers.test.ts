@@ -91,9 +91,12 @@ describe("validateOpeners", () => {
     ]);
   });
 
-  it("rejects a pivot with no published comp behind it, which would link to a 404", () => {
-    expect(messages(VALID.replace("elderwood-kayle", "elderwood-kale"))).toEqual([
-      'no published comp has the slug "elderwood-kale"',
+  it("hides a pivot with no published comp behind it, and warns instead of failing the build", () => {
+    const result = parse(VALID.replace("elderwood-kayle", "elderwood-kale"));
+    expect(result.issues).toEqual([]);
+    expect(result.openers?.openers[0]?.pivots).toEqual([{ slug: "ashe-fast-9", name: "Ashe Fast 9", tier: "S" }]);
+    expect(result.warnings.map((warning) => warning.message)).toEqual([
+      'no published comp has the slug "elderwood-kale"; hiding that pivot',
     ]);
   });
 

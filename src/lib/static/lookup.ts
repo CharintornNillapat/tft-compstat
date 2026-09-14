@@ -1,7 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { must, type QueryResult } from "@/lib/supabase/result";
-import { getSupabase } from "@/lib/supabase/server";
+import { getCachedSupabase } from "@/lib/supabase/server";
 import type { NameBook } from "./names";
 
 /**
@@ -39,7 +39,7 @@ export async function getStaticNames(): Promise<StaticNames> {
   cacheTag("static");
   cacheLife("days");
 
-  const db = getSupabase();
+  const db = getCachedSupabase();
   const [set, champions, traits, items] = await Promise.all([
     db.from("tft_sets").select("id, name").eq("is_active", true).maybeSingle(),
     // Deliberately not filtered by set: an older match references that set's

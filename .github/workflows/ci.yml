@@ -1,0 +1,49 @@
+# Runs the same two gates the README asks for before any deploy — `pnpm check`
+# (typecheck + lint + test) and `pnpm build` — on every push and pull request, so a
+# broken change is caught here instead of by the next `sync-meta.yml` run or a bad
+# Vercel deploy. Vercel builds independently on its own push-to-main hook; this
+# workflow doesn't deploy anything, it only gates the commit.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Static pages are prerendered against the real tables at build time (architecture
+    # §8), so `pnpm build` needs live read credentials — same project the site itself
+    # reads. Only the anon/public pair; nothing here can write.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Version comes from package.json "packageManager".
+      - uses: pnpm/action-setup@v6
+
+      # @supabase/supabase-js requires Node >= 22; 24 matches local development.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck, lint and test
+        run: pnpm check
+
+      - name: Build
+        run: pnpm build

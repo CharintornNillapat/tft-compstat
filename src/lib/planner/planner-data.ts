@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { parseTraitEffects } from "@/lib/curated/trait-details";
 import { isTraitKind, type TraitBreakpoint } from "@/lib/static/game";
 import { must } from "@/lib/supabase/result";
-import { getSupabase } from "@/lib/supabase/server";
+import { getCachedSupabase } from "@/lib/supabase/server";
 import { PLANNER_ITEM_KINDS } from "./board";
 import { plannerItemPool, type PlannerData } from "./catalog";
 
@@ -21,7 +21,7 @@ export async function getPlannerData(): Promise<PlannerData | null> {
   cacheTag("static");
   cacheLife("days");
 
-  const db = getSupabase();
+  const db = getCachedSupabase();
   const set = must(await db.from("tft_sets").select("id, name, mutator").eq("is_active", true).maybeSingle(), "active set");
   if (!set) return null;
 

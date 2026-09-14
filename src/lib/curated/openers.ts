@@ -43,25 +43,37 @@ const costList = OPENER_COSTS.map((cost) => `${cost}-cost`).join(" and ");
 /**
  * Pure: YAML text plus the reference tables → openers, or the issues that stopped
  * them, each with `file:line:col`. Beyond the schema: every unit exists and is
- * cheap enough to open on, every item exists, every pivot is a published comp, and
- * nothing is listed twice.
+ * cheap enough to open on, every item exists, and nothing is listed twice.
+ *
+ * A pivot naming a comp that isn't published is **not** one of those fatal
+ * issues: it's reported as a `warning` instead, and the pivot is dropped from
+ * the card rather than failing the whole build. `sync:meta` prunes generated
+ * comps daily (architecture §7.2), so a comp an opener still names can vanish
+ * from a routine, unattended run — the card should just show one fewer pill,
+ * not take the build down with it. A typo'd champion or item stays fatal: those
+ * can only be introduced by a hand edit, which is exactly when a loud failure
+ * is wanted.
  */
 export function validateOpeners(input: {
   /** Repo-relative path, used in issues. */
   file: string;
   text: string;
   refs: OpenerReferences;
-}): { openers?: Openers; issues: SeedIssue[] } {
+}): { openers?: Openers; issues: SeedIssue[]; warnings: SeedIssue[] } {
   const { file, refs } = input;
   const yaml = parseYaml(file, input.text);
-  if (yaml.syntaxIssues.length) return { issues: yaml.syntaxIssues };
+  if (yaml.syntaxIssues.length) return { issues: yaml.syntaxIssues, warnings: [] };
 
   const parsed = openersFileSchema.safeParse(yaml.data);
   if (!parsed.success) {
-    return { issues: parsed.error.issues.map((issue) => yaml.issue(issue.path, issue.message)) };
+    return {
+      issues: parsed.error.issues.map((issue) => yaml.issue(issue.path, issue.message)),
+      warnings: [],
+    };
   }
   const data = parsed.data;
   const issues: SeedIssue[] = [];
+  const warnings: SeedIssue[] = [];
 
   const didYouMean = (input: string, candidates: Iterable<readonly [string, { name: string }]>) => {
     const suggestions = suggestApiNames(input, candidates);
@@ -119,22 +131,37 @@ export function validateOpeners(input: {
     });
 
     duplicates(opener.transition_to, (i) => at("transition_to", i), "a pivot");
-    const pivots = opener.transition_to.map((slug, i): OpenerPivot => {
+    const pivots = opener.transition_to.flatMap((slug, i): OpenerPivot[] => {
       const comp = refs.comps.get(slug);
       if (!comp) {
         // Unpublished reads the same as missing here, and it should: either way the
-        // pill would link to a 404.
-        issues.push(yaml.issue(at("transition_to", i), `no published comp has the slug "${slug}"`));
+        // pill would otherwise link to a 404. Not fatal — a generated comp this
+        // opener names can be pruned by an unattended `sync:meta` run — so the
+        // pivot is just left off the card rather than failing the build.
+        warnings.push(yaml.issue(at("transition_to", i), `no published comp has the slug "${slug}"; hiding that pivot`));
+        return [];
       }
-      return { slug, name: comp?.name ?? slug, tier: comp?.tier ?? "C" };
+      return [{ slug, name: comp.name, tier: comp.tier }];
     });
 
     return { name: opener.name, tier: opener.tier, units, items, pivots, notes: opener.notes };
   });
 
-  if (issues.length) return { issues };
-  return { issues, openers: { patch: data.patch, title: data.title ?? "Early openers & item slams", openers } };
+  if (issues.length) return { issues, warnings };
+  return {
+    issues,
+    warnings,
+    openers: { patch: data.patch, title: data.title ?? "Early openers & item slams", openers },
+  };
 }
+
+/**
+ * Re-exported so existing imports of `extractOpenerPivotSlugs` from this module
+ * keep working; the implementation lives in `opener-pivots.ts` because it also
+ * needs to be importable from `sync-meta.ts`, a plain script that can't pull in
+ * this module's `next/cache` and Supabase-client dependencies.
+ */
+export { extractOpenerPivotSlugs } from "./opener-pivots";
 
 /**
  * Tagged `static` and `comps` rather than `cacheLife("max")` like the patch brief:
@@ -142,10 +169,12 @@ export function validateOpeners(input: {
  * come from the DB, so a `sync:static` or `seed:curated` has to be able to refresh
  * it. `getComps()` is the same cached read `/comps` and `TopComps` already make.
  *
- * A missing file returns null and the section doesn't render. A file that names a
- * unit, item or comp that isn't there **throws**, failing the build the way
- * `seed:curated` aborts on a typo — a dead pivot link is a bug to fix, not a card
- * to quietly blank out.
+ * A missing file returns null and the section doesn't render. A file that names
+ * an unknown unit or item **throws**, failing the build the way `seed:curated`
+ * aborts on a typo — those can only come from a hand edit, so a loud failure is
+ * wanted. A pivot naming an unpublished comp is not fatal (see `validateOpeners`
+ * above): it's logged and the pivot is left off the card, since `sync:meta` can
+ * prune a generated comp an opener names on a routine, unattended run.
  */
 export async function getOpeners(): Promise<Openers | null> {
   "use cache";
@@ -157,7 +186,7 @@ export async function getOpeners(): Promise<Openers | null> {
 
   const [{ names }, { comps }] = await Promise.all([getStaticNames(), getComps()]);
   const { file, text } = found;
-  const { openers, issues } = validateOpeners({
+  const { openers, issues, warnings } = validateOpeners({
     file,
     text,
     refs: { names, comps: new Map(comps.map((comp) => [comp.slug, { name: comp.name, tier: comp.tier }])) },
@@ -165,5 +194,6 @@ export async function getOpeners(): Promise<Openers | null> {
   if (!openers) {
     throw new Error(`Invalid ${file}:\n${issues.map((issue) => `  ${formatIssue(issue)}`).join("\n")}`);
   }
+  for (const warning of warnings) console.warn(`[openers] ${formatIssue(warning)}`);
   return openers;
 }

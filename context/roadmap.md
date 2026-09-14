@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–18 deployed (2026-09-14). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–20 deployed and Task 21 done, not yet deployed (2026-09-14). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–18 done (2026-09-14) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–21 done (2026-09-14) |
 
 ---
 
@@ -673,6 +673,21 @@ Approved task by task rather than as a whole phase.
     horizontal overflow at 400px on the four touched pages; zero page errors.
   - **Routes:** `/`, `/comps`, `/comps/riftbeast-pebbles`, `/bis`, `/augments`, `/tiers/champions`, `/tiers/items`,
     `/me` and `/planner` all 200.
+
+- [x] **Task 21 — Build safety and pipeline hardening** (requested 2026-09-14 as "Task 18: Build Safety & Pipeline Hardening", after an audit found the daily sync could fail a deploy over a pruned comp)
+  - **Openers no longer fail the build over a pruned comp.** A `transition_to` slug with no published comp is now a `warning`, not an issue: `getOpeners()` logs it and drops that one pivot pill instead of throwing. Unknown units/items and a duplicate stay fatal — those only come from a hand edit. The extraction (`extractOpenerPivotSlugs`) lives in a new `opener-pivots.ts` so `sync-meta.ts` (a plain script) can import it without pulling in `openers.ts`'s `next/cache` and Supabase-client dependencies.
+  - **`sync:meta` warns before it prunes a comp an opener still names.** `warnStaleOpenerPivots` checks each about-to-be-removed generated comp's slug against the set's `openers.yaml` pivots and prints a loud line if one matches — not fatal (the point above already makes an orphaned pivot harmless), but worth surfacing in an unattended daily run.
+  - **CI** (`.github/workflows/ci.yml`, new): `pnpm check` then `pnpm build` on every push to `main` and every pull request.
+  - **`sync-meta.yml` gates its commit on a real build**, not just each generator's own schema check: after `sync:meta --seed` and `sync:bis`, a "Check for changes" step short-circuits a no-op day, then — only when `data/curated` changed — `pnpm build` must pass before the commit-and-push step runs. Needs a new repo secret, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the anon client the build's static pages read), alongside the existing four.
+  - **Build-time reads retry transient failures.** `getCachedSupabase()` (new, `supabase/server.ts`) wraps the anon client with `createRetryingFetch()` (new, `supabase/retry.ts`): up to 3 attempts, exponential backoff with full jitter, retrying a network error or a 408/429/5xx response but never a real PostgREST/RLS 4xx. Wired into every build-time consumer — `curated/queries.ts`, `curated/bis.ts`, `static/lookup.ts`, `planner/planner-data.ts` — guarding against a repeat of the transient Supabase Gateway Timeout that failed a Task 12 deploy. `stats/queries.ts` (the uncached `/me` and `/` reads, §6.3) deliberately keeps the plain client: a retry there would only add latency ahead of a live response.
+  - **A dead Riot key stops hammering itself.** `AUTH_ERROR_COOLDOWN_S` (24h) replaces `COOLDOWN_S` (120s) for an `AuthError` on the `cron` and `stale-read` triggers, so an expired key gets one real retry a day instead of one on nearly every `/me` visit. `manual` keeps the short cooldown, and `pnpm riot:sync --force` clears the row outright so verifying a rotated key isn't gated behind a prior unattended failure (README "Rotating the Riot API key").
+
+**Verified — Task 21 (2026-09-14):**
+- **Checks:** `pnpm check` (523 tests, up from 505: 9 new in `opener-pivots.test.ts`, 9 in `supabase/retry.test.ts`, plus additions to `openers.test.ts` and `sync-service.test.ts`) and `pnpm build` (fetch cache cleared) are green; every route keeps its shape — `/`  and `/comps/[slug]` still Partial Prerender; `/bis`, `/augments`, `/comps`, `/planner` and both tier lists still Static.
+- **openers/sync-meta:** `pnpm sync:meta --dry-run` ran the changed code path end to end with no crash. Nothing is currently stale on the live feed, so the new warning line didn't fire in that run; `extractOpenerPivotSlugs` and `validateOpeners`'s warning path are covered directly by tests instead, including a pivot dropped mid-schema-failure and a non-string `transition_to` entry.
+- **Not yet exercised live:** the CI workflow (needs a push/PR on GitHub to actually run) and `sync-meta.yml`'s new build gate (needs a real `data/curated` change to reach it) — both checked by parsing the YAML and reasoning through the job, not by a real Actions run.
+- **New required secret:** `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be added as a repository secret (Settings → Secrets and variables → Actions) before `ci.yml` or `sync-meta.yml`'s build step can succeed on GitHub — neither workflow had a build step before, so it was never needed there.
+- **Not done:** no live rehearsal of an actual day-long `AuthError` cooldown (would need a real dead key against production) or of a Supabase Gateway Timeout actually retrying (the retry path is covered by injected-failure tests in `retry.test.ts`, not a real flaky endpoint).
 
 - [ ] Further tasks — not yet specified.
 

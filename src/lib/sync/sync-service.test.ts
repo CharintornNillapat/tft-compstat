@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { RiotClient } from "@/lib/riot/client";
 import { RateLimiter } from "@/lib/riot/limiter";
-import { isStale, syncPlayer, type SyncState } from "./sync-service";
+import { AUTH_ERROR_COOLDOWN_S, COOLDOWN_S, isStale, syncPlayer, type SyncState } from "./sync-service";
 
 /**
  * The sync algorithm (architecture §5.3) against a fake Supabase and a mocked Riot,
@@ -229,6 +229,54 @@ describe("failure paths keep partial progress", () => {
     const final = writes.filter((w) => w.table === "sync_state").at(-1)?.rows as Record<string, unknown>;
     expect(final.status).toBe("error");
     expect(final.lock_until).toBeNull();
+  });
+
+  it("a manual retry after an expired key keeps the short cooldown, not the day-long one", async () => {
+    const { db, writes } = makeDb({ storedMatchIds: [] });
+    const { client } = makeClient([new Response("", { status: 403 })]);
+    const before = Date.now();
+
+    const result = await syncPlayer(ME, "manual", { db, client });
+
+    expect(result.status).toBe("error");
+    const nextAllowedAt = Date.parse(result.status === "error" ? result.nextAllowedAt : "");
+    // A person just rotated the key and reached for `pnpm riot:sync` or the
+    // refresh button — that shouldn't be locked out for a day by the failure
+    // that prompted the fix.
+    expect(nextAllowedAt).toBeLessThanOrEqual(before + COOLDOWN_S * 1000 + 1_000);
+    const final = writes.filter((w) => w.table === "sync_state").at(-1)?.rows as Record<string, unknown>;
+    expect(Date.parse(final.next_allowed_at as string)).toBeLessThanOrEqual(before + COOLDOWN_S * 1000 + 1_000);
+  });
+
+  it.each(["cron", "stale-read"] as const)(
+    "an expired key on an unattended %s trigger gets the day-long cooldown, not COOLDOWN_S",
+    async (trigger) => {
+      const { db, writes } = makeDb({ storedMatchIds: [] });
+      const { client } = makeClient([new Response("", { status: 403 })]);
+      const before = Date.now();
+
+      const result = await syncPlayer(ME, trigger, { db, client });
+
+      expect(result.status).toBe("error");
+      const nextAllowedAt = Date.parse(result.status === "error" ? result.nextAllowedAt : "");
+      // Otherwise a dead key gets retried, and fails, on essentially every
+      // stale `/me` visit or cron tick until someone notices and fixes it.
+      expect(nextAllowedAt).toBeGreaterThan(before + COOLDOWN_S * 1000);
+      expect(nextAllowedAt).toBeLessThanOrEqual(before + AUTH_ERROR_COOLDOWN_S * 1000 + 1_000);
+      const final = writes.filter((w) => w.table === "sync_state").at(-1)?.rows as Record<string, unknown>;
+      expect(Date.parse(final.next_allowed_at as string)).toBeGreaterThan(before + COOLDOWN_S * 1000);
+    },
+  );
+
+  it("a rate limit still uses Riot's own Retry-After, not the auth cooldown", async () => {
+    const { db } = makeDb({ storedMatchIds: [] });
+    const { client } = makeClient([new Response("", { status: 429, headers: { "Retry-After": "5" } })]);
+
+    const result = await syncPlayer(ME, "cron", { db, client });
+
+    expect(result).toMatchObject({ status: "rate_limited", retryAfterS: 5 });
+    const nextAllowedAt = Date.parse(result.status === "rate_limited" ? result.nextAllowedAt : "");
+    expect(nextAllowedAt).toBeLessThan(Date.now() + COOLDOWN_S * 1000);
   });
 
   it("never exceeds the per-run call budget", async () => {

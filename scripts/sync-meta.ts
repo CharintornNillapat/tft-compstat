@@ -77,9 +77,11 @@ import {
   type CompAugmentPicks,
 } from "@/lib/curated/augment-sync";
 import { parseAugmentTiers } from "@/lib/curated/augment-tiers";
+import { extractOpenerPivotSlugs } from "@/lib/curated/openers";
 import {
   AUGMENT_TIERS_FILE,
   COMPS_DIR,
+  OPENERS_FILE,
   TIER_LIST_FILES,
   type TierListKind,
 } from "@/lib/curated/schemas";
@@ -831,6 +833,38 @@ function reportComps(plans: readonly CompPlan[], stale: readonly string[], skipp
   }
 }
 
+/**
+ * Warns when a generated comp about to be removed (because it dropped out of
+ * the meta selection) is still a `transition_to` target in this set's
+ * `openers.yaml`. Not fatal on its own — `getOpeners()` already hides an
+ * orphaned pivot's pill rather than failing the build (architecture §7, §8) —
+ * but it means a hand-written opener is about to point at a dead comp, which
+ * is worth a loud line in an otherwise unattended daily run.
+ */
+async function warnStaleOpenerPivots(stale: readonly string[], setId: number): Promise<void> {
+  if (!stale.length) return;
+  const openersFile = `${CURATED_DIR}/${setId}/${OPENERS_FILE}`;
+  let text: string;
+  try {
+    text = await readFile(openersFile, "utf8");
+  } catch {
+    return; // No openers.yaml for this set — nothing that could reference the comp.
+  }
+
+  const pivotSlugs = new Set(extractOpenerPivotSlugs(openersFile, text));
+  const orphaned = stale.flatMap((file) => {
+    const slug = file.split("/").pop()?.replace(/\.ya?ml$/, "");
+    return slug && pivotSlugs.has(slug) ? [slug] : [];
+  });
+  if (!orphaned.length) return;
+
+  console.warn(
+    `\n⚠ ${plural(orphaned.length, "comp")} about to be removed ${orphaned.length === 1 ? "is" : "are"} still a ` +
+      `transition_to target in ${openersFile}: ${orphaned.join(", ")}.\n` +
+      "  The pivot pill will just be hidden rather than 404 (architecture §7), but the opener could use a new one.",
+  );
+}
+
 /** The same check `pnpm seed:curated` runs, against text that is still in memory. */
 function validateCompPlans(plans: readonly CompPlan[], setId: number, references: References): SeedIssue[] {
   const comps: SeedComp[] = [];
@@ -1106,7 +1140,10 @@ async function main() {
         minBoards,
         references,
       });
-  if (comps) reportComps(comps.plans, comps.stale, comps.skipped, `${CURATED_DIR}/${setId}/${COMPS_DIR}`);
+  if (comps) {
+    reportComps(comps.plans, comps.stale, comps.skipped, `${CURATED_DIR}/${setId}/${COMPS_DIR}`);
+    await warnStaleOpenerPivots(comps.stale, setId);
+  }
 
   const augments = values["no-augments"]
     ? undefined

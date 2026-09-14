@@ -290,8 +290,12 @@ Verify in this order:
 # 1. The key itself, locally — probes Riot, writes nothing.
 pnpm riot:setup --dry-run
 
-# 2. A real local sync through the full gate.
+# 2. A real local sync through the full gate. Add --force if the key had been
+#    dead long enough for a background trigger (cron, stale-on-read) to hit it
+#    and set the day-long AuthError cooldown below — otherwise this step itself
+#    can come back `skipped`.
 pnpm riot:sync
+pnpm riot:sync --force
 
 # 3. Production, after the redeploy has finished.
 curl -s -H "Authorization: Bearer $CRON_SECRET" https://tft-compstat.vercel.app/api/cron/sync
@@ -300,6 +304,8 @@ curl -s -H "Authorization: Bearer $CRON_SECRET" https://tft-compstat.vercel.app/
 Step 3 should return `{ok: true, ...}`. If it returns `{skipped: true, reason: "locked-or-cooling"}`, that is success too — step 2 just consumed the cooldown. Wait out `nextAllowedAt` and retry, or trust step 2.
 
 Finally, load `/me` and confirm the warning banner is gone and the sync badge reads "synced *n*m ago". `sync_state.status` clears itself on the next successful sync; there is nothing to reset by hand.
+
+**A dead key now cools down for a day, not two minutes, but only on the triggers nobody is watching.** An `AuthError` from `cron` or `/me`'s stale-on-read sets `next_allowed_at` a full day out (`AUTH_ERROR_COOLDOWN_S`), so a key that dies overnight doesn't get retried, and fail, on every page view until someone notices. A `manual` failure (the refresh button, or `pnpm riot:sync` with no flags) keeps the short cooldown, so diagnosing a fresh failure by hand still only costs two minutes between tries — but `acquire_sync_lock`'s gate is the same one row for every trigger, so if a background trigger already set the day-long cooldown before you got there, step 2 needs `--force` to clear it rather than run into it.
 
 > `pnpm riot:setup` without `--dry-run` is only needed if the **Riot ID or platform** changes, not for a key swap — the puuid is unchanged.
 
@@ -374,7 +380,7 @@ TTFB is unchanged exactly as predicted — the static shell never depended on th
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `/me` banner: "Riot API key invalid or expired" | Development key past its 24h | [Rotate the key](#rotating-the-riot-api-key-personal-key) |
+| `/me` banner: "Riot API key invalid or expired" | Development key past its 24h | [Rotate the key](#rotating-the-riot-api-key-personal-key). Cron/stale-read set a day-long cooldown on this error, so verify with `pnpm riot:sync --force`. |
 | `/me` banner: "Rate limited by Riot" | 429; partial data was kept | None needed. It retries on the next sync; `next_allowed_at` holds Riot's `Retry-After`. |
 | Refresh button appears to do nothing | Inside the cooldown | The countdown on the button shows the remaining time. |
 | Cron returns 401 | Wrong or missing `CRON_SECRET`, or a non-`Bearer` scheme | Compare `.env.local` with the Vercel variable; remember a change needs a redeploy. |
@@ -401,7 +407,7 @@ TTFB is unchanged exactly as predicted — the static shell never depended on th
 | `pnpm sync:meta` | MetaTFT ranked stats → the two tier-list YAML files, and the generated comps |
 | `pnpm sync:bis` | MetaTFT unit builds → `champion-bis.yaml` |
 | `pnpm riot:setup` | Riot ID → puuid; probe routing; seed `riot_accounts` + `sync_state` |
-| `pnpm riot:sync` | One sync locally |
+| `pnpm riot:sync` | One sync locally. `--force` clears any cooldown/lock first (§ [Verify](#3-verify-and-why-there-is-no-downtime)) |
 | `pnpm riot:backfill` | Deeper history |
 | `pnpm rederive` | Recompute `player_matches` from cached raw JSON |
 
