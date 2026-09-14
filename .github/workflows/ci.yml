@@ -24,10 +24,18 @@ jobs:
     timeout-minutes: 15
     # Static pages are prerendered against the real tables at build time (architecture
     # §8), so `pnpm build` needs live read credentials — same project the site itself
-    # reads. Only the anon/public pair; nothing here can write.
+    # reads.
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      # /me's header (MeHeader) is inside a Suspense boundary, so its query result
+      # never reaches the prerendered shell — but it constructs the service-role
+      # admin client *synchronously*, before Next's Cache Components can register
+      # the subtree as dynamic and defer it. That construction validates the key,
+      # so the build fails without one even though nothing it reads is ever used.
+      # Found the hard way: this workflow's first run had only the two vars above
+      # and failed prerendering /me with "SUPABASE_SERVICE_ROLE_KEY: ... undefined".
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v7
 
