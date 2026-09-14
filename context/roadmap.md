@@ -480,7 +480,46 @@ Approved task by task rather than as a whole phase.
     above passed, copying the same three codes as locally.
   - **Routes:** `/`, `/comps`, `/augments`, `/bis`, `/tiers/champions`, `/tiers/items`, `/me`,
     `/comps/riftbeast-pebbles` and `/comps/elderwood-kayle` all 200.
-- **Not verifiable here:** pasting into the TFT client itself — to be confirmed in-game.
+- **Confirmed in-game (2026-09-14):** codes pasted into the TFT client import into the Team Planner.
+
+- [x] **Task 16 — Team planner and "My Planner" saved comps (`/planner`)** (approved 2026-09-14)
+  - **Decisions taken at approval:** per-unit star level 1–3 plus an optional comp-level `isFavorite`;
+    one copy per champion; all 28 hexes allowed, with a warning past the 10 units a team code holds.
+  - `getPlannerData()` (`use cache`, `static`): 74 champions, the `DA_` completed / emblem / artifact pool
+    (Artifactinate and the augment Flora Fatalis emblem dropped), 36 traits with tooltip text. No schema change.
+  - Pure modules with tests: `planner/board.ts` (place, move, swap, remove, stars, item and emblem rules,
+    `sanitizeBoard`, team-code order, trait adapter), `planner/saved-comps.ts` (versioned localStorage
+    document, defensive parse, save / duplicate / delete / favourite, draft) and `planner/catalog.ts`
+    (item pool, filters, tile labels).
+  - `PlannerApp` and its parts: editable board (tap, Pointer Events drag with edge auto-scroll, keyboard),
+    champion and item pickers, unit inspector, live traits, `CopyTeamCodeButton`, My Planner cards.
+  - `HexUnitFace` / `EmptyHex` extracted from `HexBoard` and shared with the planner board.
+  - Nav: Planner is `7`, Me moved to `8`; `shortcut-match.test.ts` pins the new order.
+  - Tests: 44 new (`board` 21, `saved-comps` 15, `catalog` 8), plus the shortcut test updated.
+
+**Verified — Task 16 (2026-09-14):**
+- **Checks:** `pnpm check` (479 tests, up from 435) and `pnpm build` (fetch cache cleared) green. `/planner`
+  builds **Static** at 1d / 1w; every other route keeps its shape and lifetime.
+- **No regression from the `HexUnitFace` extraction:** the board `<figure>` of three comps
+  (`riftbeast-pebbles`, `draven-fast-9`, `elderwood-kayle`) at 1280 and 390px was captured from the Task 15
+  build and again after — all 12 HTML captures and all 12 screenshots byte-identical.
+- **Local `pnpm start`, headless Edge** at 1280, 960 and 390px, a fresh browser profile each, every check passed:
+  74 champion tiles; tap-to-place; search finds Pebbles and places it; mouse drag tile → hex; placing a fielded
+  champion moves it; unit onto unit swaps; the dropped unit is selected; 3★; tap and drag to equip; the emblem rule
+  ("Ashe already has Hunter…") and the fourth item refused; live traits (2 Hunter); arrow keys move focus and Delete
+  removes; dragging off the board removes; the name keeps its spaces; save; a 40-character team code copied; 11
+  units show the over-10 warning; the draft survives a reload; My Planner duplicate, pin (moves to the top),
+  delete with confirm, a card's team code, and Load over unsaved changes with confirm; shortcut `7` opens
+  `/planner`; no horizontal overflow in either view; zero console errors.
+- **Defects found and fixed while verifying:**
+  - **No way to drag a low tile onto the board at 960px.** The picker sits under the board, and a tile low in the
+    list and the board do not fit on screen together. Drags now scroll the page within 56px of the window edge;
+    proved at 960×650 with the board scrolled to y −160 — the drag scrolled up and dropped Taric on his hex.
+  - The header read "Theorycraft **a** Enchanted Wilds board"; it now reads "Theorycraft boards for …".
+  - The draft name was cleaned on every keystroke, which ate the space typed between two words; the draft now keeps
+    the name as typed and Save cleans it (a test pins both).
+- **Also seen, not changed:** at 390px the site nav already scrolls inside its own `overflow-x-auto` strip, so
+  Planner and Me sit off to its right, as BIS / Augments / Me did before; the document itself never overflows.
 
 - [ ] Further tasks — not yet specified.
 

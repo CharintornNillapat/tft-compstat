@@ -16,7 +16,7 @@ type FilterableComp = {
 };
 
 /** Lowercase letters and digits only, so "kha'zix" finds Kha'Zix and "fast9" finds Fast 9. */
-const normalize = (text: string) =>
+export const normalize = (text: string) =>
   text
     .normalize("NFD")
     .toLowerCase()

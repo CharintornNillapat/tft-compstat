@@ -10,6 +10,7 @@ A minimalist, dark, data-dense TFT companion site built for a second monitor whi
 1. **Meta comps showcase.** Curated comps with positioning, carries, items, traits and tier.
 2. **Champion & item tier lists.** Costs 1–5, with S/A/B/C ratings.
 3. **Personal player dashboard.** Scoped to **one Riot account**. It covers recent matches (last 10–20+), avg placement, top-4 rate and favorite comps.
+4. **Team planner** (Phase 6 Task 16). Build a board, see its traits, copy the in-game Team Planner code, and keep comps in "My Planner" — stored in the viewer's browser, not the database (§8).
 
 **Non-goals:** global win-rate aggregation, multi-user accounts, crawling other players.
 
@@ -97,16 +98,19 @@ src/app/
   augments/page.tsx          Augment tier list
   comps/page.tsx, comps/[slug]/page.tsx
   tiers/champions/page.tsx, tiers/items/page.tsx
+  planner/page.tsx           Team planner (static shell + one client island)
   me/page.tsx                Personal dashboard
   api/cron/sync/route.ts, api/revalidate/route.ts
 src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx), TierRow, CostFilter, ToggleGroup, HoverTip,
-                             HexBoard, CompList, CompGuide, CompTraitList, CompItemBuilds, GuideTimeline, GuideMarkdown,
+                             HexBoard + HexUnitFace/EmptyHex (hex-board.tsx), CompList, CompGuide, CompTraitList, CompItemBuilds, GuideTimeline, GuideMarkdown,
                              CarryMark (comp-details.tsx), CopyTeamCodeButton,
                              PlaystyleBadge, DifficultyBadge, ContestedBadge (comp-badges.tsx),
                              AugmentBoard, RarityPill, AugmentFace, AugmentDetails (augment-parts.tsx),
                              PlacementPill, StatTile, Sparkline, PlacementHistogram, Segmented, Skeleton, SyncNotice,
                              MeDashboard, MeMatchHistory, MeFavoriteComps, CarryCell (me-comp-cell.tsx),
                              Shortcuts, and the pure helpers placement-styles.ts, sparkline-geometry.ts, shortcut-match.ts
+  planner/                   PlannerApp, PlannerBoard, ChampionPicker, ItemPicker, UnitInspector, SavedCompList,
+                             ConfirmButton; hooks use-stored-value.ts (localStorage store), use-pointer-drag.ts
 src/lib/
   env.ts                     Zod-validated env
   cache-tags.ts              the cache tags /api/revalidate accepts
@@ -138,6 +142,12 @@ src/lib/
   curated/comp-filter.ts     /comps tier/style/search filter (pure, client-safe)
   curated/guide-sections.ts  splitGuide: a comp guide's markdown → labelled stage sections + footnote (pure, client-safe, §9)
   curated/team-code.ts       buildTeamCode: a comp's units → the TFT client's Team Planner import code (pure, client-safe, §9)
+  planner/board.ts           the planner board: place/move/swap/remove, stars, item + emblem rules, sanitizeBoard,
+                             team-code order and trait adapters (pure, client-safe, §9)
+  planner/saved-comps.ts     "My Planner" localStorage contract: versioned JSON, defensive parse, save/duplicate/
+                             delete/favourite, draft (pure, client-safe, §8)
+  planner/catalog.ts         item pool, champion/item filters, tile labels, the PlannerData type (pure, client-safe)
+  planner/planner-data.ts    getPlannerData(): the active set's champions, items and traits, `use cache` + `static` (§8)
 ```
 
 ---
@@ -1069,6 +1079,27 @@ comps:                        # keyed by comp slug; a comp without an entry show
     `cacheLife("max")` on it (the build listed the shell at 30d / 1y where it had shown no lifetime);
     awaited first, every route keeps the shape and lifetime it had. The panel uses native `title`
     tooltips: the page has no `HoverTip`, and six descriptions do not earn a client island.
+- **`/planner`** (Phase 6 Task 16) is fully **Static** (1d / 1w): `getPlannerData()` is `'use cache'` with
+  `cacheTag("static")` — every name, icon, cost, trait and planner code on it comes from the static tables, so
+  `pnpm sync:static` must be able to refresh it, the `/bis` rule. It ships the active set's 74 champions, the
+  holdable items and all 36 traits with tooltip text; everything else happens in one client island, `PlannerApp`.
+  - **Saved comps live in `localStorage`, not Supabase.** §0 has no accounts and every DB write is server-side
+    with the service role; a public write path for anonymous comps would be the first thing on the site anyone
+    could write to, with nothing to scope it by. A theorycraft board is a per-browser scratchpad, so the page says
+    plainly that saved comps stay in this browser.
+  - **The storage contract is `planner/saved-comps.ts`**: key `tft-compstat:planner:v1`, a `{ version: 1, comps }`
+    document whose units store `hex: { row, col }`, `star` (1–3) and `items`, plus comp-level `isFavorite`. It is
+    parsed defensively — corrupt JSON or an unknown version gives an empty list and a notice, a malformed comp is
+    skipped, and a current-set board is rebuilt through `sanitizeBoard` (the editor's own rules) with every dropped
+    unit or item named. Comps of another set are kept but cannot be loaded. At most 50 comps.
+  - **localStorage is read as an external store, not copied into state** (`use-stored-value.ts`,
+    `useSyncExternalStore`). The board being edited is itself a stored draft (`…:planner:draft:v1`) written on
+    every change, so a reload or a second tab shows the same board with no effect syncing React state to storage.
+    The server snapshot is `undefined`, so the prerendered page is an empty board and Save stays disabled until the
+    saved list has been read — saving before hydration would have overwritten it with an empty list.
+  - Storage can be blocked or full, so every access is guarded and writes land in an in-memory copy first: the
+    planner still works for the tab's lifetime and says that nothing is being kept.
+  - **`NAV_ITEMS` gained an eighth entry** after Augments, so `7` is now Planner and `Me` moved to `8`.
   - **`refreshMyMatches` calls `refresh()`**, unconditionally. `refresh()` (Next 16, Server-Action-only) re-runs a route's *uncached* server content, which is exactly what a sync changes. The Phase 4 code called `revalidatePath("/me")` and only when `newMatches > 0`, which was wrong twice over: a "you're up to date" refresh never re-rendered, so the sync badge and cooldown countdown kept showing pre-sync values; and what `revalidatePath` invalidates is the prerendered shell, the one part that didn't change. Every `SyncResult` variant also carries `nextAllowedAt` now, so `RefreshButton` starts its countdown from the action's return value instead of waiting for the re-render.
 - Icons come from CommunityDragon URLs via `next/image`.
   - `remotePatterns` allows only `https://raw.communitydragon.org/*/game/assets/**` with no query string.
@@ -1095,8 +1126,8 @@ comps:                        # keyed by comp slug; a comp without an entry show
   - Patch brief: `--color-buff` (green) and `--color-nerf` (red), their own tokens for the same reason as `--color-carry` — the page's LP delta already spends `place-top4` and `tier-s` on "up" and "down", and a second meaning on the same colours would be ambiguous where they sit inches apart. Each badge also carries a ▲/▼ glyph, so **shape** says buff-or-nerf too.
   - Augment rarity (`RarityPill`): an outlined tint plus the word, in the **trait-style** silver / gold / prismatic tokens — reused rather than new, because the game uses one metal ladder for both. Never a solid plate: the tier badge beside it is the solid one, and the word carries the meaning without the colour.
 - **Layout:**
-  - A single top nav: Overview · Comps · Champions · Items · BIS · Augments · Me.
-  - Keyboard shortcuts `1–7` switch pages and `/` focuses search (`Shortcuts` in the root layout; `NAV_ITEMS` is exported from `nav-tabs.tsx` so routes and shortcuts can't drift). The decision lives in the pure `shortcut-match.ts`, because that's where shortcuts actually go wrong: they stay inert while focus is in an input, textarea, select or contenteditable, and never fire with Ctrl/Alt/Meta held. `/` only calls `preventDefault()` once it has found a search box, so on pages without one the browser's quick-find still works. Links carry `aria-keyshortcuts`.
+  - A single top nav: Overview · Comps · Champions · Items · BIS · Augments · Planner · Me.
+  - Keyboard shortcuts `1–8` switch pages and `/` focuses search (`Shortcuts` in the root layout; `NAV_ITEMS` is exported from `nav-tabs.tsx` so routes and shortcuts can't drift). The decision lives in the pure `shortcut-match.ts`, because that's where shortcuts actually go wrong: they stay inert while focus is in an input, textarea, select or contenteditable, and never fire with Ctrl/Alt/Meta held. `/` only calls `preventDefault()` once it has found a search box, so on pages without one the browser's quick-find still works. Links carry `aria-keyshortcuts`.
   - Optimized for a half-width 1080p window (~960px) that also degrades to phone width.
 - **Key components:**
   - `ChampionIcon`: cost border, star pips, mini item icons.
@@ -1108,7 +1139,15 @@ comps:                        # keyed by comp slug; a comp without an entry show
     - The tooltip shows name, cost, **tier**, traits and the note. Not the ability: `champions` stores only `api_name, cost, icon_url, is_shop_unit, name, set_id, traits`, so abilities would need a new `sync-static` source.
   - `TraitBadge`: style color and count.
   - `TierRow`: tier label plus a wrapping icon row. `CostRow` is its twin for the cost view — same label-column/`min-h-11`/em-dash-when-empty shape, so the two groupings of one board read as one layout. Its label is a *tinted* plate rather than `TierBadge`'s solid one: "1-cost" is five times the width of "S", and five saturated blocks down the left edge would outweigh the icons they label.
+  - `/planner` (`PlannerApp`, Phase 6 Task 16): a Builder | My Planner toggle. From `md` the Board panel (name, Save / Save as new / New, the board, unit count, team code, Clear, a status line and the unit inspector) takes 7 columns and Traits (`CompTraitList`, live) 5, with the pickers full width below; under `md` the order is board, pickers, traits.
+    - **Rules** are `planner/board.ts`, the curated comp rules applied live: one copy per champion (placing one already on the board moves it), a unit per hex, up to 3 items, no emblem for a trait the unit has. Every edit returns `{ board, error }`, and the error is shown in an `aria-live` status line rather than thrown. Units default to 2★; the board takes all 28 hexes.
+    - **Team code** comes from `buildTeamCode` over `plannerOrder` — most items first (the carries), then cost, then back row first. Past 10 units a warning in `--color-contested` names the units the code leaves out, and the button's tooltip says the same.
+    - **Placing**, three ways, all tested: tap a champion tile to arm it and then a hex (the phone path); drag with Pointer Events (`use-pointer-drag.ts`) — tile to hex, unit to hex (move or swap), item to unit, unit off the board to remove; or the keyboard — the board is one tab stop, arrows move between hexes, Enter acts, Delete removes, Esc disarms. A press becomes a drag after 6px, so taps stay clicks. HTML5 drag-and-drop is not used because it never fires for touch.
+    - **Touch**: board hexes are `touch-action: none` and drag by touch; picker tiles keep native scrolling, so on a phone they are tap-to-place. Holding a drag within 56px of the window's top or bottom edge scrolls the page — at the 960px half-width window a tile low in the list and the board are not on screen together, and without it those tiles could not be dragged onto the board.
+    - **Pickers**: champions by search (name or trait), cost (`CostFilter`) and a trait `<select>` — 36 trait toggles would wrap into a wall of buttons; items by kind (completed, emblems, artifacts) and search. The item pool is `DA_` completed items, emblems and artifacts only, with the augment-only duplicates dropped (`plannerItemPool`: `DA_Artifactinate*`, and the same-named Flora Fatalis emblem). Same-named forms get their distinguishing trait in the caption ("Lux · Blossom").
+    - **My Planner** cards: pin (★, favourites sort first), name, unit icons in team-code order, top active traits, and Load / Duplicate / Delete / Copy team code. Delete, and Load over unsaved changes, use `ConfirmButton` — a second press within 4s, no modal.
   - `HexBoard`: 4×7 pointy-top hexes, front row (0) at the top, odd rows shifted right by half a hex.
+    - A unit's face — cost rim, portrait, star pips, carry mark, items — is `HexUnitFace`, shared with the planner's board so the two cannot draw a unit differently. The extraction changed no markup: the three comp boards' HTML and screenshots were byte-identical before and after (Task 16).
     - Positions are percentages of an aspect-ratio box, so it scales from 400px to about 512px wide.
     - Each unit shows a cost-colored rim, a gold outer rim when it's a carry, star pips and up to 3 item icons, with details on hover.
   - `/comps` rows: tier, name (+ Contested / Gem badges), playstyle and difficulty chips, then the curated stats; carries (with items), a divider, then the rest of the board; active traits as icon + count.

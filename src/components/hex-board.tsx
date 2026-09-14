@@ -15,12 +15,12 @@ import { ItemIcon } from "./item-icon";
  */
 const WIDTH_HEXES = BOARD_COLS + 0.5;
 const HEIGHT_HEXES = 1 + 0.75 * (BOARD_ROWS - 1);
-const ASPECT_RATIO = WIDTH_HEXES / (HEIGHT_HEXES * (2 / Math.sqrt(3)));
+export const BOARD_ASPECT_RATIO = WIDTH_HEXES / (HEIGHT_HEXES * (2 / Math.sqrt(3)));
 
 const percent = (value: number) => `${(value * 100).toFixed(3)}%`;
 
 /** Where hex (row, col) sits, as percentages of the board. */
-function hexBox(row: number, col: number) {
+export function hexBox(row: number, col: number) {
   return {
     left: percent((col + (row % 2) * 0.5) / WIDTH_HEXES),
     top: percent((row * 0.75) / HEIGHT_HEXES),
@@ -36,6 +36,62 @@ function unitLabel(unit: CompUnit) {
   return `${unit.name}, ${unit.star}-star${unit.isCarry ? " carry" : ""}, ${ROW_NAMES[unit.row]}, column ${unit.col + 1}${items}`;
 }
 
+/** What a hex draws for a unit: the comp board's `CompUnit` and the planner's units both fit. */
+export type HexFaceUnit = {
+  name: string;
+  cost: number;
+  iconUrl: string | null;
+  star: number;
+  isCarry: boolean;
+  items: readonly { name: string; iconUrl: string | null }[];
+};
+
+/**
+ * A unit's face inside a hex — cost rim, portrait, star pips, carry mark and items —
+ * shared by the comp board and the planner so the two can never draw a unit differently.
+ * Absolutely positioned; the parent (a button in both boards) is the hex's box.
+ */
+export function HexUnitFace({ unit }: { unit: HexFaceUnit }) {
+  return (
+    <>
+      {unit.isCarry ? <span aria-hidden className="hex absolute inset-0.5 bg-carry" /> : null}
+      <span
+        aria-hidden
+        className={`hex absolute ${unit.isCarry ? "inset-1.25" : "inset-0.5"} ${COST_BG[unit.cost] ?? "bg-line"}`}
+      />
+      <span aria-hidden className={`hex absolute ${unit.isCarry ? "inset-2" : "inset-1.25"} overflow-hidden bg-raised`}>
+        {unit.iconUrl ? (
+          <Image
+            src={unit.iconUrl}
+            alt=""
+            width={64}
+            height={64}
+            className="size-full object-cover transition-transform group-hover:scale-110"
+          />
+        ) : (
+          <span className="grid size-full place-items-center text-[10px] font-semibold text-muted">
+            {unit.name.slice(0, 2)}
+          </span>
+        )}
+      </span>
+      <StarPips star={unit.star} className="absolute inset-x-0 top-0.5 z-10 text-center text-[10px]" />
+      {unit.isCarry ? <CarryMark className="absolute right-0 bottom-[22%] z-10" /> : null}
+      {unit.items.length ? (
+        <span className="absolute inset-x-0 bottom-[6%] z-10 flex justify-center gap-px">
+          {unit.items.map((item, i) => (
+            <ItemIcon key={i} name={item.name} iconUrl={item.iconUrl} size={14} alt="" />
+          ))}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
+/** An empty hex's plate. */
+export function EmptyHex({ className = "bg-line/60" }: { className?: string }) {
+  return <span aria-hidden className={`hex absolute inset-0.5 ${className}`} />;
+}
+
 /** The 4×7 board (architecture §9), front row at the top. Units show details on hover. */
 export function HexBoard({ units }: { units: CompUnit[] }) {
   const tip = useHoverTip<CompUnit>();
@@ -47,7 +103,7 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
         role="group"
         aria-label="Board positions, front row at the top"
         className="relative mx-auto w-full max-w-lg"
-        style={{ aspectRatio: ASPECT_RATIO }}
+        style={{ aspectRatio: BOARD_ASPECT_RATIO }}
       >
         {Array.from({ length: BOARD_ROWS }, (_, row) =>
           Array.from({ length: BOARD_COLS }, (_, col) => {
@@ -61,41 +117,10 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
                     aria-label={unitLabel(unit)}
                     className="group absolute inset-0 rounded-sm"
                   >
-                    {unit.isCarry ? <span aria-hidden className="hex absolute inset-0.5 bg-carry" /> : null}
-                    <span
-                      aria-hidden
-                      className={`hex absolute ${unit.isCarry ? "inset-1.25" : "inset-0.5"} ${COST_BG[unit.cost] ?? "bg-line"}`}
-                    />
-                    <span
-                      aria-hidden
-                      className={`hex absolute ${unit.isCarry ? "inset-2" : "inset-1.25"} overflow-hidden bg-raised`}
-                    >
-                      {unit.iconUrl ? (
-                        <Image
-                          src={unit.iconUrl}
-                          alt=""
-                          width={64}
-                          height={64}
-                          className="size-full object-cover transition-transform group-hover:scale-110"
-                        />
-                      ) : (
-                        <span className="grid size-full place-items-center text-[10px] font-semibold text-muted">
-                          {unit.name.slice(0, 2)}
-                        </span>
-                      )}
-                    </span>
-                    <StarPips star={unit.star} className="absolute inset-x-0 top-0.5 z-10 text-center text-[10px]" />
-                    {unit.isCarry ? <CarryMark className="absolute right-0 bottom-[22%] z-10" /> : null}
-                    {unit.items.length ? (
-                      <span className="absolute inset-x-0 bottom-[6%] z-10 flex justify-center gap-px">
-                        {unit.items.map((item, i) => (
-                          <ItemIcon key={i} name={item.name} iconUrl={item.iconUrl} size={14} alt="" />
-                        ))}
-                      </span>
-                    ) : null}
+                    <HexUnitFace unit={unit} />
                   </button>
                 ) : (
-                  <span aria-hidden className="hex absolute inset-0.5 bg-line/60" />
+                  <EmptyHex />
                 )}
               </div>
             );

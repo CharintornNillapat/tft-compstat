@@ -1,7 +1,7 @@
 import { NAV_ITEMS } from "./nav-tabs";
 
 /**
- * Which shortcut a keypress means, if any (architecture §9: `1`–`7` switch pages
+ * Which shortcut a keypress means, if any (architecture §9: `1`–`8` switch pages
  * and `/` focuses search).
  *
  * Pure and separate from the listener because this is where keyboard shortcuts

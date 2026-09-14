@@ -6,9 +6,9 @@ const press = (key: string, over: Partial<ShortcutContext> = {}) =>
   shortcutAction({ key, hasModifier: false, inEditable: false, ...over });
 
 describe("shortcutAction", () => {
-  it("maps 1-7 to the seven nav routes, in order", () => {
-    expect(NAV_ITEMS).toHaveLength(7);
-    expect(["1", "2", "3", "4", "5", "6", "7"].map((k) => press(k))).toEqual([
+  it("maps 1-8 to the eight nav routes, in order", () => {
+    expect(NAV_ITEMS).toHaveLength(8);
+    expect(["1", "2", "3", "4", "5", "6", "7", "8"].map((k) => press(k))).toEqual([
       { type: "navigate", index: 0 },
       { type: "navigate", index: 1 },
       { type: "navigate", index: 2 },
@@ -16,12 +16,14 @@ describe("shortcutAction", () => {
       { type: "navigate", index: 4 },
       { type: "navigate", index: 5 },
       { type: "navigate", index: 6 },
+      { type: "navigate", index: 7 },
     ]);
   });
 
   it("keeps the keys pinned to the nav order, so a new tab rebinds them", () => {
-    // Adding /bis and then /augments in front of /me moved Me from 5 to 6 to 7; this is
-    // the assertion that catches the next such move rather than letting it pass silently.
+    // Adding /bis, /augments and then /planner in front of /me moved Me from 5 to 6, 7
+    // and 8; this is the assertion that catches the next such move rather than letting
+    // it pass silently.
     expect(NAV_ITEMS.map((item) => item.href)).toEqual([
       "/",
       "/comps",
@@ -29,8 +31,10 @@ describe("shortcutAction", () => {
       "/tiers/items",
       "/bis",
       "/augments",
+      "/planner",
       "/me",
     ]);
+    expect(press("7")).toEqual({ type: "navigate", index: 6 });
   });
 
   it("maps / to search", () => {
@@ -39,7 +43,6 @@ describe("shortcutAction", () => {
 
   it("ignores digits with no route behind them", () => {
     expect(press("0")).toBeNull();
-    expect(press("8")).toBeNull();
     expect(press("9")).toBeNull();
   });
 
