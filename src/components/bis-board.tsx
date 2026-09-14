@@ -2,6 +2,7 @@
 
 import { Fragment, useMemo, useState } from "react";
 import type { BisChampion, BisItem } from "@/lib/curated/bis";
+import type { ItemText } from "@/lib/static/tooltip-text";
 import { BIS_ROLES, isChampionCost, type BisRole, type ChampionCost } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
 import { CostFilter } from "./cost-filter";
@@ -10,6 +11,7 @@ import { EmptyState } from "./empty-state";
 import { HoverTip, useHoverTip } from "./hover-tip";
 import { ItemIcon } from "./item-icon";
 import { ToggleGroup } from "./toggle-group";
+import { ItemTextBlock } from "./tooltip-text";
 
 const ROLE_OPTIONS = BIS_ROLES.map((role) => ({ value: role, label: role }));
 
@@ -21,7 +23,14 @@ const ROLE_OPTIONS = BIS_ROLES.map((role) => ({ value: role, label: role }));
  * the same columns so the eye can run down them. The board is a client component
  * only for the two filters and the shared tooltip — the data is prerendered.
  */
-export function BisBoard({ champions }: { champions: BisChampion[] }) {
+export function BisBoard({
+  champions,
+  itemText,
+}: {
+  champions: BisChampion[];
+  /** Tooltip text by item api name, sent once rather than on every build that holds the item. */
+  itemText: Readonly<Record<string, ItemText>>;
+}) {
   const [costs, setCosts] = useState<ReadonlySet<ChampionCost>>(() => new Set());
   const [roles, setRoles] = useState<ReadonlySet<BisRole>>(() => new Set());
   const tip = useHoverTip<BisItem>();
@@ -57,8 +66,8 @@ export function BisBoard({ champions }: { champions: BisChampion[] }) {
       )}
 
       {tip.active ? (
-        <HoverTip id={tip.id} anchor={tip.active.anchor}>
-          <ItemDetails item={tip.active.item} />
+        <HoverTip id={tip.id} anchor={tip.active.anchor} wide={tip.active.item.apiName in itemText}>
+          <ItemDetails item={tip.active.item} text={itemText[tip.active.item.apiName] ?? null} />
         </HoverTip>
       ) : null}
     </section>
@@ -170,8 +179,8 @@ function ItemGroup({
 
 const KIND_TAG: Partial<Record<string, string>> = { artifact: "Artifact", radiant: "Radiant" };
 
-/** Name, emblem trait and recipe — the same tooltip body `/tiers/items` shows — plus the artifact/radiant tag. */
-function ItemDetails({ item }: { item: BisItem }) {
+/** Name, emblem trait, recipe, stats and description — the same tooltip body `/tiers/items` shows — plus the artifact/radiant tag. */
+function ItemDetails({ item, text }: { item: BisItem; text: ItemText | null }) {
   const tag = item.kind ? KIND_TAG[item.kind] : undefined;
   return (
     <>
@@ -189,6 +198,7 @@ function ItemDetails({ item }: { item: BisItem }) {
           ))}
         </p>
       ) : null}
+      {text ? <ItemTextBlock text={text} /> : null}
     </>
   );
 }

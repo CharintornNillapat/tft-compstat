@@ -1,7 +1,8 @@
 /**
  * CommunityDragon → tft_sets, traits, champions, items (architecture §4.2), then
- * revalidates the site's "static" cache tag. Trait types come from MetaTFT's lookup
- * file, the one source that has them; without it the stored types are kept.
+ * revalidates the site's "static" cache tag. Trait types and the ability and item
+ * tooltip text come from MetaTFT's lookup file, the one source that has them; without
+ * it the stored types and text are kept.
  *
  *   pnpm sync:static              newest standard set in the live game data
  *   pnpm sync:static --set 18     a specific set
@@ -20,11 +21,13 @@ import {
   type StaticSnapshot,
   teamPlannerCodes,
   teamPlannerUrl,
+  type TooltipSource,
 } from "@/lib/static/cdragon";
 import { ITEM_KINDS, CHAMPION_COSTS, TRAIT_KINDS, type TraitKind } from "@/lib/static/game";
+import { lookupItemSchema, lookupUnitSchema, parseLookupEntries } from "@/lib/static/metatft-text";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { chunks, must, selectAll } from "./lib/db";
-import { fetchTraitKinds } from "./lib/meta-feed";
+import { fetchSetLookup } from "./lib/meta-feed";
 import { revalidateSite } from "./lib/revalidate";
 
 async function getJson(url: string): Promise<unknown> {
@@ -34,19 +37,33 @@ async function getJson(url: string): Promise<unknown> {
 }
 
 /**
- * Trait types from MetaTFT's lookup, the only source that has them. Undefined when
- * unavailable, which leaves `traits.kind` untouched rather than clearing it: the
- * tooltip loses a subtitle, and nothing else depends on it.
+ * Trait types and tooltip text from MetaTFT's lookup, the only source that has either.
+ * Each is undefined when unavailable, which leaves `traits.kind` and the text columns
+ * untouched rather than clearing them: a tooltip loses a subtitle or a paragraph, and
+ * nothing else depends on either.
  */
-async function fetchKinds(setId: number): Promise<Map<string, TraitKind> | undefined> {
+async function fetchLookup(setId: number): Promise<{ traitKinds?: Map<string, TraitKind>; tooltips?: TooltipSource }> {
   try {
-    const kinds = await fetchTraitKinds(setId);
-    if (kinds.size) return kinds;
-    console.warn(`MetaTFT lists no trait types for set ${setId}; traits.kind left as it was.`);
+    const lookup = await fetchSetLookup(setId);
+    const units = parseLookupEntries(lookupUnitSchema, lookup.units);
+    const items = parseLookupEntries(lookupItemSchema, lookup.items);
+    if (units.skipped + items.skipped) {
+      console.warn(`Skipped ${units.skipped + items.skipped} MetaTFT lookup entries with an unexpected shape.`);
+    }
+    if (!lookup.kinds.size) console.warn(`MetaTFT lists no trait types for set ${setId}; traits.kind left as it was.`);
+    if (!lookup.patch) console.warn("MetaTFT's lookup names no patch; tooltip text left as it was.");
+    return {
+      traitKinds: lookup.kinds.size ? lookup.kinds : undefined,
+      // Without a patch label there is nothing honest to print under the numbers, so no text is written.
+      tooltips:
+        lookup.patch && units.parsed.length
+          ? { source: lookup.patch, units: units.parsed, items: new Map(items.parsed.map((item) => [item.apiName, item])) }
+          : undefined,
+    };
   } catch (error) {
-    console.warn(`MetaTFT trait types unavailable (${(error as Error).message}); traits.kind left as it was.`);
+    console.warn(`MetaTFT lookup unavailable (${(error as Error).message}); trait types and tooltip text left as they were.`);
+    return {};
   }
-  return undefined;
 }
 
 /**
@@ -81,7 +98,13 @@ function printSummary({ set, traits, champions, items, warnings }: StaticSnapsho
   const planned = champions.filter((c) => c.team_planner_code != null).length;
   const plannerNote = champions.some((c) => "team_planner_code" in c) ? `${planned} of ${champions.length}` : "unchanged";
   console.log(`  planner    ${plannerNote}`);
+  const voiced = champions.filter((c) => c.ability_text != null).length;
+  const source = champions.find((c) => c.text_source)?.text_source ?? items.find((i) => i.text_source)?.text_source;
+  const abilityNote = champions.some((c) => "ability_text" in c) ? `${voiced} of ${champions.length} (${source ?? "no source"})` : "unchanged";
+  console.log(`  abilities  ${abilityNote}`);
   console.log(`  items      ${items.length}  (${countBy(items, (i) => i.kind, ITEM_KINDS)})`);
+  const described = items.filter((i) => i.description != null || i.stats != null).length;
+  console.log(`  item text  ${items.some((i) => "description" in i) ? `${described} of ${items.length}` : "unchanged"}`);
   if (warnings.length) console.log(`  warnings:\n${warnings.map((w) => `    - ${w}`).join("\n")}`);
 }
 
@@ -125,8 +148,11 @@ async function main() {
   console.log(`Fetching CommunityDragon TFT data for game version ${patch}…`);
   const data = parseCdragonTft(await getJson(`${CDRAGON_ORIGIN}/${patch}/cdragon/tft/en_us.json`));
   const picked = pickSet(data, setNumber);
-  const [traitKinds, plannerCodes] = await Promise.all([fetchKinds(picked.number), fetchPlannerCodes(patch, picked.mutator)]);
-  const snapshot = buildStaticSnapshot(data, { patch, setNumber, traitKinds, plannerCodes });
+  const [{ traitKinds, tooltips }, plannerCodes] = await Promise.all([
+    fetchLookup(picked.number),
+    fetchPlannerCodes(patch, picked.mutator),
+  ]);
+  const snapshot = buildStaticSnapshot(data, { patch, setNumber, traitKinds, plannerCodes, tooltips });
   printSummary(snapshot);
   if (values["dry-run"]) {
     console.log("\nDry run: nothing written.");

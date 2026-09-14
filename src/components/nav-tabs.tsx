@@ -27,11 +27,23 @@ function activeHref(pathname: string) {
   )?.href;
 }
 
-/** Static tab list; also the Suspense fallback while the pathname is unknown. */
+/**
+ * Static tab list; also the Suspense fallback while the pathname is unknown.
+ *
+ * On a phone the eight tabs overflow, and a list clipped at a word boundary ("BIS")
+ * gives no hint it scrolls. The right edge fades out instead, over the last 1.5rem.
+ * The list ends in 1.5rem of padding, so scrolled to the end the fade covers only that
+ * padding and "Me" is fully visible — and when nothing overflows, the fade is invisible.
+ * `w-max` is what makes that padding count: a list only as wide as the nav overflows its
+ * own box, and the scroll area then ends at the last tab, not after the padding.
+ */
 export function NavList({ active }: { active?: string }) {
   return (
-    <nav aria-label="Main" className="-mb-px h-full min-w-0 overflow-x-auto">
-      <ul className="flex h-full items-stretch">
+    <nav
+      aria-label="Main"
+      className="-mb-px h-full min-w-0 overflow-x-auto mask-[linear-gradient(to_right,#000_calc(100%-1.5rem),transparent)]"
+    >
+      <ul className="flex h-full w-max items-stretch pr-6">
         {NAV_ITEMS.map(({ href, label }, index) => {
           const isActive = href === active;
           return (

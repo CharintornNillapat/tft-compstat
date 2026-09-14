@@ -17,7 +17,7 @@ A minimalist, dark, data-dense TFT companion site built for a second monitor whi
 | Topic | Decision |
 |---|---|
 | Access model | **Public read, locked writes.** No logins. Anyone with the URL can view. All DB writes happen server-side with the service-role key. Riot sync is bounded by a DB lock and cooldown, and cron requires `CRON_SECRET`. |
-| Curated content | **YAML seed files in the repo are the source of truth** (Zod-validated, upserted by a script, history kept in git). An optional in-app admin UI comes in Phase 5. |
+| Curated content | **YAML seed files in the repo are the source of truth** (Zod-validated, upserted by a script, history kept in git). An in-app admin UI was considered for Phase 5 and left **out of scope** (roadmap Phase 5): `sync:meta` / `sync:bis` now generate most curated files, and an editor would need logins this access model rules out. |
 | Stats computation | Cache **raw** Riot data in Supabase. Compute derived stats on read, as pure TS over ≤N rows. |
 
 ---
@@ -194,7 +194,10 @@ create table champions (
   traits       text[] not null default '{}',     -- trait api_names
   icon_url     text,
   is_shop_unit boolean not null default true,    -- true for every playable unit, Riftbeasts included; §4.8
-  team_planner_code smallint check (team_planner_code between 1 and 4095)  -- client Team Planner id; §4.8, §9
+  team_planner_code smallint check (team_planner_code between 1 and 4095),  -- client Team Planner id; §4.8, §9
+  ability_name text,                             -- tooltip text from MetaTFT's lookup; §4.8 (Phase 6 Task 20)
+  ability_text text,                             -- values resolved per star: "465 / 700 / 1000 (AD)"
+  text_source  text                              -- the lookup's _metadata.patch, e.g. 'pbe'
 );
 
 create table items (
@@ -204,7 +207,10 @@ create table items (
   components   text[] not null default '{}',
   grants_trait text references traits(api_name), -- emblems
   icon_url     text,
-  is_active    boolean not null default true
+  is_active    boolean not null default true,
+  description  text,                             -- tooltip text from MetaTFT's lookup; §4.8 (Phase 6 Task 20)
+  stats        text,                             -- "150 Health · 20 Armor"
+  text_source  text                              -- the lookup's _metadata.patch, e.g. 'pbe'
 );
 ```
 
@@ -412,6 +418,15 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 - Names drop client markup (`<rules>…</rules>`). An empty name falls back to the api name.
 - Items that leave the pool keep their rows with `is_active = false`.
 - **Set 18 lists most items twice:** `DA_…` (the Enchanted Wilds versions, built from `DA_Component_*`) and the older `TFT_Item_…`. Both are stored; which one match data uses is a Phase 4 check (§11).
+
+**Tooltip text** (Phase 6 Task 20, migration `20260914092833_tooltip_text.sql`)
+- **CommunityDragon cannot supply it for Set 18.** Its ability text keeps 352 `@Placeholder@` values with no numbers behind them, no `DA_` item has a description, and the champion bins carry no spell values. MetaTFT's lookup — the file `kind` already comes from — has both resolved, so `sync:static` reads that file once (`fetchSetLookup` in `scripts/lib/meta-feed.ts`) and `src/lib/static/metatft-text.ts` turns its markup into plain text.
+- **The lookup is a PBE build.** `_metadata.patch` reads `pbe`, and on 2026-09-14 14 of 65 matched champions had base stats that differ from live 18.2. Each text is stored with `text_source`, and every tooltip prints "Values from PBE data" (`textSourceLabel`) — chosen at review over dropping the numbers. A later lookup naming a real patch prints "Values from patch N" with no code change.
+- **Units join on name + cost** (`matchLookupUnit`): MetaTFT says `TFT18_Ashe` where match data says `DA_18_Ashe`. A repeated name prefers the shop unit; anything still ambiguous gets no text rather than the wrong ability. The nine non-base Lux forms have no lookup unit. Items join by api name, which both sources share.
+- **Markup.** `<TFTAttribute attributeId>` reads the ability's per-star `attributeValues` (1★–3★ shown), then a footer entry naming the same attribute. `<TFTCurveTable row>` reads step-wise `[star, value]` pairs (items: key 1). `format` (percent, percentMinusOne, invertedPercent), `precision` and `icon` (→ "AD", "Attack Speed"…) shape each value; equal values across stars collapse to one. `stats` is `statLine`'s stat tags joined " · ".
+- **Live counters are dropped with their line:** `TFTSpellAttributes.*` / `TFTItemAttributes.*` ("Gold generated this game: …"), and an unresolved attribute styled as rules text ("(Greens Foraged: …)"). A tag with no attribute only draws an icon (Adaptor units) and becomes its word. Style tags and client string-table references (`{Augment.Variant…}`) are dropped. **Any other unresolved value drops the whole text** — the `augmentText` rule, since "deals ? damage" is worse than nothing.
+- **Omitted without a source.** When the lookup is unreachable or names no patch, the text columns are left out of the upsert, so stored text survives — the `kind` rule. A malformed unit or item entry is skipped and counted, never fatal.
+- Set 18, dry run 2026-09-14: abilities **65 of 74**; item text 144 of 771, including **108 of the 113** items the curated files name.
 
 **Icons:** `https://raw.communitydragon.org/<version>/game/<path lowercased, .tex → .png>`. CommunityDragon keeps old version directories (checked back to 13.1), so a stored URL keeps pointing at the synced file.
 
@@ -1070,9 +1085,10 @@ comps:                        # keyed by comp slug; a comp without an entry show
     items the file actually names, because `items` holds 771 rows in Set 18.
   - `BisBoard` is a client component for the cost and role filters and the shared
     `HoverTip` only; the rows themselves are prerendered.
-  - **The tooltip shows name, emblem trait and recipe — not item stats.** `items` stores no
-    stat or description text, so that would need a new `sync-static` source; flagged here
-    rather than faked, as in Phase 6 Task 3.
+  - **The tooltip shows name, emblem trait, recipe, stats and description.** The text came in
+    Phase 6 Task 20 from MetaTFT's lookup (§4.8); until then it was flagged as unavailable
+    rather than faked. It is sent **once per item** as `ChampionBis.itemText`, keyed by api
+    name, rather than on every `BisItem` — a completed item sits in dozens of builds.
   - **`NAV_ITEMS` gained a sixth entry**, and the number shortcuts are derived from its
     length, so `6` now navigates and `Me` moved from `5` to `6`. `shortcut-match.test.ts`
     pins the order so the next such move is caught rather than silent.
@@ -1163,6 +1179,7 @@ comps:                        # keyed by comp slug; a comp without an entry show
   - Augment rarity (`RarityPill`): an outlined tint plus the word, in the **trait-style** silver / gold / prismatic tokens — reused rather than new, because the game uses one metal ladder for both. Never a solid plate: the tier badge beside it is the solid one, and the word carries the meaning without the colour.
 - **Layout:**
   - A single top nav: Overview · Comps · Champions · Items · BIS · Augments · Planner · Me.
+    - On a phone the tabs overflow. `NavList` fades the strip's right edge over 1.5rem so it reads as scrollable, and the list is `w-max` with `pr-6`: scrolled to the end, the fade covers that padding rather than "Me". Where nothing overflows the fade lands on empty padding and is invisible (Phase 6 Task 19).
   - Keyboard shortcuts `1–8` switch pages and `/` focuses search (`Shortcuts` in the root layout; `NAV_ITEMS` is exported from `nav-tabs.tsx` so routes and shortcuts can't drift). The decision lives in the pure `shortcut-match.ts`, because that's where shortcuts actually go wrong: they stay inert while focus is in an input, textarea, select or contenteditable, and never fire with Ctrl/Alt/Meta held. `/` only calls `preventDefault()` once it has found a search box, so on pages without one the browser's quick-find still works. Links carry `aria-keyshortcuts`.
   - Optimized for a half-width 1080p window (~960px) that also degrades to phone width.
 - **Key components:**
@@ -1172,7 +1189,7 @@ comps:                        # keyed by comp slug; a comp without an entry show
     - Rows are strongest-first **by inheritance, not by a comparator**: `getChampionTierList()` already returns S→C with each tier in its YAML `position` order, so bucketing stably preserves both. Re-sorting would discard the author's hand-written ranking within a tier.
     - In cost rows each icon carries a corner `TierBadge`. Left-to-right order is otherwise the only signal that a row is ranked, and that signal disappears the moment a row wraps.
     - A cost outside 1–5 gets its own trailing row rather than being dropped; the DB check should make it unreachable, but a champion silently vanishing is a worse failure than an odd extra row.
-    - The tooltip shows name, cost, **tier**, traits and the note. Not the ability: `champions` stores only `api_name, cost, icon_url, is_shop_unit, name, set_id, traits`, so abilities would need a new `sync-static` source.
+    - The tooltip shows name, cost, **tier**, traits, the note and — since Phase 6 Task 20 — the **ability**, with values per star and a "Values from PBE data" line (`AbilityBlock` in `components/tooltip-text.tsx`; source rules in §4.8). A champion with no ability text keeps the old narrow tooltip.
   - `TraitBadge`: style color and count.
   - `TierRow`: tier label plus a wrapping icon row. `CostRow` is its twin for the cost view — same label-column/`min-h-11`/em-dash-when-empty shape, so the two groupings of one board read as one layout. Its label is a *tinted* plate rather than `TierBadge`'s solid one: "1-cost" is five times the width of "S", and five saturated blocks down the left edge would outweigh the icons they label.
   - `/planner` (`PlannerApp`, Phase 6 Task 16): a Builder | My Planner toggle. From `md` the Board panel (name, Save / Save as new / New, the board, unit count, team code, Clear, a status line and the unit inspector) takes 7 columns and Traits (`CompTraitList`, live) 5, with the pickers full width below; under `md` the order is board, pickers, traits.

@@ -2,6 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { getStaticNames } from "@/lib/static/lookup";
 import type { NameBook } from "@/lib/static/names";
+import { toItemText, type ItemText } from "@/lib/static/tooltip-text";
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import { readNewestCuratedFile } from "./curated-files";
@@ -52,12 +53,17 @@ export type ChampionBis = {
   /** Provenance line from the generated file, printed under the page title. */
   source: string | null;
   champions: BisChampion[];
+  /**
+   * Tooltip stats and description by item api name — once per item, however many
+   * builds hold it, rather than repeated on every `BisItem` in the payload.
+   */
+  itemText: Record<string, ItemText>;
 };
 
 /** Extra item columns the tooltip needs, which `NameBook` doesn't carry. */
 export type BisItemDetails = ReadonlyMap<
   string,
-  { components: string[]; grantsTrait: string | null; kind?: ItemKind }
+  { components: string[]; grantsTrait: string | null; kind?: ItemKind; text?: ItemText | null }
 >;
 
 export type BisReferences = { names: NameBook; itemDetails: BisItemDetails };
@@ -161,6 +167,15 @@ export function validateChampionBis(input: {
   });
 
   if (issues.length) return { issues };
+
+  const itemText: Record<string, ItemText> = {};
+  for (const champion of champions) {
+    for (const item of [...champion.primary, ...champion.secondary, ...champion.special]) {
+      const text = refs.itemDetails.get(item.apiName)?.text;
+      if (text) itemText[item.apiName] = text;
+    }
+  }
+
   return {
     issues,
     bis: {
@@ -168,6 +183,7 @@ export function validateChampionBis(input: {
       title: data.title ?? "Best in slot",
       source: data.source ?? null,
       champions,
+      itemText,
     },
   };
 }
@@ -194,7 +210,7 @@ export async function getChampionBis(): Promise<ChampionBis | null> {
   const { file, text } = found;
 
   // Only the items this file actually names: `items` holds 771 rows in Set 18, and
-  // the recipes are needed for the tooltip alone.
+  // the recipes and text are needed for the tooltip alone.
   const used = new Set<string>();
   const parsed = championBisFileSchema.safeParse(parseYaml(file, text).data);
   if (parsed.success) {
@@ -204,12 +220,18 @@ export async function getChampionBis(): Promise<ChampionBis | null> {
   }
   const rows = used.size
     ? must(
-        await getSupabase().from("items").select("api_name, components, grants_trait, kind").in("api_name", [...used]),
+        await getSupabase()
+          .from("items")
+          .select("api_name, components, grants_trait, kind, description, stats, text_source")
+          .in("api_name", [...used]),
         "bis items",
       )
     : [];
   const itemDetails: BisItemDetails = new Map(
-    rows.map((row) => [row.api_name, { components: row.components, grantsTrait: row.grants_trait, kind: row.kind }]),
+    rows.map((row) => [
+      row.api_name,
+      { components: row.components, grantsTrait: row.grants_trait, kind: row.kind, text: toItemText(row) },
+    ]),
   );
 
   const { bis, issues } = validateChampionBis({ file, text, refs: { names, itemDetails } });

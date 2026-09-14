@@ -11,6 +11,7 @@ import { COST_TEXT } from "./cost-styles";
 import { HoverTip, useHoverTip } from "./hover-tip";
 import { Segmented } from "./segmented";
 import { NoteDot, TierBadge, TierRow } from "./tier-row";
+import { AbilityBlock } from "./tooltip-text";
 
 const GROUPINGS = [
   { value: "cost", label: "Cost" },
@@ -74,7 +75,7 @@ export function ChampionTierBoard({ tiers }: { tiers: ChampionTierList["tiers"] 
       </div>
 
       {tip.active ? (
-        <HoverTip id={tip.id} anchor={tip.active.anchor}>
+        <HoverTip id={tip.id} anchor={tip.active.anchor} wide={tip.active.item.ability !== null}>
           <ChampionDetails entry={tip.active.item} />
         </HoverTip>
       ) : null}
@@ -129,6 +130,7 @@ function ChampionDetails({ entry }: { entry: ChampionTierEntry }) {
         </span>
       </p>
       {entry.traits.length ? <p className="text-muted">{entry.traits.join(" · ")}</p> : null}
+      {entry.ability ? <AbilityBlock ability={entry.ability} /> : null}
       {entry.note ? <p className="mt-1.5 border-t border-line pt-1.5 text-fg">{entry.note}</p> : null}
     </>
   );

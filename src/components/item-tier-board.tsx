@@ -6,8 +6,9 @@ import { ITEM_KIND_LABELS } from "@/lib/static/game";
 import { HoverTip, useHoverTip } from "./hover-tip";
 import { ItemIcon } from "./item-icon";
 import { NoteDot, TierRow } from "./tier-row";
+import { ItemTextBlock } from "./tooltip-text";
 
-/** Item tier rows grouped by kind, with hover details (recipe, emblem trait, note). */
+/** Item tier rows grouped by kind, with hover details (recipe, emblem trait, stats and description, note). */
 export function ItemTierBoard({ groups }: { groups: ItemTierList["groups"] }) {
   const tip = useHoverTip<ItemTierEntry>();
 
@@ -38,7 +39,7 @@ export function ItemTierBoard({ groups }: { groups: ItemTierList["groups"] }) {
         </section>
       ))}
       {tip.active ? (
-        <HoverTip id={tip.id} anchor={tip.active.anchor}>
+        <HoverTip id={tip.id} anchor={tip.active.anchor} wide={tip.active.item.text !== null}>
           <ItemDetails entry={tip.active.item} />
         </HoverTip>
       ) : null}
@@ -62,6 +63,7 @@ function ItemDetails({ entry }: { entry: ItemTierEntry }) {
           ))}
         </p>
       ) : null}
+      {entry.text ? <ItemTextBlock text={entry.text} /> : null}
       {entry.note ? <p className="mt-1.5 border-t border-line pt-1.5 text-fg">{entry.note}</p> : null}
     </>
   );

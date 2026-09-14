@@ -159,16 +159,28 @@ export const LOOKUP_ORIGIN = "https://data.metatft.com/lookups";
 
 const lookupSchema = z.object({
   traits: z.array(z.object({ apiName: z.string(), type: z.string().nullish() })),
-  _metadata: z.object({ set: z.string() }),
+  // Parsed entry by entry in `metatft-text.ts`, so one odd unit can't fail the whole file.
+  units: z.array(z.unknown()).default([]),
+  items: z.array(z.unknown()).default([]),
+  _metadata: z.object({ set: z.string(), patch: z.string().nullish() }),
 });
 
+export type SetLookup = {
+  /** Trait type by api name. */
+  kinds: Map<string, TraitKind>;
+  /** `_metadata.patch`, which reads "pbe" even at the `latest` path (§4.8). */
+  patch: string | null;
+  units: unknown[];
+  items: unknown[];
+};
+
 /**
- * Trait type by api name, from MetaTFT's per-set lookup file. It is the one source
- * that has it — CommunityDragon and Data Dragon carry no origin/class split — so
- * `sync:static` reads this and nothing else from MetaTFT. A type it does not
- * recognise is dropped rather than stored.
+ * MetaTFT's per-set lookup file. It is the one source with trait types — CommunityDragon
+ * and Data Dragon carry no origin/class split — and with Set 18's ability and item values
+ * resolved, so `sync:static` reads this and nothing else from MetaTFT. A trait type it
+ * does not recognise is dropped rather than stored.
  */
-export async function fetchTraitKinds(setId: number): Promise<Map<string, TraitKind>> {
+export async function fetchSetLookup(setId: number): Promise<SetLookup> {
   const url = new URL(`${LOOKUP_ORIGIN}/TFTSet${setId}_latest_en_us.json`);
   const feed = parseFeed(lookupSchema, await getJson(url), `set ${setId} lookup`);
   if (parseFeedSet(feed._metadata.set) !== setId) {
@@ -179,7 +191,7 @@ export async function fetchTraitKinds(setId: number): Promise<Map<string, TraitK
     const kind = trait.type?.toLowerCase();
     if (isTraitKind(kind)) kinds.set(trait.apiName, kind);
   }
-  return kinds;
+  return { kinds, patch: feed._metadata.patch ?? null, units: feed.units, items: feed.items };
 }
 
 /* ------------------------------------------------------------ augments (§7.5) */

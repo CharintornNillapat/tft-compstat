@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** All five phases complete and deployed (2026-09-12). Live at https://tft-compstat.vercel.app, with Set 18 static data, the sample tier lists, four curated comps, the match cache syncing daily and the personal dashboard.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–18 deployed (2026-09-14). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,6 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–18 done (2026-09-14) |
 
 ---
 
@@ -617,6 +618,54 @@ Approved task by task rather than as a whole phase.
     400 / 960 / 1280, no overflow, aligned rows, the phone fold 2 → 8 → 2 cards, zero console errors.
   - **Routes:** `/`, `/comps`, `/comps/riftbeast-pebbles`, `/bis`, `/augments`, `/tiers/champions`, `/tiers/items`,
     `/me` and `/planner` all 200.
+
+- [x] **Task 19 — Phone nav fade and stale docs** (approved 2026-09-14)
+  - `NavList`: the tab strip's right edge fades over 1.5rem (`mask-[linear-gradient(…)]`), and the list is `w-max` with
+    `pr-6`, so scrolled to the end the fade covers only padding and "Me" is fully visible (architecture §9).
+  - **Found while verifying and fixed:** without `w-max` the list was only as wide as the nav, its end padding never
+    entered the scroll area, and at 400px "Me" ended at the nav's right edge (384px), under the fade.
+  - Docs: this file's header and progress table now show Phase 6 as open, task by task; architecture §0 records the
+    admin UI as out of scope instead of "comes in Phase 5".
+- [x] **Task 20 — Ability and item text in tooltips** (approved 2026-09-14; data source chosen at review: "text with values, labelled PBE")
+  - **Source.** CommunityDragon cannot supply it: Set 18's ability text in `en_us.json` has 352 `@Placeholder@`
+    values and none resolvable, no `DA_` item has a description, and the champion bins carry no spell values. MetaTFT's
+    per-set lookup — already read for trait types — has both resolved, but **only as a PBE build**: 14 of 65 matched
+    champions had base stats that differ from live 18.2 (Ashe range 6 → 5, Diana mana 30 → 40). So every text is stored
+    with its source and every tooltip says "Values from PBE data" (architecture §4.8).
+  - Migration `20260914092833_tooltip_text.sql`: `champions.ability_name/ability_text/text_source`,
+    `items.description/stats/text_source`. Columns on existing tables, so their grants and RLS apply unchanged.
+  - `src/lib/static/metatft-text.ts` (pure, 13 tests): lookup markup → text with values per star, live counters dropped
+    with their line, any other unresolved value dropping the text; `matchLookupUnit` joins on name + cost, because
+    MetaTFT says `TFT18_Ashe` where match data says `DA_18_Ashe`. `tooltip-text.ts` (3 tests) is the client-safe label.
+  - `sync:static` reads the lookup once (`fetchSetLookup`, replacing `fetchTraitKinds`) for trait types and text;
+    `buildStaticSnapshot` omits the text columns without a source, so stored text survives a failed fetch (2 tests).
+  - Tooltips: `/tiers/champions` gains the ability, `/tiers/items` and `/bis` gain stats and description
+    (`components/tooltip-text.tsx`). `/bis` sends item text **once per item** as `itemText`, not on every build.
+  - **Dry run against live sources (2026-09-14):** abilities **65 of 74** — only the nine non-base Lux forms, which the
+    lookup lists as one unit; item text 144 of 771 and **108 of the 113** items the curated files name. Aegis of Dawn,
+    Lich Bane, Wit's End, Hextech Gunblade and Nashor's Tooth keep their stats only: a value in the description
+    doesn't resolve.
+  - **Found while dry-running and fixed:** client string-table references (`{Augment.Variant…}`) left in 8 texts;
+    icon-only attributes on Adaptor units (Gromp, Nidalee, Akali, Kog'Maw, Master Yi) and rules-styled trackers
+    (Teemo, Ornn), plus Veigar's counter line, voided 8 abilities — 57 → 65.
+  - **Not included:** comp boards and the planner, whose tooltips don't carry this text.
+  - **Data (2026-09-14):** `pnpm db:push` was refused by the session's permission check, so the migration was applied
+    through the Supabase MCP (`apply_migration`, approved by the user). It records the UTC time it ran, `20260914092833`,
+    so the local file was renamed from `20260914180000_…` to match and a later CLI push won't re-apply it. That sorts
+    before `20260914120000_champion_team_planner_code`; the two touch different columns, so the order is harmless.
+    Then `pnpm db:types` and `pnpm sync:static`: abilities 65 of 74 (pbe), item text 144 of 771, "static" revalidated
+    on production.
+
+**Verified — Tasks 19 and 20 (2026-09-14):**
+- **Checks:** `pnpm check` (505 tests, up from 487) and `pnpm build` (fetch cache cleared) green; every route keeps its
+  shape (`/tiers/champions`, `/tiers/items` and `/bis` Static, `/` Partial Prerender).
+- **Local `pnpm start`, headless Edge:**
+  - At 400px, scrolled to the end, "Me" ends at 360px — exactly where the 24px fade begins. Before `w-max` it ended at
+    384px, under the fade; the scroll width grew from 503 to 527px by the padding.
+  - At 960px the champion (Pebbles: "Azure Laser … 160 / 240 / 360 (AP) magic damage"), item (Tacticians Shield) and
+    BIS (Edge of Night: "10% AD · 10% AP · 20 Armor · 15% Attack Speed") tooltips each show their text and "Values from
+    PBE data", in the wide tooltip.
+  - No horizontal overflow at 400px on `/`, `/tiers/champions`, `/tiers/items` or `/bis`; zero page errors.
 
 - [ ] Further tasks — not yet specified.
 

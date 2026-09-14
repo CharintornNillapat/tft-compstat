@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       champions: {
         Row: {
+          ability_name: string | null
+          ability_text: string | null
           api_name: string
           cost: number
           icon_url: string | null
@@ -23,9 +25,12 @@ export type Database = {
           name: string
           set_id: number
           team_planner_code: number | null
+          text_source: string | null
           traits: string[]
         }
         Insert: {
+          ability_name?: string | null
+          ability_text?: string | null
           api_name: string
           cost: number
           icon_url?: string | null
@@ -33,9 +38,12 @@ export type Database = {
           name: string
           set_id: number
           team_planner_code?: number | null
+          text_source?: string | null
           traits?: string[]
         }
         Update: {
+          ability_name?: string | null
+          ability_text?: string | null
           api_name?: string
           cost?: number
           icon_url?: string | null
@@ -43,6 +51,7 @@ export type Database = {
           name?: string
           set_id?: number
           team_planner_code?: number | null
+          text_source?: string | null
           traits?: string[]
         }
         Relationships: [
@@ -184,29 +193,38 @@ export type Database = {
         Row: {
           api_name: string
           components: string[]
+          description: string | null
           grants_trait: string | null
           icon_url: string | null
           is_active: boolean
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
+          stats: string | null
+          text_source: string | null
         }
         Insert: {
           api_name: string
           components?: string[]
+          description?: string | null
           grants_trait?: string | null
           icon_url?: string | null
           is_active?: boolean
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
+          stats?: string | null
+          text_source?: string | null
         }
         Update: {
           api_name?: string
           components?: string[]
+          description?: string | null
           grants_trait?: string | null
           icon_url?: string | null
           is_active?: boolean
           kind?: Database["public"]["Enums"]["item_kind"]
           name?: string
+          stats?: string | null
+          text_source?: string | null
         }
         Relationships: [
           {

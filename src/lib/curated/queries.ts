@@ -9,6 +9,7 @@ import {
   type TierRank,
   type TraitBreakpoint,
 } from "@/lib/static/game";
+import { toItemText, type ChampionAbility, type ItemText } from "@/lib/static/tooltip-text";
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import type { TierListKind } from "./schemas";
@@ -43,6 +44,8 @@ export type ChampionTierEntry = {
   /** Trait display names. */
   traits: string[];
   note: string | null;
+  /** The tooltip's ability; null when the static sync stored none. */
+  ability: ChampionAbility | null;
 };
 
 export type ChampionTierList = TierListMeta & { tiers: TierGroup<ChampionTierEntry>[] };
@@ -59,6 +62,8 @@ export type ItemTierEntry = {
   /** Trait name, for emblems. */
   grantsTrait: string | null;
   note: string | null;
+  /** The tooltip's stats and description; null when the static sync stored neither. */
+  text: ItemText | null;
 };
 
 /** Only kinds and tiers that have entries, in display order. */
@@ -142,7 +147,7 @@ export async function getChampionTierList(): Promise<ChampionTierList | null> {
   const rows = must(
     await db
       .from("tier_entries")
-      .select("tier, note, champion:champions(api_name, name, cost, traits, icon_url)")
+      .select("tier, note, champion:champions(api_name, name, cost, traits, icon_url, ability_name, ability_text, text_source)")
       .eq("tier_list_id", list.id)
       .order("tier")
       .order("position"),
@@ -163,6 +168,10 @@ export async function getChampionTierList(): Promise<ChampionTierList | null> {
               iconUrl: champion.icon_url,
               traits: champion.traits.map((apiName) => traits.get(apiName)?.name ?? apiName),
               note,
+              ability:
+                champion.ability_name && champion.ability_text
+                  ? { name: champion.ability_name, text: champion.ability_text, source: champion.text_source }
+                  : null,
             },
           },
         ]
@@ -183,7 +192,7 @@ export async function getItemTierList(): Promise<ItemTierList | null> {
   const rows = must(
     await db
       .from("tier_entries")
-      .select("tier, note, item:items(api_name, name, kind, components, grants_trait, icon_url)")
+      .select("tier, note, item:items(api_name, name, kind, components, grants_trait, icon_url, description, stats, text_source)")
       .eq("tier_list_id", list.id)
       .order("tier")
       .order("position"),
@@ -210,6 +219,7 @@ export async function getItemTierList(): Promise<ItemTierList | null> {
               }),
               grantsTrait: item.grants_trait ? (traits.get(item.grants_trait)?.name ?? item.grants_trait) : null,
               note,
+              text: toItemText(item),
             },
           },
         ]

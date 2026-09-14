@@ -34,7 +34,7 @@ export default async function BisPage() {
         }
       />
       {bis.source ? <p className="mb-3 text-faint">{bis.source}</p> : null}
-      <BisBoard champions={bis.champions} />
+      <BisBoard champions={bis.champions} itemText={bis.itemText} />
     </>
   );
 }

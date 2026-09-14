@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { TablesInsert } from "@/lib/supabase/types";
 import type { ItemKind, TraitBreakpoint, TraitEffect, TraitKind, TraitStyle } from "./game";
+import { abilityText, itemText, matchLookupUnit, type LookupItem, type LookupUnit } from "./metatft-text";
 import { traitText } from "./trait-text";
 
 /**
@@ -272,6 +273,21 @@ export type SnapshotOptions = {
    * survive. A champion the map lacks gets null and one warning for all of them.
    */
   plannerCodes?: ReadonlyMap<string, number>;
+  /**
+   * Ability and item text from MetaTFT's lookup (`metatft-text.ts`). Undefined when the
+   * lookup is unavailable: the text columns are then left out of the rows, so stored
+   * text survives. A champion with no matching unit, or a value that doesn't resolve,
+   * gets null and one warning for all of them.
+   */
+  tooltips?: TooltipSource;
+};
+
+export type TooltipSource = {
+  /** MetaTFT's `_metadata.patch`, e.g. "pbe", stored beside every text it produced. */
+  source: string;
+  units: readonly LookupUnit[];
+  /** By item api name, which MetaTFT shares with CommunityDragon (`DA_…`). */
+  items: ReadonlyMap<string, LookupItem>;
 };
 
 export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions): StaticSnapshot {
@@ -315,28 +331,43 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
   // trait excludes the traitless legacy summons and the cost-8/11 anvils. Data Dragon's
   // shop list is not consulted: it omits Set 18's Riftbeasts, which the shop sells at
   // their costs like any other champion (§4.8).
-  const { plannerCodes } = options;
+  const { plannerCodes, tooltips } = options;
   const playable = cdSet.champions.filter((c) => c.cost >= 1 && c.cost <= 5 && c.traits.length > 0);
-  const champions = playable.map((c) => ({
-    api_name: c.apiName,
-    set_id: setId,
-    name: c.name,
-    cost: c.cost,
-    traits: c.traits.flatMap((name) => {
-      const apiName = traitByName.get(name);
-      if (!apiName) warnings.push(`${c.apiName}: unknown trait "${name}" skipped.`);
-      return apiName ? [apiName] : [];
-    }),
-    icon_url: cdragonAssetUrl(c.tileIcon ?? c.squareIcon ?? c.icon, patch),
-    // Explicit rather than the column default, so an upsert clears a stale false.
-    is_shop_unit: true,
-    // Omitted rather than null without a source, the same rule as `traits.kind`.
-    ...(plannerCodes ? { team_planner_code: plannerCodes.get(c.apiName) ?? null } : {}),
-  }));
+  const champions = playable.map((c) => {
+    const unit = tooltips ? matchLookupUnit(tooltips.units, c) : undefined;
+    const ability = unit ? abilityText(unit) : null;
+    return {
+      api_name: c.apiName,
+      set_id: setId,
+      name: c.name,
+      cost: c.cost,
+      traits: c.traits.flatMap((name) => {
+        const apiName = traitByName.get(name);
+        if (!apiName) warnings.push(`${c.apiName}: unknown trait "${name}" skipped.`);
+        return apiName ? [apiName] : [];
+      }),
+      icon_url: cdragonAssetUrl(c.tileIcon ?? c.squareIcon ?? c.icon, patch),
+      // Explicit rather than the column default, so an upsert clears a stale false.
+      is_shop_unit: true,
+      // Omitted rather than null without a source, the same rule as `traits.kind`.
+      ...(plannerCodes ? { team_planner_code: plannerCodes.get(c.apiName) ?? null } : {}),
+      ...(tooltips
+        ? { ability_name: ability?.name ?? null, ability_text: ability?.text ?? null, text_source: ability ? tooltips.source : null }
+        : {}),
+    };
+  });
   if (plannerCodes) {
     const unplanned = champions.filter((c) => c.team_planner_code === null).map((c) => c.api_name);
     if (unplanned.length) {
       warnings.push(`No Team Planner code for ${unplanned.join(", ")}; team codes skip them.`);
+    }
+  }
+  if (tooltips) {
+    const silent = champions.filter((c) => c.ability_text === null).map((c) => c.api_name);
+    if (silent.length) {
+      warnings.push(
+        `No ability text for ${silent.join(", ")}: no single matching ${tooltips.source} unit, or a value it does not resolve.`,
+      );
     }
   }
 
@@ -354,6 +385,8 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
     const grantsTrait = emblemOf ? (traitByName.get(emblemOf) ?? null) : null;
     const taggedEmblem = item.tags?.includes(ITEM_TAGS.emblem) ?? false;
     if (taggedEmblem && !grantsTrait) warnings.push(`Emblem ${apiName} ("${name}") matches no trait.`);
+    const lookup = tooltips?.items.get(item.apiName);
+    const text = lookup ? itemText(lookup) : { description: null, stats: null };
     return [
       {
         api_name: item.apiName,
@@ -363,6 +396,15 @@ export function buildStaticSnapshot(data: CdragonTft, options: SnapshotOptions):
         grants_trait: grantsTrait,
         icon_url: cdragonAssetUrl(item.icon, patch),
         is_active: true,
+        // Omitted without a source, like the champion text. No warning per item: most of
+        // the pool is older `TFT_Item_…` entries the lookup never lists.
+        ...(tooltips
+          ? {
+              description: text.description,
+              stats: text.stats,
+              text_source: text.description || text.stats ? tooltips.source : null,
+            }
+          : {}),
       },
     ];
   });

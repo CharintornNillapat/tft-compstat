@@ -278,6 +278,60 @@ describe("buildStaticSnapshot", () => {
     expect(snapshot.champions.every((c) => !("team_planner_code" in c))).toBe(true);
   });
 
+  it("stores ability and item text when given, null where nothing matches, with one warning", () => {
+    const tooltips = {
+      source: "pbe",
+      units: [
+        {
+          apiName: "TFT18_Ashe",
+          name: "Ashe",
+          cost: 5,
+          curveValues: { Damage: [[1, 100], [2, 150], [3, 225]] },
+          ability: { name: "Spirit Rift", desc: 'Deals <TFTCurveTable row="Damage"/> damage.' },
+        },
+      ],
+      items: new Map([
+        [
+          "DA_InfinityEdge",
+          {
+            apiName: "DA_InfinityEdge",
+            desc: "Gain Precision.",
+            statLine: '<TFTCurveTable row="AD" icon="icon.AD" type="stat"/>',
+            curveValues: { AD: [[1, 35]] },
+          },
+        ],
+      ]),
+    };
+    const texted = buildStaticSnapshot(data, { patch: PATCH, tooltips });
+
+    expect(texted.champions.find((c) => c.api_name === "DA_18_Ashe")).toMatchObject({
+      ability_name: "Spirit Rift",
+      ability_text: "Deals 100 / 150 / 225 damage.",
+      text_source: "pbe",
+    });
+    expect(texted.champions.find((c) => c.api_name === "DA_18_KhaZix")).toMatchObject({
+      ability_name: null,
+      ability_text: null,
+      text_source: null,
+    });
+    expect(texted.warnings.filter((w) => w.startsWith("No ability text for"))).toHaveLength(1);
+    expect(texted.items.find((i) => i.api_name === "DA_InfinityEdge")).toMatchObject({
+      description: "Gain Precision.",
+      stats: "35 AD",
+      text_source: "pbe",
+    });
+    expect(texted.items.find((i) => i.api_name === "DA_Component_BFSword")).toMatchObject({
+      description: null,
+      stats: null,
+      text_source: null,
+    });
+  });
+
+  it("leaves the text columns out of the rows without a source, so an upsert keeps stored text", () => {
+    expect(snapshot.champions.every((c) => !("ability_text" in c) && !("text_source" in c))).toBe(true);
+    expect(snapshot.items.every((i) => !("description" in i) && !("stats" in i))).toBe(true);
+  });
+
   it("classifies items by tag, then by api name and recipe", () => {
     const kinds = Object.fromEntries(snapshot.items.map((i) => [i.api_name, i.kind]));
     expect(kinds).toEqual({
