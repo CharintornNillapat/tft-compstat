@@ -611,6 +611,12 @@ Approved task by task rather than as a whole phase.
   fewer" folds back to 2.
 - **Found while verifying and fixed:** subgrid rows taller than their chips spread the chips down the row, away from
   their label — `content-start` on the row list.
+- **Deployed (2026-09-14, commit `f9e7b06`)**: `dpl_J5i9eDJiMbxsgeM3SkWQANoiPtJ6` built first time, Ready in ~28s in `icn1`, aliased to
+  https://tft-compstat.vercel.app.
+  - **The same headless-Edge run against production** gave identical figures: heights 1,377 / 1,403 / 1,128px at
+    400 / 960 / 1280, no overflow, aligned rows, the phone fold 2 → 8 → 2 cards, zero console errors.
+  - **Routes:** `/`, `/comps`, `/comps/riftbeast-pebbles`, `/bis`, `/augments`, `/tiers/champions`, `/tiers/items`,
+    `/me` and `/planner` all 200.
 
 - [ ] Further tasks — not yet specified.
 
