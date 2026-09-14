@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-13T10:53:57.660Z. Names, icons, rarity and text: CommunityDragon 16.18.
+# (per comp), updated 2026-09-14T13:08:48.372Z. Names, icons, rarity and text: CommunityDragon 16.18.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.2"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-13. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-14. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -106,12 +106,6 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/branching-out-i.png
     description: Gain a random Emblem and a Reforger.
-  - api_name: DA_Kingslayer
-    name: Kingslayer
-    rarity: Silver
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/kingslayer_i.png
-    description: After winning player combat, gain 1 gold. If they had more health than you, gain 6 Gold instead. Gain 1 gold.
   - api_name: DA_LatentForge
     name: Latent Forge
     rarity: Silver
@@ -202,12 +196,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/ascension1.png
     description: After 12 seconds of combat, your units gain 20% Damage Amp.
-  - api_name: DA_18_GoodForSomethingI
-    name: Good For Something I
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/good-for-something-i.png
-    description: Champions that aren't holding items have a 40% chance to drop 1 gold on death.
   - api_name: DA_IronAssets
     name: Iron Assets
     rarity: Silver
@@ -259,18 +247,6 @@ augments:
       Round start: items on your bench are randomized.
 
       Gain 1 random component.
-  - api_name: DA_18_ResidualMagicPlus
-    name: Residual Magic +
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Your team gains 75 Health. Each time you purchase a Wisp, increase this by 10.
-  - api_name: DA_18_ResidualMagicPlusPlus
-    name: Residual Magic ++
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Your team gains 90 Health. Each time you purchase a Wisp, increase this by 10.
   - api_name: DA_SliceOfLife
     name: Slice of Life
     rarity: Silver
@@ -295,18 +271,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/twinguardians_i.png
     description: If you have exactly 2 allies in your first row, grant them 100 Health, 35 Armor, and 35 Magic Resist.
-  - api_name: DA_18_WispRebatePlusPlus
-    name: Wisp Rebate+
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Each time you purchase a Wisp, gain 2 gold. Gain 8 gold now.
-  - api_name: DA_18_WispRebatePlus
-    name: Wisp Rebate
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Each time you purchase a Wisp, gain 2 gold. Gain 4 gold now.
   - api_name: DA_18_BigGrabBag
     name: Big Grab Bag
     rarity: Gold
@@ -445,15 +409,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/swordsmith_ii.png
     description: Gain 2 random completed items that build from B.F. Sword.
-  - api_name: DA_LegionOfThrees
-    name: Legion Of Threes
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/legionofthrees_ii.png
-    description: |-
-      Gain a random Emblem. Your 3-cost champions and all allies equipped with an Emblem gain 150 Health and 12% Attack Speed.
-
-      Reckoning Championship, 2021
   - api_name: DA_MaxBuild
     name: Max Build
     rarity: Gold
@@ -631,6 +586,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: Champions gain 1.5% Attack Damage, 1.5% Ability Power, 1.5 Armor, and 1.5 Magic Resist for each ally that shares a trait with them.
+  - api_name: DA_18_WispRebatePlusPlus
+    name: Wisp Rebate+
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Each time you purchase a Wisp, gain 2 gold. Gain 8 gold now.
   - api_name: DA_Expedition
     name: Expedition
     rarity: Silver
@@ -727,6 +688,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/golden-gifts-iii.png
     description: "Gain a 2-star champion and 1 gold each time you level up. The champion's cost tier is your level minus 4 (max: 5-cost)."
+  - api_name: DA_Kingslayer
+    name: Kingslayer
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/kingslayer_i.png
+    description: After winning player combat, gain 1 gold. If they had more health than you, gain 6 Gold instead. Gain 1 gold.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -790,12 +757,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/young-and-wild-and-free-i.png
     description: You can always move freely on Carousel rounds. Gain 5 gold.
-  - api_name: DA_ElectrochargeI
-    name: Electrocharge I
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/electrocharge-i.png
-    description: Every 4 attacks an ally takes, they deal 30-90 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
   - api_name: DA_FeelingLucky
     name: Feeling Lucky
     rarity: Silver
@@ -808,6 +769,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/findyourcenter_i.png
     description: Your champion that starts combat in the center of the front row gains 15% Damage Amp and 25% max Health.
+  - api_name: DA_Recombobulator
+    name: Recombobulator
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/recombobulator-i.png
+    description: Champions on your board permanently transform into random champions 1 cost tier higher (max 5). Gain 2 Magnetic Removers and 3 free rerolls.
   - api_name: DA_FocusedFire
     name: Focused Fire
     rarity: Silver
@@ -820,6 +787,18 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: Your Tactician loses 20 Health, but after 5 player combats, gain 3 4-cost champions and 8 gold.
+  - api_name: DA_18_ResidualMagicPlusPlus
+    name: Residual Magic ++
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Your team gains 90 Health. Each time you purchase a Wisp, increase this by 10.
+  - api_name: DA_18_ResidualMagicPlus
+    name: Residual Magic +
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Your team gains 75 Health. Each time you purchase a Wisp, increase this by 10.
   - api_name: DA_FlowingTears
     name: Flowing Tears
     rarity: Silver
@@ -907,6 +886,15 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Primal grants an additional Blessing. Gain a Vi and a Nidalee.
+  - api_name: DA_LegionOfThrees
+    name: Legion Of Threes
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/legionofthrees_ii.png
+    description: |-
+      Gain a random Emblem. Your 3-cost champions and all allies equipped with an Emblem gain 150 Health and 12% Attack Speed.
+
+      Reckoning Championship, 2021
   - api_name: DA_18_RivalsAugment
     name: Unrivaled
     rarity: Gold
@@ -993,12 +981,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/grouphug2_ii.png
     description: "Combat start: Champions grant other adjacent champions 9 Armor and Magic Resist. This effect stacks."
-  - api_name: DA_ElectrochargeII
-    name: Electrocharge II
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/electrocharge-ii.png
-    description: Every 4 attacks an ally takes, they deal 50-140 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
   - api_name: DA_Epoch
     name: Epoch
     rarity: Gold
@@ -1086,12 +1068,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/slammin_ii.png
     description: Gain 3 gold. After each player combat, if there are no items on your bench (other than consumables), gain 2 XP.
-  - api_name: DA_18_BlossomTraitAugment
-    name: Blossom's Call
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: When you buy a Wisp, gain a random Blossom champion based on the Wisp's cost. Gain a Yunara, a Yorick, and a Karma.
   - api_name: DA_SoloLeveling
     name: Solo Leveling
     rarity: Gold
@@ -1312,12 +1288,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
     description: Champions gain 3.5% Attack Damage, 3.5% Ability Power, 3.5 Armor, and 3.5 Magic Resist for each ally that shares a trait with them.
-  - api_name: DA_18_SolarTraitAugment
-    name: Chosen of the Sun
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Gain a Leona, a Kayle, and a Sejuani. Leona gains 70 permanent max Health each round, increased by 10 for each unique 3-star champion fielded.
   - api_name: DA_BonusGiftPlus
     name: Bonus Gift+
     rarity: Gold
@@ -1342,18 +1312,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: While Sprykin is active, gain a second BFF summon that is 35% as powerful. Gain a Teemo, a Veigar, and a Kobuko.
-  - api_name: DA_18_LunarTraitAugment
-    name: Sun and Moon
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Your Lunar champions gain 100 Health and 8% Damage Amp for each unique Solar champion fielded. Gain a Leona, a Kayle, and a Diana.
-  - api_name: DA_18_LunarTraitAugmentPlus
-    name: Sun and Moon+
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Your Lunar champions gain 100 Health and 8% Damage Amp for each unique Solar champion fielded. Gain a Leona, a Kayle, and an Aphelios.
   - api_name: DA_18_WeightTheWorth
     name: Weight The Worth
     rarity: Gold
@@ -1468,12 +1426,36 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/comebackstory_iii.png
     description: Your team gains 4 Health and 0.3% Attack Speed per missing player Health.
+  - api_name: DA_18_GoodForSomethingI
+    name: Good For Something I
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/good-for-something-i.png
+    description: Champions that aren't holding items have a 40% chance to drop 1 gold on death.
+  - api_name: DA_ClearMind
+    name: Clear Mind
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/clearmind2.png
+    description: If there are no champions on your bench at the end of player combat, gain 3 XP.
+  - api_name: DA_HealingOrbsII
+    name: Healing Orbs II
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/healing-orbs-ii.png
+    description: When an enemy dies, a nearby ally is healed for 575 Health.
   - api_name: DA_AugmentedPower
     name: Augmented Power
     rarity: Silver
-    tier: C
+    tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/powerup_i.png
     description: Your next augment is one tier higher.
+  - api_name: DA_18_WispRebatePlus
+    name: Wisp Rebate
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Each time you purchase a Wisp, gain 2 gold. Gain 4 gold now.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1492,24 +1474,6 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: Gain 2 1-cost champions, 1 2-cost champion, and 1 3-cost champion.
-  - api_name: DA_Recombobulator
-    name: Recombobulator
-    rarity: Silver
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/recombobulator-i.png
-    description: Champions on your board permanently transform into random champions 1 cost tier higher (max 5). Gain 2 Magnetic Removers and 3 free rerolls.
-  - api_name: DA_ClearMind
-    name: Clear Mind
-    rarity: Gold
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/clearmind2.png
-    description: If there are no champions on your bench at the end of player combat, gain 3 XP.
-  - api_name: DA_HealingOrbsII
-    name: Healing Orbs II
-    rarity: Gold
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/healing-orbs-ii.png
-    description: When an enemy dies, a nearby ally is healed for 575 Health.
   - api_name: DA_Hustler
     name: Hustler
     rarity: Gold
@@ -1588,19 +1552,49 @@ augments:
       Open an armory and choose one of 3 traits. Gain a Lux with that trait and a Spear of Shojin.
 
       Traits on your board are more likely to appear in the armory. Lux provides +2 to her chosen trait
+  - api_name: DA_18_LunarTraitAugmentPlus
+    name: Sun and Moon+
+    rarity: Gold
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Your Lunar champions gain 100 Health and 8% Damage Amp for each unique Solar champion fielded. Gain a Leona, a Kayle, and an Aphelios.
+  - api_name: DA_18_LunarTraitAugment
+    name: Sun and Moon
+    rarity: Gold
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Your Lunar champions gain 100 Health and 8% Damage Amp for each unique Solar champion fielded. Gain a Leona, a Kayle, and a Diana.
+  - api_name: DA_ElectrochargeI
+    name: Electrocharge I
+    rarity: Silver
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/electrocharge-i.png
+    description: Every 4 attacks an ally takes, they deal 30-90 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
+  - api_name: DA_18_SolarTraitAugment
+    name: Chosen of the Sun
+    rarity: Gold
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Gain a Leona, a Kayle, and a Sejuani. Leona gains 70 permanent max Health each round, increased by 10 for each unique 3-star champion fielded.
+  - api_name: DA_18_BlossomTraitAugment
+    name: Blossom's Call
+    rarity: Gold
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: When you buy a Wisp, gain a random Blossom champion based on the Wisp's cost. Gain a Yunara, a Yorick, and a Karma.
+  - api_name: DA_ElectrochargeII
+    name: Electrocharge II
+    rarity: Gold
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/electrocharge-ii.png
+    description: Every 4 attacks an ally takes, they deal 50-140 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
 comps:
   adaptor-master-yi:
     source: MASTER YI > Adaptor > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
-  blossom-sett-ashe:
-    source: ASHE > Blossom > Lvl 9 rush
-    augments: [ DA_LateGameSpecialist, DA_ChampDelivery, DA_SliceOfLife, DA_BandOfThieves, DA_SlightlyMagicRoll, DA_18_WispRebatePlus ]
-  blossom-sett-sivir:
-    source: ASHE > Blossom > Lvl 9 rush
-    augments: [ DA_LateGameSpecialist, DA_ChampDelivery, DA_SliceOfLife, DA_BandOfThieves, DA_SlightlyMagicRoll, DA_18_WispRebatePlus ]
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll
-    augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_FrontlineFoundation, DA_SpreadingRoots, DA_TheTraitTree, DA_UrfsGrabBag ]
+    augments: [ DA_18_BranchingOutPlus, DA_BoxingLessons, DA_FrontlineFoundation, DA_SpreadingRoots, DA_TheTraitTree, DA_UrfsGrabBag ]
   elderwood-ezreal-draven:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_ChampDelivery, DA_SliceOfLife, DA_BandOfThieves, DA_SlightlyMagicRoll, DA_18_WispRebatePlus ]

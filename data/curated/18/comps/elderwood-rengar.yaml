@@ -3,29 +3,29 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster elderwood-rengar, DIAMOND+.
-# Sample: 7,936 boards, avg 4.70, patch 18.2, set 18.
+# Sample: 8,505 boards, avg 4.73, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
 # no top4_rate to write.
 slug: elderwood-rengar
 name: Elderwood Rengar
-tier: B
+tier: C
 style: reroll_3
 difficulty: 2
 patch: "18.2"
 order: 23
-summary: "Ends at level 7 with Rengar carrying. MetaTFT DIAMOND+: 7,936 boards, avg 4.70, picked 1.1% of boards."
-avg_place: 4.7
-pick_rate: 1.06
+summary: "Ends at level 7 with Kha'Zix carrying. MetaTFT DIAMOND+: 8,505 boards, avg 4.73, picked 1.0% of boards."
+avg_place: 4.73
+pick_rate: 1.03
 level_recommended: 7
 early_units: [ DA_18_KhaZix, DA_18_Kobuko, DA_18_RekSai, DA_18_Rengar ]
 flex_units: [ DA_18_Soraka, DA_18_Kennen ]
 board:
   - { unit: DA_18_Diana, row: 1, col: 2, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Rengar, row: 2, col: 0, star: 3, carry: true, priority: 1, items: [ DA_EdgeOfNight, DA_GuinsoosRageblade, DA_TitansResolve ] }
+  - { unit: DA_18_Rengar, row: 2, col: 0, star: 3, carry: true, priority: 2, items: [ DA_EdgeOfNight, DA_GuinsoosRageblade, DA_TitansResolve ] }
   - { unit: DA_18_Hecarim, row: 0, col: 3, star: 3, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
-  - { unit: DA_18_KhaZix, row: 2, col: 1, star: 3, carry: true, priority: 2, items: [ DA_EdgeOfNight, DA_HandOfJustice, DA_RabadonsDeathcap ] }
+  - { unit: DA_18_KhaZix, row: 2, col: 1, star: 3, carry: true, priority: 1, items: [ DA_EdgeOfNight, DA_HandOfJustice, DA_RabadonsDeathcap ] }
   - { unit: DA_18_LeBlanc, row: 3, col: 6, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Aphelios, row: 3, col: 0, star: 1, items: [ DA_RedBuff ] }
   - { unit: DA_18_Ezreal, row: 3, col: 1, star: 1, items: [ DA_ThiefsGloves ] }
@@ -35,10 +35,10 @@ guide: |-
   **Levelling:** level 7 by 3-6.
 
   **Items**, in the order to build them:
-  - **Rengar**: Edge of Night, Guinsoo's Rageblade, Titan's Resolve
   - **Kha'Zix**: Edge of Night, Hand Of Justice, Rabadon's Deathcap
+  - **Rengar**: Edge of Night, Guinsoo's Rageblade, Titan's Resolve
   - **Hecarim**: Gargoyle Stoneplate, Spirit Visage, Warmogs Armor
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 7,936 boards, avg 4.70. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 8,505 boards, avg 4.73. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
