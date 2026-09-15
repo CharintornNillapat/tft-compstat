@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-14T13:08:48.372Z. Names, icons, rarity and text: CommunityDragon 16.18.
+# (per comp), updated 2026-09-15T08:14:49.368Z. Names, icons, rarity and text: CommunityDragon 16.18.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.2"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-14. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-15. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -1456,6 +1456,15 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: Each time you purchase a Wisp, gain 2 gold. Gain 4 gold now.
+  - api_name: DA_18_LuxAugmentII
+    name: Master of All Origins
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
+    description: |-
+      Open an armory and choose one of 3 traits. Gain a Lux with that trait and a Spear of Shojin.
+
+      Traits on your board are more likely to appear in the armory. Lux provides +2 to her chosen trait
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1543,15 +1552,6 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/the-golden-egg-iii.png
     description: Gain a golden egg that hatches in 11 turns for a huge amount of loot. Winning player combat speeds up the hatch timer by an extra turn.
-  - api_name: DA_18_LuxAugmentII
-    name: Master of All Origins
-    rarity: Prismatic
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
-    description: |-
-      Open an armory and choose one of 3 traits. Gain a Lux with that trait and a Spear of Shojin.
-
-      Traits on your board are more likely to appear in the armory. Lux provides +2 to her chosen trait
   - api_name: DA_18_LunarTraitAugmentPlus
     name: Sun and Moon+
     rarity: Gold
