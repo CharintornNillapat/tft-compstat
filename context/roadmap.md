@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–20 deployed and Task 21 done, not yet deployed (2026-09-14). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–21 deployed and verified (2026-09-14). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–21 done (2026-09-14) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–21 deployed (2026-09-14) |
 
 ---
 
@@ -685,8 +685,8 @@ Approved task by task rather than as a whole phase.
 **Verified — Task 21 (2026-09-14):**
 - **Checks:** `pnpm check` (523 tests, up from 505: 9 new in `opener-pivots.test.ts`, 9 in `supabase/retry.test.ts`, plus additions to `openers.test.ts` and `sync-service.test.ts`) and `pnpm build` (fetch cache cleared) are green; every route keeps its shape — `/`  and `/comps/[slug]` still Partial Prerender; `/bis`, `/augments`, `/comps`, `/planner` and both tier lists still Static.
 - **openers/sync-meta:** `pnpm sync:meta --dry-run` ran the changed code path end to end with no crash. Nothing is currently stale on the live feed, so the new warning line didn't fire in that run; `extractOpenerPivotSlugs` and `validateOpeners`'s warning path are covered directly by tests instead, including a pivot dropped mid-schema-failure and a non-string `transition_to` entry.
-- **Not yet exercised live:** the CI workflow (needs a push/PR on GitHub to actually run) and `sync-meta.yml`'s new build gate (needs a real `data/curated` change to reach it) — both checked by parsing the YAML and reasoning through the job, not by a real Actions run.
-- **New required secret:** `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be added as a repository secret (Settings → Secrets and variables → Actions) before `ci.yml` or `sync-meta.yml`'s build step can succeed on GitHub — neither workflow had a build step before, so it was never needed there.
+- **Deployed (2026-09-14, commits `5374e80` and `a1e7eef`)**: pushed to `main` and live on https://tft-compstat.vercel.app. First CI workflow run caught that `MeHeader` synchronously constructs the Supabase admin client during build and required `SUPABASE_SERVICE_ROLE_KEY` in `ci.yml` (fixed in `a1e7eef` and recorded in architecture §8).
+- **GitHub Actions secrets:** `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` configured alongside the existing repository secrets for CI and daily meta sync.
 - **Not done:** no live rehearsal of an actual day-long `AuthError` cooldown (would need a real dead key against production) or of a Supabase Gateway Timeout actually retrying (the retry path is covered by injected-failure tests in `retry.test.ts`, not a real flaky endpoint).
 
 - [ ] Further tasks — not yet specified.
