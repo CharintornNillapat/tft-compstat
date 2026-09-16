@@ -708,7 +708,7 @@ Approved task by task rather than as a whole phase.
 **Verified — Task 23 (2026-09-16):**
 - **Checks:** `pnpm check` (526 tests, up from 524: 2 new unit tests in `meta-brief.test.ts` for adjustments and entity resolution) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
 - **Route lifetime & static analysis:** `/` retains its exact Partial Prerender behavior.
-- **Not committed/pushed:** Held in working directory awaiting user review.
+- **Deployed (2026-09-16, commit `d63abc6`)**: pushed to `main` and verified.
 
 - [ ] Further tasks — not yet specified.
 
