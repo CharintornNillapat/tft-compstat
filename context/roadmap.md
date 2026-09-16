@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–25 verified (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–26 verified (2026-09-16) |
 
 ---
 
@@ -738,6 +738,28 @@ Approved task by task rather than as a whole phase.
 - **Checks:** `pnpm check` (541 tests, up from 526: 15 new unit tests in `openers-sync.test.ts`) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
 - **Dry-run & Live execution:** `pnpm sync:openers --dry-run` and `pnpm sync:openers` ran cleanly, deriving 8 balanced opener boards across S, A, and B tiers from 28 meta comps on Patch 18.2 with zero validation errors.
 - **Route lifetime & static analysis:** `/` retains its Partial Prerender behavior with all 8 openers prerendered in the static shell.
+
+- [x] **Task 26 — Redesigned Comps Toolbar and Multi-Metric Sorting (`/comps`)** (approved 2026-09-16)
+  - **Pure sorting engine (`src/lib/curated/comp-sort.ts`):** Supports sorting comp summaries by `"tier" | "avg" | "top4" | "pick"`.
+    - Natural sort directions:
+      - `tier`: `asc` (S → A → B → C).
+      - `avg`: `asc` (3.90 → 4.50, lowest/best avg placement first).
+      - `top4`: `desc` (65% → 45%, highest top-4 rate first).
+      - `pick`: `desc` (15% → 1%, highest pick rate first).
+    - Null handling: Comps with unrecorded/missing stats are always placed at the end of the list in stat-based sorts, regardless of ascending or descending direction.
+    - Tiebreaking: Broken deterministically by tier order (S > A > B > C) → `sortOrder` → alphabetical name.
+  - **Active column visual reinforcement (`src/components/comp-stats.tsx`):** Added `highlightField?: CompStatField` to `CompStatsRow`. When sorting by average placement, top-4 rate, or pick rate, the corresponding stat in every comp row is highlighted with `text-accent font-bold` and an accent background pill (`bg-accent/10 px-1 -mx-1 text-accent`).
+  - **Toolbar redesign (`src/components/comp-list.tsx`):**
+    - Clean two-row toolbar layout:
+      - Row 1: Search input (`type="search"` preserving `/` global shortcut) + Results count (`visible of total comps`) + One-click `Reset filters` button when search, tier/style filters, or custom sort are active.
+      - Row 2: Grouped and uppercase-labeled control bars (`Tier`, `Style`, `Sort`) separated by a subtle border (`border-t border-line/60 pt-2`), wrapping naturally on mobile (390px) and desktop (960px+) without horizontal scrolling.
+    - Sort buttons: Render `Tier`, `Avg Place`, `Top 4 %`, and `Pick Rate` with active accent styling, toggle between `asc` and `desc` on repeat click, display direction SVG arrows (`↑` / `↓`), and provide accessible ARIA attributes and descriptive tooltips.
+  - **Unit testing (`src/lib/curated/comp-sort.test.ts`):** 5 unit tests verifying sorting across all keys, ascending and descending directions, null placement at the end, and deterministic tiebreaking.
+
+**Verified — Task 26 (2026-09-16):**
+- **Checks:** `pnpm check` (546 tests, up from 541: 5 new tests in `comp-sort.test.ts`) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
+- **Route lifetime & static analysis:** `/comps` retains its exact Static prerendering behavior (revalidate 1d, expire 1w).
+- **Layout & Responsiveness:** Clean rendering across desktop (960px) and mobile viewports with no horizontal overflow.
 
 - [ ] Further tasks — not yet specified.
 

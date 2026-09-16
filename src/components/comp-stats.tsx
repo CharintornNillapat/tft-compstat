@@ -32,10 +32,12 @@ const ALL_FIELDS: CompStatField[] = ["avg", "top4", "pick", "level"];
 export function CompStatsRow({
   stats,
   fields = ALL_FIELDS,
+  highlightField,
   className = "",
 }: {
   stats: CompStats;
   fields?: readonly CompStatField[];
+  highlightField?: CompStatField;
   className?: string;
 }) {
   if (!hasCompStats(stats)) return null;
@@ -56,18 +58,39 @@ export function CompStatsRow({
   return (
     <dl className={`flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] ${className}`}>
       {fields.map((field) => (
-        <Stat key={field} label={label[field][0]} value={value[field]} title={label[field][1]} />
+        <Stat
+          key={field}
+          label={label[field][0]}
+          value={value[field]}
+          title={label[field][1]}
+          highlighted={field === highlightField}
+        />
       ))}
     </dl>
   );
 }
 
-function Stat({ label, value, title }: { label: string; value: string | null; title: string }) {
+function Stat({
+  label,
+  value,
+  title,
+  highlighted = false,
+}: {
+  label: string;
+  value: string | null;
+  title: string;
+  highlighted?: boolean;
+}) {
   if (value === null) return null;
   return (
-    <div className="flex items-baseline gap-1" title={title}>
-      <dt className="text-faint">{label}</dt>
-      <dd className="font-medium text-muted tabular-nums">{value}</dd>
+    <div
+      className={`flex items-baseline gap-1 rounded transition-colors ${
+        highlighted ? "bg-accent/10 px-1 -mx-1 text-accent" : ""
+      }`}
+      title={title}
+    >
+      <dt className={highlighted ? "text-accent/70 font-semibold" : "text-faint"}>{label}</dt>
+      <dd className={`tabular-nums ${highlighted ? "font-bold text-accent" : "font-medium text-muted"}`}>{value}</dd>
     </div>
   );
 }

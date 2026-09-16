@@ -17,7 +17,13 @@ import { HoverTip, useHoverTip } from "./hover-tip";
 import { ItemIcon } from "./item-icon";
 import { TierBadge } from "./tier-row";
 import { TraitHex } from "./trait-badge";
-import { ToggleGroup } from "./toggle-group";
+import {
+  sortComps,
+  type CompSortKey,
+  type SortDirection,
+  DEFAULT_SORT_DIRECTIONS,
+} from "@/lib/curated/comp-sort";
+import { TOGGLE_BUTTON, TOGGLE_OFF, TOGGLE_ON, ToggleGroup } from "./toggle-group";
 
 /** A meta badge's tooltip carries no data of its own, only which badge it was. */
 type BadgeTip = { badge: "gem" | "contested" };
@@ -28,11 +34,66 @@ const GEM_TIP: BadgeTip = { badge: "gem" };
 const CONTESTED_TIP: BadgeTip = { badge: "contested" };
 const BADGE_TOOLTIPS: Record<BadgeTip["badge"], string> = { gem: GEM_TOOLTIP, contested: CONTESTED_TOOLTIP };
 
-/** Dense comp rows with tier/style filters and search; units, traits and badges show details on hover. */
+const SORT_OPTIONS: readonly {
+  key: CompSortKey;
+  label: string;
+  defaultDir: SortDirection;
+  hint: { asc: string; desc: string };
+}[] = [
+  {
+    key: "tier",
+    label: "Tier",
+    defaultDir: "asc",
+    hint: { asc: "S → C tier", desc: "C → S tier" },
+  },
+  {
+    key: "avg",
+    label: "Avg Place",
+    defaultDir: "asc",
+    hint: { asc: "Best placement first", desc: "Worst placement first" },
+  },
+  {
+    key: "top4",
+    label: "Top 4 %",
+    defaultDir: "desc",
+    hint: { asc: "Lowest top-4 rate first", desc: "Highest top-4 rate first" },
+  },
+  {
+    key: "pick",
+    label: "Pick Rate",
+    defaultDir: "desc",
+    hint: { asc: "Lowest pick rate first", desc: "Highest pick rate first" },
+  },
+] as const;
+
+function SortDirectionIcon({ direction }: { direction: SortDirection }) {
+  return (
+    <svg
+      viewBox="0 0 10 10"
+      aria-hidden="true"
+      className="size-2.5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {direction === "asc" ? (
+        <path d="M5 8V2M2.5 4.5 5 2l2.5 2.5" />
+      ) : (
+        <path d="M5 2v6M2.5 5.5 5 8l2.5-2.5" />
+      )}
+    </svg>
+  );
+}
+
+/** Dense comp rows with tier/style filters, sort controls and search; units, traits and badges show details on hover. */
 export function CompList({ comps, traitDetails }: { comps: CompSummary[]; traitDetails: TraitDetailBook }) {
   const [tiers, setTiers] = useState<ReadonlySet<TierRank>>(() => new Set());
   const [styles, setStyles] = useState<ReadonlySet<CompStyle>>(() => new Set());
   const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<CompSortKey>("tier");
+  const [direction, setDirection] = useState<SortDirection>("asc");
   const tip = useHoverTip<TipItem>();
 
   const tierOptions = TIER_RANKS.filter((tier) => comps.some((comp) => comp.tier === tier)).map((tier) => ({
@@ -43,31 +104,104 @@ export function CompList({ comps, traitDetails }: { comps: CompSummary[]; traitD
     value: style,
     label: COMP_STYLE_LABELS[style],
   }));
-  const visible = filterComps(comps, { tiers, styles, query });
+
+  const filtered = filterComps(comps, { tiers, styles, query });
+  const visible = sortComps(filtered, sortKey, direction);
+
+  const isFiltered = query.trim() !== "" || tiers.size > 0 || styles.size > 0;
+  const isCustomSort = sortKey !== "tier" || direction !== "asc";
+  const canReset = isFiltered || isCustomSort;
+
+  const handleReset = () => {
+    setQuery("");
+    setTiers(new Set());
+    setStyles(new Set());
+    setSortKey("tier");
+    setDirection("asc");
+  };
+
+  const handleSortChange = (key: CompSortKey) => {
+    if (key === sortKey) {
+      setDirection((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setDirection(DEFAULT_SORT_DIRECTIONS[key]);
+    }
+  };
 
   return (
     <section aria-label="Comps">
-      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search comps, units, traits, items  ( / )"
-          aria-label="Search comps"
-          className="h-7 w-full min-w-0 rounded border border-line bg-panel px-2 placeholder:text-faint sm:w-60"
-        />
-        <ToggleGroup label="Filter by tier" options={tierOptions} selected={tiers} onChange={setTiers} />
-        <ToggleGroup label="Filter by style" options={styleOptions} selected={styles} onChange={setStyles} />
-        <p className="text-muted sm:ml-auto" aria-live="polite">
-          {visible.length === comps.length ? comps.length : `${visible.length} of ${comps.length}`}{" "}
-          {comps.length === 1 ? "comp" : "comps"}
-        </p>
+      <div className="mb-3 space-y-2">
+        {/* Top bar: Search input + comp counter & Reset button */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search comps, units, traits, items  ( / )"
+            aria-label="Search comps"
+            className="h-7 w-full min-w-0 rounded border border-line bg-panel px-2 text-xs placeholder:text-faint focus:border-accent focus:outline-none sm:w-64"
+          />
+          <div className="flex items-center gap-3 text-xs text-muted sm:ml-auto">
+            {canReset ? (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-accent hover:underline"
+              >
+                Reset filters
+              </button>
+            ) : null}
+            <p className="tabular-nums text-muted" aria-live="polite">
+              {visible.length === comps.length ? comps.length : `${visible.length} of ${comps.length}`}{" "}
+              {comps.length === 1 ? "comp" : "comps"}
+            </p>
+          </div>
+        </div>
+
+        {/* Filters and Sort Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line/60 pt-2 text-xs">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium tracking-wider text-faint uppercase">Tier</span>
+              <ToggleGroup label="Filter by tier" options={tierOptions} selected={tiers} onChange={setTiers} />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium tracking-wider text-faint uppercase">Style</span>
+              <ToggleGroup label="Filter by style" options={styleOptions} selected={styles} onChange={setStyles} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-medium tracking-wider text-faint uppercase">Sort</span>
+            <div role="group" aria-label="Sort comps" className="flex flex-wrap items-center gap-1">
+              {SORT_OPTIONS.map((opt) => {
+                const isActive = sortKey === opt.key;
+                const hint = isActive ? opt.hint[direction] : opt.hint[opt.defaultDir];
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    aria-pressed={isActive}
+                    aria-label={`Sort by ${opt.label}${isActive ? ` (${direction === "asc" ? "ascending" : "descending"})` : ""}`}
+                    title={`${opt.label}: ${hint}. Click to ${isActive ? "reverse order" : "sort"}.`}
+                    onClick={() => handleSortChange(opt.key)}
+                    className={`${TOGGLE_BUTTON} ${isActive ? TOGGLE_ON : TOGGLE_OFF} flex items-center gap-1 text-xs`}
+                  >
+                    <span>{opt.label}</span>
+                    {isActive ? <SortDirectionIcon direction={direction} /> : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
       {visible.length ? (
         <ol className="divide-y divide-line rounded-md border border-line bg-panel">
           {visible.map((comp) => (
-            <CompRow key={comp.slug} comp={comp} tip={tip} />
+            <CompRow key={comp.slug} comp={comp} tip={tip} sortKey={sortKey} />
           ))}
         </ol>
       ) : (
@@ -101,7 +235,7 @@ function TraitTip({ trait, comps, details }: { trait: TraitCount; comps: CompSum
   );
 }
 
-function CompRow({ comp, tip }: { comp: CompSummary; tip: Tip }) {
+function CompRow({ comp, tip, sortKey }: { comp: CompSummary; tip: Tip; sortKey: CompSortKey }) {
   const carries = comp.units.filter((unit) => unit.isCarry);
   const others = comp.units.filter((unit) => !unit.isCarry);
 
@@ -137,7 +271,12 @@ function CompRow({ comp, tip }: { comp: CompSummary; tip: Tip }) {
             <DifficultyBadge difficulty={comp.difficulty} />
           </div>
           {/* No level here: a fourth stat wraps this column onto a ragged second line. */}
-          <CompStatsRow stats={comp} fields={["avg", "top4", "pick"]} className="mt-1" />
+          <CompStatsRow
+            stats={comp}
+            fields={["avg", "top4", "pick"]}
+            highlightField={sortKey === "avg" ? "avg" : sortKey === "top4" ? "top4" : sortKey === "pick" ? "pick" : undefined}
+            className="mt-1"
+          />
         </div>
       </div>
 

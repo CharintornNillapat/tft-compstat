@@ -138,6 +138,7 @@ src/lib/
   curated/augments.ts        cached read of augment-tiers.yaml (§8)
   curated/meta-sync.ts       pure: placement histogram → tier bands → tier-list YAML text (§7.1)
   curated/comp-sync.ts       pure: comp feed rows → board, carries, style → comp YAML text (§7.2)
+  curated/comp-sort.ts       pure: comp sorting by tier, avg placement, top-4 rate, pick rate (§7.2)
   curated/traits.ts          computeActiveTraits (pure, client-safe)
   curated/trait-details.ts   trait tooltip data: tiers with text, member champions (pure, client-safe)
   curated/comp-badges.ts     Contested / difficulty / playstyle rules (pure, client-safe)
@@ -1067,7 +1068,7 @@ comps:                        # keyed by comp slug; a comp without an entry show
   - Query functions (`src/lib/curated/queries.ts`) use `'use cache'` + `cacheTag(...)` + `cacheLife('days')`, so they prerender into the static shell.
   - The build output shows `/tiers/*` as static with revalidate 1d and expire 1w. The one-day lifetime is only a safety net; the scripts revalidate on demand.
   - Tags are listed in `src/lib/cache-tags.ts`: `static` (sets, traits, champions, items), `tiers` and `comps`. Tier and comp queries also carry `static`, since they join champion, item and trait data.
-  - `/comps` is static (revalidate 1d, expire 1w). `getComps()` returns the active set's published comps, with traits computed on the server, and a client `CompList` filters them.
+  - `/comps` is static (revalidate 1d, expire 1w). `getComps()` returns the active set's published comps, with traits computed on the server, and a client `CompList` filters and sorts them (by tier, avg placement, top-4 rate, or pick rate).
   - `/comps/[slug]` is Partial Prerender.
     - `generateStaticParams` returns every published slug. Cache Components rejects an empty list, so with no comps it returns the placeholder `__none__`, which renders the 404 page.
     - Other slugs get the App Shell and stream in on first visit. `notFound()` runs inside Suspense, so an unknown slug is a soft 404: status 200 with `noindex`.
