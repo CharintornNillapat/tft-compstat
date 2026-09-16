@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–29 deployed and verified and Task 30 awaiting review (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–30 deployed and verified (2026-09-17). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–29 deployed and verified, Task 30 in review (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–30 deployed and verified (2026-09-17) |
 
 ---
 
@@ -804,6 +804,7 @@ Approved task by task rather than as a whole phase.
 - **Matching is honest but carry-blind.** A Hecarim board matched *Vanguard Kha'Zix* at 71% because it shared 5 of that comp's 7 units. That is the documented cost of a pure unit-overlap rule (architecture §6.2); the printed share is what keeps it from reading as a stated fact. A carry-aware refinement would be a change to that contract, not a bug fix.
 - **Revalidation secrets (the Task 29 finding) are fixed and proven.** Production returns 401 for a wrong secret and `{"revalidated":["static"]}` for the real one; and the `sync-meta.yml` runs since the secrets were set log `Revalidated "static"` and `Revalidated "tiers, comps"` with no skip warning (runs 35106510756 and 35108479646, both green).
 - **Rebased onto three `chore(auto)` sync commits (2026-09-17)** with no conflicts; gates re-run green on the rebased tree, and because those syncs re-seeded the curated comps the match figures above were re-measured against the new boards — unchanged.
+- **Deployed (2026-09-17, commit `51008e7`, trailer `AGY-Task: 30`)**: CI green in 68s; production serves the curated table and the per-row tags, all eight routes 200. The figures on the live site match the local measurement exactly.
 - **Not done:** no test covers `getCuratedCompShapes()` itself — it is a Supabase read, the same shape as its neighbours in that file, and the suite has no DB. The threshold is a constant rather than a control, so a curious player cannot ask "what if I count 50%?".
 
 - [ ] Further tasks — not yet specified.

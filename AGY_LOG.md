@@ -55,7 +55,9 @@ Newest entry first. One entry per finished task, in this template — **every fi
   - Still open from Task 29: no `if: failure()` notification on `sync-meta.yml`; the set rollover guard's throw path has no live rehearsal or unit test; `is_shop_unit` is dead (architecture §4.8); `CONTEXT.md` and `docs/adr/` named by `CLAUDE.md` do not exist.
   - Nothing else outstanding.
 * **Rebased onto `origin/main` (2026-09-17)** over three `chore(auto)` sync commits — the manual run above plus the scheduled 03:00 UTC one — with no conflicts. Gates re-run on the rebased tree: check 589/589, knip 0, build 42/42 with the fetch cache cleared, route shapes unchanged. Those syncs also re-seeded the curated comps, so the figures above were **re-measured against the new boards and are unchanged**: still 13 of 18, same seven comps, same averages.
-* **Deployed:** no — committed on `main` and left unpushed for review.
+* **Deployed:** yes — 2026-09-17, commit `51008e7` (trailer `AGY-Task: 30`), live on https://tft-compstat.vercel.app.
+  - **CI** (`ci.yml`) green on `51008e7` in 68s ([35152727303](https://github.com/CharintornNillapat/tft-compstat/actions/runs/35152727303)) — typecheck, lint, test and build on a clean runner with no fetch cache.
+  - **Vercel** production serves the new code: `/me` returns the curated table (13 of 18 games matched, the same seven comps measured locally) and 13 `CuratedCompTag`s on the history rows. All eight routes 200 in 0.67–1.56s from Thailand.
 
 ---
 
