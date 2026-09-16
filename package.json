@@ -16,6 +16,7 @@
     "seed:curated": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/seed-curated.ts",
     "sync:meta": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/sync-meta.ts",
     "sync:bis": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/sync-bis.ts",
+    "sync:openers": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/sync-openers.ts",
     "riot:setup": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/riot-setup.ts",
     "riot:sync": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/riot-sync.ts",
     "riot:backfill": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/riot-backfill.ts",

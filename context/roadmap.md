@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–24 deployed (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–25 verified (2026-09-16) |
 
 ---
 
@@ -726,6 +726,18 @@ Approved task by task rather than as a whole phase.
 - **Checks:** `pnpm check` (526 tests) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
 - **Route lifetime & static analysis:** `/` retains its exact Partial Prerender behavior with all 8 openers prerendered in the static shell.
 - **Deployed (2026-09-16)**: pushed to `main` and verified.
+
+- [x] **Task 25 — Automated Opener Sync Pipeline** (approved 2026-09-16)
+  - **Automated derivation engine (`src/lib/curated/openers-sync.ts`):** Pure functions cluster the active published meta comps by identical 1- and 2-cost `early_units`, rank clusters by best comp tier and aggregated pick rate, compute shared trait names (e.g. "Elderwood Rapidfires", "Blossom Juggernauts"), derive high-priority completed slammable items, link viable active pivot slugs (with fallback backfilling to guarantee `OPENER_PIVOTS.min`), and generate concise gameplay notes (≤96 chars) using carry/tank role affinity scoring.
+  - **Isolated validation module (`src/lib/curated/opener-validation.ts`):** Decoupled `validateOpeners` and its types from `openers.ts` so scripts and pure derivation modules can validate without server-only/next-cache dependencies; `openers.ts` cleanly re-exports for backwards compatibility.
+  - **CLI script (`scripts/sync-openers.ts`):** `pnpm sync:openers [--dry-run] [--set N] [--max-openers N]` loads static references, parses active comp YAMLs, derives openers, validates the generated document against schema and reference tables, and writes `data/curated/<setId>/openers.yaml`.
+  - **CI & Daily sync workflow integration (`.github/workflows/sync-meta.yml`):** Wired `pnpm sync:openers` into the daily scheduled workflow after `sync:bis`, ensuring `openers.yaml` is continuously updated alongside live comps and best-in-slot builds and gated by `pnpm build`.
+  - **Test coverage (`src/lib/curated/openers-sync.test.ts`):** 15 unit tests verifying clustering, filtering of >2-cost units, trait-based naming, tiering, carry item weighting, pivot fallback, note length constraint, and end-to-end YAML serialization.
+
+**Verified — Task 25 (2026-09-16):**
+- **Checks:** `pnpm check` (541 tests, up from 526: 15 new unit tests in `openers-sync.test.ts`) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
+- **Dry-run & Live execution:** `pnpm sync:openers --dry-run` and `pnpm sync:openers` ran cleanly, deriving 8 balanced opener boards across S, A, and B tiers from 28 meta comps on Patch 18.2 with zero validation errors.
+- **Route lifetime & static analysis:** `/` retains its Partial Prerender behavior with all 8 openers prerendered in the static shell.
 
 - [ ] Further tasks — not yet specified.
 
