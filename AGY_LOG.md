@@ -49,7 +49,10 @@ Newest entry first. One entry per finished task, in this template — **every fi
   - **The carry gate's fallback paths** (no priority-1 carry stated; no carry stated at all) are unit-tested but have no live rehearsal against a real curated comp in that shape — every comp in `data/curated/18/comps/` currently states a priority-1 carry.
   - `docs/agents/domain.md` itself was left untouched — it already handles `CONTEXT.md`/`docs/adr/` not existing; only the `CLAUDE.md` bullet asserting they do needed the fix.
   - Still open from earlier tasks: no live rehearsal or unit test for the set rollover guard's throw path; the 60% match threshold is a constant, not a control; `is_shop_unit`'s readers (`shopUnits`) remain unused by anything that ever sets the column false — correcting the comment doesn't change that a future set needs a real source for it.
-* **Deployed:** no — left uncommitted in the working tree for review, as asked.
+* **Deployed:** yes — 2026-09-17, commit `124c174` (trailer `AGY-Task: 31`), live on https://tft-compstat.vercel.app.
+  - **CI** (`ci.yml`) green on `124c174` in 69s ([35158378725](https://github.com/CharintornNillapat/tft-compstat/actions/runs/35158378725)) — typecheck, lint, test and build on a clean runner with no fetch cache.
+  - **Vercel** production serves the new matching logic, not just the new code: `/me` shows `Riftbeast Malphite` at 3 games / 6.00 avg and `Sprykin Veigar` (not `Sprykin Teemo`) at 2 games / 2.50 avg — the exact carry-gate reattribution measured locally. All eight routes 200 in 0.68–1.46s from Thailand.
+  - **Migration** `20260917120000_shop_unit_comment.sql` applied by you via `pnpm exec supabase db push --linked` before this push.
 
 ---
 

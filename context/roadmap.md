@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–30 deployed and verified (2026-09-17). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–31 deployed and verified (2026-09-17). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–30 deployed and verified (2026-09-17) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–31 deployed and verified (2026-09-17) |
 
 ---
 
@@ -820,7 +820,7 @@ Approved task by task rather than as a whole phase.
   - The carry gate's fallback paths (no priority-1 carry stated; no carry stated at all) are unit-tested but have no live rehearsal against a real such comp.
   - `docs/agents/domain.md` itself was left as-is — it already says to proceed silently when `CONTEXT.md`/`docs/adr/` don't exist, so only the CLAUDE.md bullet asserting their presence needed correcting.
   - Still open from earlier tasks: the set rollover guard's throw path has no live rehearsal or unit test; matching is still bounded by the ≥60% threshold being a constant, not a control.
-* **Deployed:** no — left uncommitted in the working tree for review, as asked.
+* **Deployed (2026-09-17, commit `124c174`, trailer `AGY-Task: 31`)**: CI green in 69s; production serves the corrected attributions (`Riftbeast Malphite` 3 games, `Sprykin Veigar` not `Sprykin Teemo`), matching the local measurement exactly. The migration was applied to the linked project beforehand.
 
 - [ ] Further tasks — not yet specified.
 
