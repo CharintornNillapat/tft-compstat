@@ -119,6 +119,39 @@ async function loadCurrentList(db: Db, kind: TierListKind) {
   return { id: list.id, meta };
 }
 
+export type CuratedFreshness = {
+  /** The current champion list's patch label; null when nothing has been seeded. */
+  patch: string | null;
+  /** ISO timestamp of the last `pnpm seed:curated` write; null when nothing has been seeded. */
+  updatedAt: string | null;
+};
+
+/**
+ * When the curated data was last written, for the header's sync dot. Its own
+ * one-row read rather than `getChampionTierList()`, which the header would
+ * otherwise pull onto every route with all its champion, trait and ability joins.
+ *
+ * `tier_lists.updated_at` is the honest source: `set_updated_at()` fires on every
+ * seed, and the daily workflow seeds whether or not the ratings moved, so this
+ * says "the pipeline ran", which is the question the dot answers.
+ */
+export async function getCuratedFreshness(): Promise<CuratedFreshness> {
+  "use cache";
+  cacheTag("tiers");
+  cacheLife("days");
+
+  const list = must(
+    await getCachedSupabase()
+      .from("tier_lists")
+      .select("patch, updated_at")
+      .eq("kind", "champion")
+      .eq("is_current", true)
+      .maybeSingle(),
+    "current champion tier list",
+  );
+  return { patch: list?.patch ?? null, updatedAt: list?.updated_at ?? null };
+}
+
 async function namesByApiName(db: Db, table: "traits" | "items", apiNames: string[]) {
   if (apiNames.length === 0) return new Map<string, { name: string; icon_url: string | null }>();
   const rows = must(

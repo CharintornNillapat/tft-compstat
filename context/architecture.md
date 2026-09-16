@@ -435,6 +435,7 @@ Zero rows returned means the sync is skipped (already running or on cooldown). I
 **Writes**
 - The writes are idempotent upserts in FK order: set, traits, champions, items (in batches of 500).
 - The old active set is cleared before the new one is set.
+- **A set rollover is refused unless `--allow-set-rollover` is passed** (Phase 6 Task 29). `sync:static` reads `tft_sets.is_active` before writing and throws when the live game data names a different set, naming both. The daily workflow (§10) runs this unattended and does **not** pass the flag: a new set has no `data/curated/<setId>/` folder, so flipping the flag would leave `/comps`, `/tiers` and `/bis` prerendering an empty site. The refusal is the alarm for a set rollover; a dry run reports what it would do instead of throwing.
 - Reads page past PostgREST's 1000-row cap.
 - A failed run is fixed by re-running it.
 
@@ -603,6 +604,8 @@ Set 18 broke the old approach: `game_version` no longer carries a number (§6.1)
 | 18 | 18.2 | 2026-09-10 |
 
 The match's own `tft_set_number` picks the set, then the latest release at or before `game_datetime` gives the label. A match older or newer than anything known falls back to `"<set>.?"`, which is honest rather than wrong and is easy to grep for. **The table needs a line per patch**; a missed one mislabels matches but breaks nothing, and `scripts/rederive.ts` fixes them from `matches.raw` with 0 API calls.
+
+**A missed line is now caught** (Phase 6 Task 29). The patch label has three independent sources that nothing used to compare: the MetaTFT feed, which writes `patch:` into every generated curated file; the hand-written `meta-notes.yaml`, which drives the header pill and `/`; and this table, which labels every synced match. The feed moves on patch day and the two hand-written ones do not, so the site would print one patch and label matches with another, silently. `src/lib/curated/patch-consistency.test.ts` runs in `pnpm check` and asserts that every curated file of the newest set folder names the same patch, and that `PATCH_RELEASES`' newest entry for that set is that same label. It is the one gate that turns patch day from silent divergence into a red run.
 
 ---
 
@@ -1117,7 +1120,14 @@ comps:                        # keyed by comp slug; a comp without an entry show
 - **`/augments`** is fully **Static**: `getAugmentTiers()` reads the generated `augment-tiers.yaml`
   with **`cacheLife("max")` and no tag** — the `MetaBrief` rule, not the `/bis` one, because the file
   carries its own names, icons and rarity, so nothing in it comes from the DB and only a deployment
-  can change it. The build reports it as revalidate 30d / expire 1y.
+  can change it.
+  - **The build reports the route at 1d / 1w, not the 30d / 1y that read alone would give it**
+    (measured Task 29; true since Task 27). The header's `HeaderMetaPill` sits in the root layout, so
+    its `cacheLife("days")` read is on every route and a route's reported lifetime is the shortest of
+    its cached reads. Removing the pill returns `/augments` to 30d / 1y, which is how this was
+    confirmed. Left as is deliberately: the pill is tag-revalidated by the sync scripts, its
+    `cacheLife` is only a safety net, and a daily floor on an ambient badge that reports data
+    freshness is the right way round. Every other static route was already 1d / 1w.
   - `AugmentBoard` is a client component for the tier and rarity filters and the shared `HoverTip`
     only; the cards are prerendered.
   - **`NAV_ITEMS` gained a seventh entry** after BIS, so `6` is now Augments and `Me` moved to `7`.
@@ -1156,6 +1166,26 @@ comps:                        # keyed by comp slug; a comp without an entry show
     on write, `SecurityError` on touching `localStorage` at all — and another tab's `storage` event, against a stub window.
   - **`NAV_ITEMS` gained an eighth entry** after Augments, so `7` is now Planner and `Me` moved to `8`.
   - **`refreshMyMatches` calls `refresh()`**, unconditionally. `refresh()` (Next 16, Server-Action-only) re-runs a route's *uncached* server content, which is exactly what a sync changes. The Phase 4 code called `revalidatePath("/me")` and only when `newMatches > 0`, which was wrong twice over: a "you're up to date" refresh never re-rendered, so the sync badge and cooldown countdown kept showing pre-sync values; and what `revalidatePath` invalidates is the prerendered shell, the one part that didn't change. Every `SyncResult` variant also carries `nextAllowedAt` now, so `RefreshButton` starts its countdown from the action's return value instead of waiting for the re-render.
+- **The header pill** (`HeaderMetaPill`, root layout) prints the active set, the patch and how old the
+  curated data is. `getHeaderMeta()` is `'use cache'` with **`cacheTag("static", "tiers")`** and
+  `cacheLife("days")` — `static` for the active set, `tiers` because the age comes from the seed.
+  - **Nothing is defaulted to a literal** (Phase 6 Task 29). Task 27 shipped it with
+    `?? "Set 18"` / `?? "Patch 18.2"` inside a `try`/`catch`, so a set rollover or a failed read
+    printed a confident, wrong patch under an animated "live" dot, and a malformed `meta-notes.yaml`
+    rendered a fake header instead of failing the build the way §8 says it should. Every field is now
+    nullable and real: the set from `tft_sets.is_active`, the patch from the brief then the seeded
+    tier list (the `PatchLine` order), and with neither the pill renders nothing. This is §6.4's rule
+    — visibly unknown beats silently wrong — applied to the one element on every page.
+  - **The age is computed in the browser** (`MetaFreshnessDot`, `components/meta-freshness.ts`). The
+    pill prerenders into the static shell, so a server-rendered "2h ago" would freeze at build time.
+    The dot is `unknown` (grey, no pulse) before hydration and whenever nothing has been seeded,
+    green and pulsing under 24h, and amber and still beyond it — where the pill also prints the age
+    in words (`3d old`), so staleness is not carried by colour alone. It re-checks each minute,
+    because a second-monitor tab stays open long enough to cross the threshold.
+  - `tier_lists.updated_at` is the source (`getCuratedFreshness()`, its own one-row read rather than
+    `getChampionTierList()` and all its joins). `set_updated_at()` fires on every `seed:curated`, and
+    the daily workflow seeds whether or not the ratings moved, so it answers "did the pipeline run",
+    which is the question the dot is there to answer.
 - **Client bundles and zod** (codebase audit 2026-09-14). Top-level zod schemas cannot be tree-shaken, so a client component
   importing any *value* from a module that builds them ships all of zod. `BisBoard` and `AugmentBoard` imported `BIS_ROLES` /
   `AUGMENT_RARITIES` from `curated/schemas.ts`, and `PlannerApp` validated storage with full zod: one 389 KB chunk (≈90 KB
@@ -1267,7 +1297,7 @@ comps:                        # keyed by comp slug; a comp without an entry show
 | `REVALIDATE_SECRET` | server | Seed script → cache revalidation |
 | `SITE_URL` | local scripts and GitHub Actions, optional | Site that `sync:static`/`seed:curated` revalidate after writing. Empty = skip with a warning. Not needed on Vercel. |
 
-**GitHub Actions** (`.github/workflows/sync-meta.yml`, daily 03:00 UTC + manual): `sync:meta --seed` then `sync:bis`, then commits changes under `data/curated/` to `main` as `github-actions[bot]`. The push redeploys Vercel. Repository secrets: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `REVALIDATE_SECRET`. It runs Node 24 because `@supabase/supabase-js` requires Node >= 22.
+**GitHub Actions** (`.github/workflows/sync-meta.yml`, daily 03:00 UTC + manual): `sync:static`, then `sync:meta --seed`, `sync:bis` and `sync:openers`, then commits changes under `data/curated/` to `main` as `github-actions[bot]`. **`sync:static` runs first and was added in Task 29**: every step after it resolves `api_name`s against the champions/traits/items tables, so before that a patch adding a unit or an item had it skipped as an unknown name and silently dropped from the tier lists and `/bis` until someone ran the sync by hand (the README said so out loud and nothing enforced it). The step does not pass `--allow-set-rollover`, so a set rollover fails the job rather than going live unattended (§4.8). The push redeploys Vercel. Repository secrets: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `REVALIDATE_SECRET`. It runs Node 24 because `@supabase/supabase-js` requires Node >= 22.
 
 `src/lib/env.ts` validates **per scope**: `supabasePublicEnv()`, `supabaseAdminEnv()`, `riotEnv()`, `secretsEnv()`, and `revalidateEnv()` (`REVALIDATE_SECRET` + optional `SITE_URL`, used by `/api/revalidate` and the scripts). Each is lazy and memoized, so a consumer only needs its own variables. Error messages name the variable but never echo its value. The public and admin scopes also reject **swapped keys**: an anon/publishable key in `SUPABASE_SERVICE_ROLE_KEY`, or a service/secret key in the public anon variable.
 

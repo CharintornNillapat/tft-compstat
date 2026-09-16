@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–24 deployed and verified (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–28 deployed and verified and Task 29 in the working tree awaiting review (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–26 verified (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–28 deployed, Task 29 awaiting review (2026-09-16) |
 
 ---
 
@@ -760,6 +760,33 @@ Approved task by task rather than as a whole phase.
 - **Checks:** `pnpm check` (546 tests, up from 541: 5 new tests in `comp-sort.test.ts`) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
 - **Route lifetime & static analysis:** `/comps` retains its exact Static prerendering behavior (revalidate 1d, expire 1w).
 - **Layout & Responsiveness:** Clean rendering across desktop (960px) and mobile viewports with no horizontal overflow.
+
+- [x] **Task 27 — Instant search, hotkey badges and the header meta pill** (approved 2026-09-16)
+  - Pure search filters for `/bis` (`src/lib/curated/bis-filter.ts`, 8 tests) and `/augments` (`src/lib/curated/augment-filter.ts`, 7 tests), each behind the two-row toolbar `/comps` uses, with a `/` hotkey, a result counter and a reset button.
+  - `<kbd>` badges on the nav tabs (`1`–`8`, `sm:`+ only so phone tabs don't clip) and in each search box; a `?` shortcuts cheatsheet popover (`src/components/shortcuts-help.tsx`).
+  - `HeaderMetaPill` (`src/components/header-meta-pill.tsx`, `src/lib/curated/header-meta.ts`): an ambient "Set 18 · Patch 18.2" badge beside the logo. **Its literal fallbacks and pulsing dot were reworked in Task 29** — see there.
+  - **Gates:** `pnpm check` (562 tests) · `pnpm build` (42/42 routes) · knip 0. **Deployed** 2026-09-16, `a32874c`.
+
+- [x] **Task 28 — Hextech visual polish, trait cross-highlighting and the planner breakpoint helper** (approved 2026-09-16)
+  - Phase B: tier glows and an S-tier accent on comp rows, glowing augment rarity pills, recessed arena plates and cost-matched glows on `HexBoard`, and copy-toast feedback on the team-code button.
+  - Phase C: `CompBoardSection` (`src/components/comp-board-section.tsx`) syncs hover between the board and the trait list so hovering a trait lights its units; carry quick-filter chips on `/comps`; and `isOneAwayFromBreakpoint` (`src/lib/curated/traits.ts`, 6 tests) drives a `+1 away` chip in the planner.
+  - **Gates:** `pnpm check` (568 tests) · `pnpm build` (42/42 routes). **Deployed** 2026-09-16, `9db293a`.
+  - **Not done:** knip not run for this task.
+
+- [x] **Task 29 — Pipeline hardening and AGY conventions** (approved 2026-09-16, from the audit of the same day)
+  - **`sync:static` joined the daily workflow**, ahead of `sync:meta`. Everything downstream validates `api_name`s against the static tables, so a patch that added a unit or an item previously had it skipped as unknown and silently dropped from the tier lists and `/bis` until a human ran the sync. Architecture §10.
+  - **Set rollover guard** (`scripts/sync-static.ts`, architecture §4.8). `--allow-set-rollover` is now required to flip `tft_sets.is_active`; without it the script throws, naming both sets. The workflow does not pass it, so a set rollover fails the job instead of prerendering an empty site unattended.
+  - **No more literal patch fallbacks** (architecture §6.4). `header-meta.ts` dropped `?? "Set 18"` / `?? "Patch 18.2"` and its `try`/`catch`; `scripts/sync-openers.ts` dropped `?? "18.2"` and now throws with what to run instead. Every `HeaderMetaData` field is nullable and real, and the pill renders nothing rather than a guess.
+  - **Data staleness is visible** (architecture §8). `getCuratedFreshness()` reads `tier_lists.updated_at`; `MetaFreshnessDot` computes the age in the browser (the pill is prerendered, so a server-rendered age would freeze at build time) and goes grey/unknown before hydration, green under 24h, amber with a visible `3d old` label beyond. New `--color-stale` token.
+  - **Patch cross-check test** (`src/lib/curated/patch-consistency.test.ts`): every curated file of the newest set folder must name the same patch, and `PATCH_RELEASES`' newest entry for that set must match it. Verified to fail by editing `meta-notes.yaml` to `18.3`, then reverting.
+  - **`knip` is a devDependency and part of `pnpm check`**, instead of an ad-hoc `pnpm dlx knip` that got logged inconsistently.
+  - **AGY conventions documented** in `CLAUDE.md` and `AGENTS.md`: `AGY_LOG.md` is the session log, entries follow the template at the top of that file, paths are repo-relative, and the work commit carries an `AGY-Task: <N>` trailer so no second commit is needed to record a SHA. All 31 machine-local `file:///C:/…` links in `AGY_LOG.md` were converted to repo-relative.
+
+**Verified — Task 29 (2026-09-16):**
+- **Gates:** `pnpm check` green — 49 test files, **577 tests** (up from 568: 6 in `meta-freshness.test.ts`, 3 in `patch-consistency.test.ts`), 0 lint errors, 0 type errors, `knip` 0 findings. `pnpm build` green with the fetch cache cleared: 42/42 routes, every route keeping its shape (`/` and `/comps/[slug]` Partial Prerender; `/bis`, `/augments`, `/comps`, `/planner` and both tier lists Static).
+- **Route lifetimes:** `/augments` builds at 1d / 1w, not the 30d / 1y architecture §8 claimed. Measured to be a **Task 27 regression, not this one**: `HeaderMetaPill` sits in the root layout and its `cacheLife("days")` floors every route, confirmed by rebuilding with the pill removed (`/augments` returned to 30d / 1y). Kept, and §8 corrected — the pill is tag-revalidated and a daily floor on a freshness badge is the right way round.
+- **Not done:** the workflow changes are unexercised — no scheduled run has fired with `sync:static` in it, and the rollover guard's throw path has no live rehearsal (it needs real game data naming a new set). Neither has a unit test; both are script-level branches the existing suite doesn't reach. No `if: failure()` notification step was added to `sync-meta.yml`, so a failed daily run is still only visible in the Actions tab. `is_shop_unit` is still dead (architecture §4.8) and `CONTEXT.md` / `docs/adr/` that `CLAUDE.md` names still do not exist.
+- **Deployed:** no — left uncommitted in the working tree for review.
 
 - [ ] Further tasks — not yet specified.
 

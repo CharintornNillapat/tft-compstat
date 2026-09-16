@@ -7,8 +7,14 @@
  *   pnpm sync:static              newest standard set in the live game data
  *   pnpm sync:static --set 18     a specific set
  *   pnpm sync:static --dry-run    fetch and transform only; nothing is written
+ *   pnpm sync:static --allow-set-rollover   permit flipping the active set
  *
  * Every step is an idempotent upsert, so re-running fixes a failed run.
+ *
+ * A **set rollover** is refused unless `--allow-set-rollover` is passed. The daily
+ * workflow runs this unattended, and flipping `tft_sets.is_active` to a set with no
+ * curated folder would leave `/comps`, `/tiers` and `/bis` prerendering an empty
+ * site. Failing loudly is the point: a new set is a person's decision.
  */
 import { parseArgs } from "node:util";
 import { z } from "zod";
@@ -108,6 +114,19 @@ function printSummary({ set, traits, champions, items, warnings }: StaticSnapsho
   if (warnings.length) console.log(`  warnings:\n${warnings.map((w) => `    - ${w}`).join("\n")}`);
 }
 
+/**
+ * The set `tft_sets.is_active` currently points at, or null before the first sync.
+ * Read on its own rather than inside `writeSnapshot` so the rollover check can run
+ * during a dry run too.
+ */
+async function activeSetId(): Promise<number | null> {
+  const row = must(
+    await getSupabaseAdmin().from("tft_sets").select("id").eq("is_active", true).maybeSingle(),
+    "active set",
+  );
+  return row?.id ?? null;
+}
+
 async function writeSnapshot({ set, traits, champions, items }: StaticSnapshot) {
   const db = getSupabaseAdmin();
 
@@ -134,7 +153,11 @@ async function writeSnapshot({ set, traits, champions, items }: StaticSnapshot) 
 
 async function main() {
   const { values } = parseArgs({
-    options: { set: { type: "string" }, "dry-run": { type: "boolean", default: false } },
+    options: {
+      set: { type: "string" },
+      "dry-run": { type: "boolean", default: false },
+      "allow-set-rollover": { type: "boolean", default: false },
+    },
   });
   const setNumber = values.set === undefined ? undefined : Number(values.set);
   if (setNumber !== undefined && !Number.isInteger(setNumber)) {
@@ -154,11 +177,24 @@ async function main() {
   ]);
   const snapshot = buildStaticSnapshot(data, { patch, setNumber, traitKinds, plannerCodes, tooltips });
   printSummary(snapshot);
+
+  const current = await activeSetId();
+  const rollover = current !== null && current !== snapshot.set.id;
+  if (rollover && !values["allow-set-rollover"]) {
+    throw new Error(
+      `Set rollover refused: the active set is ${current}, the live game data is set ${snapshot.set.id}.\n` +
+        `A new set needs a curated folder (data/curated/${snapshot.set.id}/) and a look at the site before it goes live,\n` +
+        `so this is never done unattended. Re-run with --allow-set-rollover once that is ready,\n` +
+        `or pin this run with --set ${current}.`,
+    );
+  }
+
   if (values["dry-run"]) {
-    console.log("\nDry run: nothing written.");
+    console.log(rollover ? `\nDry run: would roll the active set ${current} over to ${snapshot.set.id}.` : "\nDry run: nothing written.");
     return;
   }
 
+  if (rollover) console.log(`\nRolling the active set over from ${current} to ${snapshot.set.id} (--allow-set-rollover).`);
   const { deactivated } = await writeSnapshot(snapshot);
   console.log(`\nWrote set ${snapshot.set.id}; ${deactivated} items from earlier pools marked inactive.`);
   await revalidateSite(["static"]);

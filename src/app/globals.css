@@ -63,6 +63,12 @@
      but far more saturated than either tint, and paired with a flame glyph. */
   --color-contested: #ff7a59;
 
+  /* Header sync dot when the daily meta sync has not landed in over 24h. Amber, its own
+     token rather than tier-b or cost-5: those sit on comp rows, this sits alone in the
+     header. Colour is reinforcement — the dot also stops pulsing and the pill prints the
+     age in words, so staleness survives colour-vision deficiency. */
+  --color-stale: #f0b429;
+
   /* Trait activation tiers */
   --color-trait-bronze: #b87333;
   --color-trait-silver: #a8b3bd;

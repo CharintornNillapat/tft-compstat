@@ -1,7 +1,9 @@
 # Daily MetaTFT → data/curated sync (README "Tier lists and comps from the live meta").
 #
-# Runs `pnpm sync:meta --seed` (tier lists + comps, then seed:curated into Supabase, plus
-# augment-tiers.yaml), `pnpm sync:bis` (champion-bis.yaml), and `pnpm sync:openers` (openers.yaml).
+# Runs `pnpm sync:static` (CommunityDragon → the champions/traits/items tables every step
+# below validates against), then `pnpm sync:meta --seed` (tier lists + comps, then
+# seed:curated into Supabase, plus augment-tiers.yaml), `pnpm sync:bis`
+# (champion-bis.yaml), and `pnpm sync:openers` (openers.yaml).
 # If that changed anything under data/curated/, `pnpm build` must pass against the new files
 # before they are committed — a generated file the site can't prerender fails the job instead
 # of landing on main. The push that follows is what redeploys Vercel, which is how the build-time
@@ -12,7 +14,7 @@
 # main but does not undo that live write. Openers are derived directly from the current active comps
 # and validated before writing.
 
-name: Sync meta, BIS, and openers
+name: Sync static, meta, BIS, and openers
 
 on:
   schedule:
@@ -58,6 +60,17 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      # Static game data first: everything below resolves `api_name`s against the
+      # champions/traits/items tables, and a patch that adds a unit or an item would
+      # otherwise be skipped by sync:meta as an unknown name and silently dropped from
+      # the tier lists and /bis until someone ran this by hand.
+      #
+      # `--allow-set-rollover` is deliberately NOT passed: a new set has no curated
+      # folder yet, so flipping `is_active` unattended would prerender an empty site.
+      # The script fails the job instead, which is the alarm for a set rollover.
+      - name: Sync static game data
+        run: pnpm sync:static
 
       # package.json already wraps both in `tsx --conditions=react-server
       # --env-file-if-exists=.env.local`; there is no .env.local here, so env comes from above.

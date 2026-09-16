@@ -1,6 +1,59 @@
 # Antigravity Task Log (AGY_LOG)
 
-A chronological record of engineering tasks, feature implementations, and system enhancements executed on the TFT CompStat project.
+The handoff record for this project: what was done, what it touched, and what is still open. `context/roadmap.md` is the plan; this file is what actually happened. A cold `agy` session or agent should be able to resume from the newest entry alone.
+
+## Conventions
+
+Newest entry first. One entry per finished task, in this template — **every field is required**, and `Not done` says "nothing outstanding" rather than being dropped:
+
+```markdown
+## Task N — Title
+* **AGY-Task:** N
+* **Date:** YYYY-MM-DD
+* **Roadmap:** context/roadmap.md Task N
+* **Scope:** one line
+* **Changes Delivered:** …
+* **Gates:** check NNN/NNN · build NN/NN routes · knip 0 · route shapes unchanged
+* **Not done:** … or "nothing outstanding"
+* **Deployed:** yes / no
+```
+
+- **Repo-relative paths only** — `src/components/tier-row.tsx`, never `file:///C:/…`. Absolute paths are dead links for every other machine and on GitHub.
+- **No `Commit:` field.** The work commit carries the trailer `AGY-Task: N` instead, so `git log --grep "^AGY-Task: N"` resolves it forever and a rebase can't stale it. This replaces the old habit of a second `docs(agy):` commit just to paste a SHA.
+- **Tick the matching `context/roadmap.md` task in the same change**, so the log and the plan cannot drift.
+- Entries before Task 29 predate this template and keep their original shape.
+
+---
+
+## Task 29 — Pipeline Hardening & AGY Conventions
+* **AGY-Task:** 29
+* **Date:** 2026-09-16
+* **Roadmap:** context/roadmap.md Task 29
+* **Scope:** Close the pipeline-reliability and DX gaps from the 2026-09-16 audit — automate static sync, stop the site printing patch labels it cannot back up, make data staleness visible, and pin the AGY workflow down in the repo.
+* **Changes Delivered:**
+  1. **Static sync in the daily workflow ([`.github/workflows/sync-meta.yml`](.github/workflows/sync-meta.yml)):**
+     - `pnpm sync:static` now runs **before** `sync:meta`. Every step after it validates `api_name`s against the champions/traits/items tables, so a patch that added a unit or an item previously had it skipped as an unknown name and silently dropped from the tier lists and `/bis` until someone ran the sync by hand — a failure mode [`README.md`](README.md) already described and nothing enforced.
+     - Workflow renamed to "Sync static, meta, BIS, and openers".
+  2. **Set rollover guard ([`scripts/sync-static.ts`](scripts/sync-static.ts)):**
+     - New `--allow-set-rollover` flag. The script reads `tft_sets.is_active` before writing and throws when the live game data names a different set, printing both and what to run. A dry run reports the rollover instead of throwing.
+     - The workflow deliberately does **not** pass the flag: a new set has no `data/curated/<setId>/` folder, so flipping `is_active` unattended would leave `/comps`, `/tiers` and `/bis` prerendering an empty site. The refusal is the alarm.
+  3. **No literal patch fallbacks (architecture §6.4):**
+     - [`src/lib/curated/header-meta.ts`](src/lib/curated/header-meta.ts) rewritten: dropped `?? "Set 18"`, `?? "Patch 18.2"` and the `try`/`catch` that swallowed real read failures. Every `HeaderMetaData` field is nullable and comes from real data — set from `tft_sets.is_active`, patch from the brief then the seeded tier list. [`src/components/header-meta-pill.tsx`](src/components/header-meta-pill.tsx) renders nothing when there is neither.
+     - [`scripts/sync-openers.ts`](scripts/sync-openers.ts) dropped `?? "18.2"` and now throws naming the two syncs to run instead.
+  4. **Visible data staleness:**
+     - `getCuratedFreshness()` ([`src/lib/curated/queries.ts`](src/lib/curated/queries.ts)): a one-row read of `tier_lists.updated_at`, tagged `tiers`, rather than pulling `getChampionTierList()` and its joins onto every route.
+     - [`src/components/meta-freshness.ts`](src/components/meta-freshness.ts) (pure, 6 tests in [`src/components/meta-freshness.test.ts`](src/components/meta-freshness.test.ts)) and the client island [`src/components/meta-freshness-dot.tsx`](src/components/meta-freshness-dot.tsx). The age is computed in the browser because the pill prerenders into the static shell — a server-rendered "2h ago" would freeze at build time. Grey/unknown before hydration and with nothing seeded, green and pulsing under 24h, amber and still beyond it with a visible `3d old` label so colour is not the only channel. Re-checks each minute.
+     - New `--color-stale` token in [`src/app/globals.css`](src/app/globals.css).
+  5. **Patch cross-check test ([`src/lib/curated/patch-consistency.test.ts`](src/lib/curated/patch-consistency.test.ts)):** asserts every curated file of the newest set folder names the same patch, and that `PATCH_RELEASES`' newest entry for that set matches it. Catches the three-way divergence between the MetaTFT feed, the hand-written `meta-notes.yaml` and [`src/lib/sync/patches.ts`](src/lib/sync/patches.ts) that used to go silent on patch day.
+  6. **`knip` in the standard gate:** added as a devDependency with a `knip` script, and `check` is now `typecheck && lint && test && knip` ([`package.json`](package.json)) instead of an ad-hoc `pnpm dlx knip` that got logged inconsistently.
+  7. **AGY conventions in the repo:** [`CLAUDE.md`](CLAUDE.md) gained a "Session log" section and [`AGENTS.md`](AGENTS.md) a conventions block — `AGY_LOG.md` is the session log, entries use the template now at the top of this file, paths are repo-relative, and the work commit carries an `AGY-Task: <N>` trailer so no second commit is needed to record a SHA. All 31 machine-local `file:///C:/…` links in this file were converted to repo-relative.
+* **Gates:** check 577/577 across 49 test files (up from 568/47) · lint 0 · types 0 · knip 0 · build 42/42 routes with the fetch cache cleared · route shapes unchanged (`/` and `/comps/[slug]` Partial Prerender; `/bis`, `/augments`, `/comps`, `/planner`, both tier lists Static).
+* **Not done:**
+  - **Workflow changes are unexercised.** No scheduled run has fired with `sync:static` in it, and the rollover guard's throw path has no live rehearsal — it needs real game data naming a new set. Neither branch has a unit test; both are script-level paths the suite does not reach.
+  - **No failure notification.** `sync-meta.yml` still has no `if: failure()` step, so a failed daily run is only visible in the Actions tab. Flagged in the audit, not in this scope.
+  - **`/augments` builds at 1d / 1w, not the 30d / 1y architecture §8 claimed.** Measured to be a Task 27 regression, not this one: `HeaderMetaPill` is in the root layout and its `cacheLife("days")` floors every route. Confirmed by rebuilding with the pill removed, which returned `/augments` to 30d / 1y. Kept deliberately and §8 corrected.
+  - Still open from the audit: `is_shop_unit` is dead (architecture §4.8), and the `CONTEXT.md` / `docs/adr/` that `CLAUDE.md` names do not exist.
+* **Deployed:** no — left uncommitted in the working tree for review.
 
 ---
 
@@ -10,25 +63,25 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Date:** 2026-09-16
 * **Changes Delivered:**
   1. **Phase B — Visual Polish & Hextech Aesthetic:**
-     - **Tier Glows & S-Tier Accent ([`src/components/tier-row.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/tier-row.tsx), [`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+     - **Tier Glows & S-Tier Accent ([`src/components/tier-row.tsx`](src/components/tier-row.tsx), [`src/components/comp-list.tsx`](src/components/comp-list.tsx)):**
        - Enhanced `TIER_BG.S` with ambient glow `shadow-[0_0_10px_rgba(251,113,133,0.35)]` and `TIER_BG.A` with `shadow-[0_0_6px_rgba(251,146,60,0.2)]`.
        - Added accent left border and soft gradient to S-tier comp cards in `CompRow` (`border-l-2 border-l-tier-s bg-gradient-to-r from-tier-s/[0.04] to-transparent`).
-     - **Augment Rarity Badges ([`src/components/augment-parts.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/augment-parts.tsx)):**
+     - **Augment Rarity Badges ([`src/components/augment-parts.tsx`](src/components/augment-parts.tsx)):**
        - Styled `RarityPill` with distinct glowing rarity borders (`Silver`, `Gold`, `Prismatic`) and color-coded interior indicator pips.
-     - **HexBoard Arena Polish ([`src/components/hex-board.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/hex-board.tsx), [`src/components/cost-styles.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/cost-styles.ts)):**
+     - **HexBoard Arena Polish ([`src/components/hex-board.tsx`](src/components/hex-board.tsx), [`src/components/cost-styles.ts`](src/components/cost-styles.ts)):**
        - Redesigned `EmptyHex` into authentic dual-polygon recessed arena plates (`bg-surface/75` plate with central coordinate dots).
        - Added `COST_GLOW` with drop-shadows matching unit cost tiers (gray, green, blue, purple, amber) and hover elevation transition (`group-hover:scale-105`).
        - Supported `highlightedTrait` on `HexBoard`: matching units receive `scale-110 drop-shadow-[0_0_12px_rgba(200,170,110,0.9)] ring-2 ring-accent z-20`, while unrelated units dim with `opacity-30 grayscale-[65%]`.
-     - **Copy Toast Feedback ([`src/components/copy-team-code-button.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/copy-team-code-button.tsx)):**
+     - **Copy Toast Feedback ([`src/components/copy-team-code-button.tsx`](src/components/copy-team-code-button.tsx)):**
        - Added visual feedback toast styling with buff glow (`border-buff/50 bg-buff/15 text-buff shadow-[0_0_12px_rgba(74,222,128,0.2)]`) and an inline `"Ready to paste in-game"` status pill badge.
   2. **Phase C — Interactive Ergonomics:**
-     - **Trait Cross-Highlighting ([`src/components/comp-board-section.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-board-section.tsx), [`src/components/comp-traits.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-traits.tsx), [`src/components/comp-guide.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-guide.tsx)):**
+     - **Trait Cross-Highlighting ([`src/components/comp-board-section.tsx`](src/components/comp-board-section.tsx), [`src/components/comp-traits.tsx`](src/components/comp-traits.tsx), [`src/components/comp-guide.tsx`](src/components/comp-guide.tsx)):**
        - Created client component `CompBoardSection` to manage synchronized hover state between `HexBoard` and `CompTraitList`.
        - Hovering or focusing any trait instantly highlights all fielded units that have that trait on the arena board. Includes an active indicator with a quick clear button.
-     - **Champion Quick Filter on Comps ([`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+     - **Champion Quick Filter on Comps ([`src/components/comp-list.tsx`](src/components/comp-list.tsx)):**
        - Extracted top 10 carry champions across all comps via `useMemo`.
        - Rendered interactive carry champion filter chips with champion portrait and cost border. Clicking a carry filters the comps down to those featuring that carry, clicking again clears.
-     - **Planner Breakpoint Helper ([`src/lib/curated/traits.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/traits.ts), [`src/lib/curated/traits.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/traits.test.ts), [`src/components/planner/planner-app.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/planner/planner-app.tsx)):**
+     - **Planner Breakpoint Helper ([`src/lib/curated/traits.ts`](src/lib/curated/traits.ts), [`src/lib/curated/traits.test.ts`](src/lib/curated/traits.test.ts), [`src/components/planner/planner-app.tsx`](src/components/planner/planner-app.tsx)):**
        - Implemented `isOneAwayFromBreakpoint(trait)` helper determining if fielding 1 more unit activates or upgrades a trait.
        - Added 6 unit tests covering initial tiers, upgrades, maxed traits, unique traits, and empty breakpoints.
        - Enabled `showNearBreakpoints={true}` in `planner-app.tsx`, displaying an accent `+1 away` chip beside qualifying traits and tallying near-breakpoint traits in the panel title.
@@ -43,23 +96,23 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Scope:** UI / UX Enhancement, Instant Search, Hotkey Accessibility & Live Meta Header
 * **Date:** 2026-09-16
 * **Changes Delivered:**
-  1. **Instant Live Search on `/bis` ([`src/components/bis-board.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/bis-board.tsx), [`src/lib/curated/bis-filter.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/bis-filter.ts)):**
+  1. **Instant Live Search on `/bis` ([`src/components/bis-board.tsx`](src/components/bis-board.tsx), [`src/lib/curated/bis-filter.ts`](src/lib/curated/bis-filter.ts)):**
      - Pure search algorithm matching champion names, roles, notes, completed items, components, and trait emblems.
      - Redesigned two-row toolbar matching `/comps`: search input with autofocus `/` hotkey, champion counter (`X of Y champions`), and one-click `Reset filters` button.
-     - 8 unit tests in [`src/lib/curated/bis-filter.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/bis-filter.test.ts).
-  2. **Instant Live Search on `/augments` ([`src/components/augment-board.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/augment-board.tsx), [`src/lib/curated/augment-filter.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/augment-filter.ts)):**
+     - 8 unit tests in [`src/lib/curated/bis-filter.test.ts`](src/lib/curated/bis-filter.test.ts).
+  2. **Instant Live Search on `/augments` ([`src/components/augment-board.tsx`](src/components/augment-board.tsx), [`src/lib/curated/augment-filter.ts`](src/lib/curated/augment-filter.ts)):**
      - Pure search algorithm filtering augments in milliseconds across name, description/effects (e.g. "reroll", "xp", "gold", "health"), and rarity.
      - Responsive toolbar with search bar, `<kbd>/</kbd>` shortcut badge, augment counter, and reset button.
-     - 7 unit tests in [`src/lib/curated/augment-filter.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/augment-filter.test.ts).
-  3. **Hotkey Badges (`<kbd>`) on Navigation & Search ([`src/components/nav-tabs.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/nav-tabs.tsx), [`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+     - 7 unit tests in [`src/lib/curated/augment-filter.test.ts`](src/lib/curated/augment-filter.test.ts).
+  3. **Hotkey Badges (`<kbd>`) on Navigation & Search ([`src/components/nav-tabs.tsx`](src/components/nav-tabs.tsx), [`src/components/comp-list.tsx`](src/components/comp-list.tsx)):**
      - Subtle `<kbd>` badges (`1` to `8`) on navigation tabs for `sm:`+ screens (hidden on mobile phones to prevent tab clipping).
      - Dedicated `<kbd>/</kbd>` badge cleanly integrated inside the search bars on `/comps`, `/bis`, and `/augments`.
-  4. **Shortcuts Cheatsheet Popover ([`src/components/shortcuts-help.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/shortcuts-help.tsx), [`src/components/shortcut-match.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/shortcut-match.ts)):**
+  4. **Shortcuts Cheatsheet Popover ([`src/components/shortcuts-help.tsx`](src/components/shortcuts-help.tsx), [`src/components/shortcut-match.ts`](src/components/shortcut-match.ts)):**
      - Added global `?` shortcut trigger and a compact `[ ⌨ Shortcuts ? ]` button in the header.
      - High-density cheatsheet popover showing all tab keys (`1`–`8`), search (`/`), help (`?`), and dismiss (`Esc`).
-     - Unit test for `?` mapping in [`src/components/shortcut-match.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/shortcut-match.test.ts).
-  5. **Header Meta Context Pill ([`src/components/header-meta-pill.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/header-meta-pill.tsx), [`src/lib/curated/header-meta.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/header-meta.ts)):**
-     - Ambient `Set 18 · Patch 18.2` pill with an animated emerald pulsating live sync dot beside the logo in [`src/components/site-header.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/site-header.tsx).
+     - Unit test for `?` mapping in [`src/components/shortcut-match.test.ts`](src/components/shortcut-match.test.ts).
+  5. **Header Meta Context Pill ([`src/components/header-meta-pill.tsx`](src/components/header-meta-pill.tsx), [`src/lib/curated/header-meta.ts`](src/lib/curated/header-meta.ts)):**
+     - Ambient `Set 18 · Patch 18.2` pill with an animated emerald pulsating live sync dot beside the logo in [`src/components/site-header.tsx`](src/components/site-header.tsx).
      - Cached with `cacheTag("static")` and prerendered into the static shell.
   6. **Verification & Checks:**
      - `pnpm check` (562 tests passing, 0 lint errors, 0 type errors).
@@ -72,7 +125,7 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Scope:** UI / UX Redesign & Client-Side Sorting Engine
 * **Date:** 2026-09-16
 * **Changes Delivered:**
-  1. **Pure Sorting Engine ([`src/lib/curated/comp-sort.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/comp-sort.ts)):**
+  1. **Pure Sorting Engine ([`src/lib/curated/comp-sort.ts`](src/lib/curated/comp-sort.ts)):**
      - Implemented `sortComps()` supporting sort keys: `"tier" | "avg" | "top4" | "pick"`.
      - Natural sort defaults:
        - `tier`: `"asc"` (S → A → B → C)
@@ -81,16 +134,16 @@ A chronological record of engineering tasks, feature implementations, and system
        - `pick`: `"desc"` (15% → 1%, highest play rate first)
      - Comps with unrecorded or null stats are always placed at the end of the list regardless of direction.
      - Deterministic multi-tier tiebreaking: tier order (`S > A > B > C`) → `sortOrder` → alphabetical `name`.
-  2. **Active Column Visual Feedback ([`src/components/comp-stats.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-stats.tsx)):**
+  2. **Active Column Visual Feedback ([`src/components/comp-stats.tsx`](src/components/comp-stats.tsx)):**
      - Added `highlightField?: CompStatField` prop to `CompStatsRow`.
      - When sorting by `avg`, `top4`, or `pick`, the corresponding stat in every comp card is highlighted with `text-accent font-bold` and an accent background pill (`bg-accent/10 px-1 -mx-1 text-accent`).
-  3. **Toolbar Layout Redesign ([`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+  3. **Toolbar Layout Redesign ([`src/components/comp-list.tsx`](src/components/comp-list.tsx)):**
      - Structured two-row toolbar:
        - **Row 1:** Search input (`type="search"`, preserving `/` global shortcut) + comp count (`X of Y comps`) + one-click `Reset filters` button when search, filters, or custom sorts are active.
        - **Row 2:** Labeled uppercase control bars (`Tier`, `Style`, `Sort`) with top border separation (`border-t border-line/60 pt-2`), wrapping naturally on mobile (390px) and desktop (960px+) without horizontal overflow.
      - Interactive sort buttons toggle direction on repeat clicks, show direction SVG arrows (`↑` / `↓`), and include full ARIA accessibility attributes and tooltips.
   4. **Verification & Tests:**
-     - Created unit test suite in [`src/lib/curated/comp-sort.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/comp-sort.test.ts) (5/5 tests passing).
+     - Created unit test suite in [`src/lib/curated/comp-sort.test.ts`](src/lib/curated/comp-sort.test.ts) (5/5 tests passing).
      - `pnpm check` (546 tests, 0 lint errors, 0 type errors), `pnpm build` (Next.js 16.3 static prerender), `pnpm dlx knip` (0 findings).
 
 ---
@@ -99,19 +152,19 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Commit:** `4ffd1e6` — *feat(openers): automate stage-2 opener derivation from live meta clusters*
 * **Date:** 2026-09-16
 * **Changes Delivered:**
-  1. **Automated Derivation Engine ([`src/lib/curated/openers-sync.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/openers-sync.ts)):**
+  1. **Automated Derivation Engine ([`src/lib/curated/openers-sync.ts`](src/lib/curated/openers-sync.ts)):**
      - Pure algorithm clustering 24–28 live meta comps by common 1- and 2-cost `early_units`.
      - Ranks clusters by best comp tier and aggregated pick rate to select top stage-2 boards.
      - Derives trait-based board names (e.g. "Elderwood Rapidfires", "Blossom Juggernauts") and aggregates priority slammable completed items.
      - Maps active target comp slugs with fallback backfilling to guarantee minimum pivot counts, and generates concise role-aware gameplay notes (≤96 characters).
-  2. **Validation Decoupling ([`src/lib/curated/opener-validation.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/opener-validation.ts)):**
+  2. **Validation Decoupling ([`src/lib/curated/opener-validation.ts`](src/lib/curated/opener-validation.ts)):**
      - Isolated `validateOpeners` schema checks so CLI tools and test suites can run without `server-only` or Next.js cache dependencies.
-  3. **CLI Script ([`scripts/sync-openers.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/scripts/sync-openers.ts)):**
+  3. **CLI Script ([`scripts/sync-openers.ts`](scripts/sync-openers.ts)):**
      - Added `pnpm sync:openers [--dry-run]` to derive, validate, and write `data/curated/<setId>/openers.yaml`.
-  4. **CI/CD Integration ([`.github/workflows/sync-meta.yml`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/.github/workflows/sync-meta.yml)):**
+  4. **CI/CD Integration ([`.github/workflows/sync-meta.yml`](.github/workflows/sync-meta.yml)):**
      - Integrated opener derivation into the daily scheduled workflow after `sync:bis`, ensuring opener boards update continuously alongside live meta comps, gated by `pnpm build`.
   5. **Verification & Tests:**
-     - 15 unit tests in [`src/lib/curated/openers-sync.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/openers-sync.test.ts).
+     - 15 unit tests in [`src/lib/curated/openers-sync.test.ts`](src/lib/curated/openers-sync.test.ts).
 
 ---
 
@@ -119,7 +172,7 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Commit:** `1eada0e` — *feat(data): replace placeholder openers with real meta-derived stage-2 boards*
 * **Date:** 2026-09-16
 * **Changes Delivered:**
-  1. **Data-Derived Stage-2 Boards ([`data/curated/18/openers.yaml`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/data/curated/18/openers.yaml)):**
+  1. **Data-Derived Stage-2 Boards ([`data/curated/18/openers.yaml`](data/curated/18/openers.yaml)):**
      - Replaced placeholder boards with 8 real Diamond+ meta openers from Set 18 Patch 18.2 comp clusters:
        - *Blossom Invokers* (S): Karma, Yorick, Yunara, Rakan
        - *Elderwood Vanguard* (S): Ornn, Alistar, Varus, Xayah
@@ -139,11 +192,11 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Commits:** `d63abc6`, `2e87a6a` — *feat(ui): meta brief real notes, adjusted category, and visual entity icons*
 * **Date:** 2026-09-16
 * **Changes Delivered:**
-  1. **Real Patch 18.2 Notes ([`data/curated/18/meta-notes.yaml`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/data/curated/18/meta-notes.yaml)):**
+  1. **Real Patch 18.2 Notes ([`data/curated/18/meta-notes.yaml`](data/curated/18/meta-notes.yaml)):**
      - Populated real Patch 18.2 balance takeaways (buffs: Ashe, Kennen, Rageblade, Elder Dragon; nerfs: Draven, Malphite, Kraken's Fury, Ahri; adjustments: Fast 9 XP, Elderwood, Thief's Gloves).
   2. **"Adjusted" Category:**
      - Extended `metaNotesFileSchema` to support an `adjustments` section (≤6 entries, ≤48 characters).
-     - Styled with `--color-adjust: #38bdf8` token, diamond glyph (`◆`), and responsive 3-column desktop layout ([`src/app/meta-brief.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/app/meta-brief.tsx)).
+     - Styled with `--color-adjust: #38bdf8` token, diamond glyph (`◆`), and responsive 3-column desktop layout ([`src/app/meta-brief.tsx`](src/app/meta-brief.tsx)).
   3. **Visual Entity Icons:**
      - Mini 16px portraits (`ChampionIcon` with cost border), item icons (`ItemIcon`), and trait icons rendered directly inside brief badges, auto-detected or explicitly defined via YAML entity tags.
   4. **Performance & Caching:**
@@ -155,9 +208,9 @@ A chronological record of engineering tasks, feature implementations, and system
 * **Commit:** `c1f39f4` — *feat(ui): overview and comp guide polish (traits, pivot carries, augment tooltips)*
 * **Date:** 2026-09-16
 * **Changes Delivered:**
-  1. **Top Comps Key Traits ([`src/app/top-comps.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/app/top-comps.tsx)):**
+  1. **Top Comps Key Traits ([`src/app/top-comps.tsx`](src/app/top-comps.tsx)):**
      - Rendered top 3 active traits (`comp.traits.slice(0, 3)`) with `TraitHex` and count badges beside `CompStatsRow`.
-  2. **Opener Pivot Carry Cues ([`src/app/overview-openers.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/app/overview-openers.tsx)):**
+  2. **Opener Pivot Carry Cues ([`src/app/overview-openers.tsx`](src/app/overview-openers.tsx)):**
      - Added 16px cost-bordered `ChampionIcon` for target comps' primary carry inside transition pills.
-  3. **Rich Augment Tooltips in Guides ([`src/components/comp-augments.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-augments.tsx)):**
+  3. **Rich Augment Tooltips in Guides ([`src/components/comp-augments.tsx`](src/components/comp-augments.tsx)):**
      - Built interactive `CompAugmentsList` client island using shared `useHoverTip` and `AugmentDetails`, replacing static `title` attributes with rich tier, rarity, and effect descriptions.

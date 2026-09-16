@@ -122,7 +122,15 @@ async function main() {
     });
   }
 
-  const patch = rawComps.find((c) => c.patch)?.patch ?? refs.setPatches.get(setId) ?? "18.2";
+  // No literal fallback (architecture §6.4): a wrong patch label on every opener card is
+  // worse than a failed sync, and both sources here are real data the run already loaded.
+  const patch = rawComps.find((c) => c.patch)?.patch ?? refs.setPatches.get(setId);
+  if (!patch) {
+    throw new Error(
+      `No patch label for set ${setId}: none of its comps carry one and tft_sets.patch is empty.\n` +
+        `Run pnpm sync:static, then pnpm sync:meta, before deriving openers.`,
+    );
+  }
 
   // Build reference maps for derivation
   const openerRefData: OpenerReferenceData = {
