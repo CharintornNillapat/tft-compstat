@@ -3,7 +3,7 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 259,688 games on patch 18.2, set 18. Feed updated 2026-09-16T14:07:21.214Z.
+# Sample: 265,520 games on patch 18.2, set 18. Feed updated 2026-09-16T14:26:30.754Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
 # Where they fell, as size and worst average placement: S 10 to 4.18, A 19 to 4.53, B 23 to 4.76, C 13 to 5.48.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
@@ -11,7 +11,7 @@ slug: champions-18.2
 kind: champion
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 259,688 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 265,520 games over the last 3 days."
 tiers:
   S:
     - DA_Lux18_Base
@@ -38,11 +38,11 @@ tiers:
     - DA_18_Sett
     - DA_18_Morgana
     - DA_18_Varus
-    - DA_18_KhaZix
     - DA_18_RekSai
+    - DA_18_KhaZix
+    - DA_18_Alistar
     - DA_18_Kayle
     - DA_Krug18
-    - DA_18_Alistar
     - DA_18_Diana
   B:
     - DA_18_Zyra
@@ -58,18 +58,18 @@ tiers:
     - DA_18_Lillia
     - DA_18_Rengar
     - DA_18_Yorick
-    - DA_Karma18
     - DA_18_Cassiopeia
+    - DA_Karma18
     - DA_18_Sejuani
     - DA_18_Leona
     - DA_18_MasterYi_AD
     - DA_Murkwolf18
     - DA_18_Rammus
-    - DA_18_Akali_AD
     - DA_Gromp18_AP
-    - DA_Scuttlecrab18
-  C:
+    - DA_18_Akali_AD
     - DA_18_Kobuko
+  C:
+    - DA_Scuttlecrab18
     - DA_18_Teemo
     - DA_CrimsonRaptor18
     - DA_18_Hecarim
