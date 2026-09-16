@@ -1,18 +1,25 @@
-# SAMPLE: placeholder patch notes that exercise the loader and the Overview card,
-# not meta advice. Replace them with your own, then redeploy — this file is read
-# at build time and ships inside the deployment, so no seed step is involved.
-#
-# Entries are short free text (≤48 chars, ≤6 per list) so they stay one-line
-# badges on a second monitor. Keep them scannable: subject first, reason after.
+# Set 18 Patch 18.2 meta takeaways and key balance adjustments.
+# Entries are short free text (≤48 chars, ≤6 per list) or objects with optional
+# entity tags (`champion:`, `item:`, `trait:`) so they render mini icons and
+# fit on one line on a second monitor.
 patch: "18.2"
 title: Patch 18.2 brief
 buffs:
-  - Ashe — Ranger bonus up 15%
-  - Kennen 2★ survivability
-  - Guinsoo's ramp faster
-  - Flora Fatalis at 4
+  - Ashe — Ranger AD & AS scaled up
+  - Kennen — 2★ shield & survivability
+  - item: "Guinsoo's Rageblade"
+    text: "Guinsoo's Rageblade — attack speed ramp"
+  - Elder Dragon — breath damage & HP
 nerfs:
-  - Draven — base AD down
-  - Malphite frontline durability
-  - Kraken's Fury proc rate
-tip: Ranger openers are back; hold Recurve Bows for Ashe.
+  - Draven — base AD and scaling reduced
+  - Malphite — passive armor & MR reduced
+  - item: "Kraken's Fury"
+    text: "Kraken's Fury — third-hit proc damage"
+  - Ahri — max mana increased 40 → 50
+adjustments:
+  - Level 9 — XP requirement adjusted 80 → 76
+  - trait: "Elderwood"
+    text: "Elderwood — growth interval reworked"
+  - item: "Thief's Gloves"
+    text: "Thief's Gloves — roll table normalized"
+tip: Fast 9 boards and Blossom lead the meta; hold Recurve Bows early for Ashe or Draven.

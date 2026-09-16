@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–21 deployed and verified (2026-09-14) and Task 22 implemented and verified locally (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–22 deployed and verified (2026-09-16) and Task 23 implemented and verified locally (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–21 deployed, Task 22 verified locally (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–22 deployed, Task 23 verified locally (2026-09-16) |
 
 ---
 
@@ -697,7 +697,18 @@ Approved task by task rather than as a whole phase.
 **Verified — Task 22 (2026-09-16):**
 - **Checks:** `pnpm check` (524 tests, up from 523: new test in `openers.test.ts` asserting carry propagation to pivots) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
 - **Route lifetime & static analysis:** `/` and `/comps/[slug]` retain their exact Partial Prerender behavior. Comp guide augment list adds minimal JS payload since `useHoverTip` and `AugmentDetails` are already shared in the chunk.
-- **Not committed/pushed:** Held in working directory awaiting user review before committing and deploying.
+- **Deployed (2026-09-16, commit `c1f39f4`)**: pushed to `main` and verified.
+
+- [x] **Task 23 — Meta Brief Enhancements** (approved 2026-09-16)
+  - **Real patch 18.2 notes:** `data/curated/18/meta-notes.yaml` updated with real Set 18 Patch 18.2 meta takeaways and balance notes (Ashe, Kennen, Guinsoo's Rageblade, Elder Dragon buffs; Draven, Malphite, Kraken's Fury, Ahri nerfs; Fast 9 XP, Elderwood, Thief's Gloves adjustments).
+  - **"Adjusted" category:** `metaNotesFileSchema` (`src/lib/curated/schemas.ts`) and `MetaBrief` (`src/lib/curated/meta-brief.ts`) support `adjustments` (≤6 entries, ≤48 chars). Styled with new `--color-adjust: #38bdf8` token, diamond glyph (`◆`), and responsive 3-column layout on desktop (`src/app/meta-brief.tsx`).
+  - **Visual entity icons:** `BriefEntry` optionally attaches `BriefEntity` (`champion`, `item`, or `trait`), auto-detected from text prefix or specified via explicit YAML object (`champion:`, `item:`, `trait:`). `MetaBrief` renders a 16px portrait (`ChampionIcon` with cost border), item icon (`ItemIcon`), or trait icon (`Image`) beside the direction glyph.
+  - **Static caching:** `getMetaBrief()` upgraded to `cacheTag("static")` and `cacheLife("days")`, resolving champion and item icons from `getStaticNames()`.
+
+**Verified — Task 23 (2026-09-16):**
+- **Checks:** `pnpm check` (526 tests, up from 524: 2 new unit tests in `meta-brief.test.ts` for adjustments and entity resolution) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
+- **Route lifetime & static analysis:** `/` retains its exact Partial Prerender behavior.
+- **Not committed/pushed:** Held in working directory awaiting user review.
 
 - [ ] Further tasks — not yet specified.
 

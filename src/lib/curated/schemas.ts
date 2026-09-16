@@ -170,8 +170,21 @@ const briefEntry = z
   .min(1, "must not be empty")
   .max(48, "must be at most 48 characters, so it fits on one badge");
 
+export const briefEntryObjectSchema = z.strictObject({
+  text: briefEntry,
+  /** Optional champion name or api_name to display portrait icon. */
+  champion: z.string().trim().min(1, "must not be empty").optional(),
+  /** Optional item name or api_name to display item icon. */
+  item: z.string().trim().min(1, "must not be empty").optional(),
+  /** Optional trait name or api_name to display trait icon. */
+  trait: z.string().trim().min(1, "must not be empty").optional(),
+});
+
+export const briefEntrySchema = z.union([briefEntry, briefEntryObjectSchema]);
+export type BriefEntryInput = z.infer<typeof briefEntrySchema>;
+
 const briefEntries = z
-  .array(briefEntry, { error: "must be a list of short lines" })
+  .array(briefEntrySchema, { error: "must be a list of short lines or entry objects" })
   .max(6, "at most 6 fit in the card before it stops being a glance")
   .default([]);
 
@@ -184,11 +197,13 @@ export const metaNotesFileSchema = z
     buffs: briefEntries,
     /** What got weaker — shown as red badges. */
     nerfs: briefEntries,
+    /** Reworks or system changes — shown as blue/adjusted badges. */
+    adjustments: briefEntries,
     /** One line of advice under the badges. */
     tip: z.string().trim().min(1).max(160, "must be at most 160 characters").optional(),
   })
-  .refine((file) => file.buffs.length + file.nerfs.length > 0 || file.tip, {
-    error: "needs at least one buff, nerf or tip; an empty brief would render an empty card",
+  .refine((file) => file.buffs.length + file.nerfs.length + file.adjustments.length > 0 || file.tip, {
+    error: "needs at least one buff, nerf, adjustment or tip; an empty brief would render an empty card",
   });
 
 /**
