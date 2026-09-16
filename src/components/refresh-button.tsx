@@ -48,7 +48,8 @@ export function RefreshButton({ nextAllowedAt }: { nextAllowedAt: string | null 
             setMessage(describe(result));
           })
         }
-        className="rounded border border-line bg-panel px-2 py-1 text-[13px] hover:border-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
+        // Taller on a phone, where this is a thumb target rather than a pointer one.
+        className="rounded border border-line bg-panel px-2.5 py-1.5 text-[13px] hover:border-zinc-600 disabled:cursor-not-allowed disabled:opacity-50 sm:px-2 sm:py-1"
       >
         {pending ? "Syncing…" : "Refresh"}
       </button>

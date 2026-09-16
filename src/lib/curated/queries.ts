@@ -10,6 +10,9 @@ import {
   type TraitBreakpoint,
 } from "@/lib/static/game";
 import { toItemText, type ChampionAbility, type ItemText } from "@/lib/static/tooltip-text";
+// Type only: the shape is defined next to the matcher that consumes it, which is pure
+// and client-safe, so nothing of this module follows it into the browser.
+import type { CuratedCompShape } from "@/lib/stats/curated-match";
 import { must } from "@/lib/supabase/result";
 import { getCachedSupabase } from "@/lib/supabase/server";
 import type { TierListKind } from "./schemas";
@@ -527,4 +530,35 @@ export async function getCompSlugs(): Promise<string[]> {
 
   const rows = must(await getCachedSupabase().from("comps").select("slug").eq("is_published", true), "comp slugs");
   return rows.map((row) => row.slug);
+}
+
+/**
+ * Every published comp of the active set, reduced to its board unit names, so `/me`
+ * can tell which curated comp a played board was going for (architecture §6.2 step 4).
+ *
+ * Deliberately **not** `getComps()`: this crosses to the browser, and that payload
+ * carries icons, items, traits, stats and guides for every comp. This is four fields
+ * and ~10 api names each. Tagged `comps` only — it reads no static table, so a
+ * `static` revalidation has nothing to change here.
+ */
+export async function getCuratedCompShapes(): Promise<CuratedCompShape[]> {
+  "use cache";
+  cacheTag("comps");
+  cacheLife("days");
+
+  const rows = must(
+    await getCachedSupabase()
+      .from("comps")
+      .select("slug, name, tier, set_id, set:tft_sets!inner(is_active), units:comp_units(champion_api_name)")
+      .eq("is_published", true)
+      .eq("set.is_active", true),
+    "curated comp shapes",
+  );
+  return rows.map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    tier: row.tier,
+    setId: row.set_id,
+    coreUnits: row.units.map((unit) => unit.champion_api_name),
+  }));
 }

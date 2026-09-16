@@ -1,10 +1,12 @@
 import "server-only";
+import { getCuratedCompShapes } from "@/lib/curated/queries";
 import { QUEUE_IDS } from "@/lib/static/game";
 import { getStaticNames } from "@/lib/static/lookup";
 import { pickNames, type NameBook } from "@/lib/static/names";
 import { must } from "@/lib/supabase/result";
 import { getSupabase } from "@/lib/supabase/server";
 import { getTrackedPuuid } from "@/lib/sync/sync-service";
+import type { CuratedCompShape } from "./curated-match";
 import type { RankSnapshot } from "./rank";
 import { namesUsedBy, toMatchRow } from "./row";
 import { FETCH_LIMIT, type MatchRow } from "./types";
@@ -83,6 +85,12 @@ export type DashboardData = {
   rank: { current: RankSnapshot | null; previous: RankSnapshot | null };
   currentSet: number | null;
   setName: string | null;
+  /**
+   * The active set's curated comps, for matching played boards in the browser
+   * (architecture §6.2 step 4). Cached under the `comps` tag while everything else
+   * here is live — curated comps change on a seed, not on a sync.
+   */
+  curatedComps: CuratedCompShape[];
 };
 
 /** Null when no account is tracked yet. */
@@ -91,13 +99,14 @@ export async function getDashboardData(limit = FETCH_LIMIT): Promise<DashboardDa
   const puuid = await getTrackedPuuid(db);
   if (!puuid) return null;
 
-  const [account, rows, rank] = await Promise.all([
+  const [account, rows, rank, curatedComps] = await Promise.all([
     must(
       await db.from("riot_accounts").select("game_name, tag_line, platform").eq("puuid", puuid).limit(1),
       "riot account",
     ).at(0),
     loadMatches(db, puuid, limit),
     getLatestRank(db, puuid),
+    getCuratedCompShapes(),
   ]);
 
   const { names, activeSet } = await namesFor(rows);
@@ -111,6 +120,7 @@ export async function getDashboardData(limit = FETCH_LIMIT): Promise<DashboardDa
     rank,
     currentSet: activeSet?.id ?? null,
     setName: activeSet?.name ?? null,
+    curatedComps,
   };
 }
 

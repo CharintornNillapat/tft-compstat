@@ -27,6 +27,12 @@ export async function Dashboard() {
   }
 
   return (
-    <MeDashboard rows={data.rows} names={data.names} currentSet={data.currentSet} setName={data.setName} />
+    <MeDashboard
+      rows={data.rows}
+      names={data.names}
+      currentSet={data.currentSet}
+      setName={data.setName}
+      curatedComps={data.curatedComps}
+    />
   );
 }

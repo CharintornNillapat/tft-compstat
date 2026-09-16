@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import type { NameBook } from "@/lib/static/names";
 import { favoriteComps } from "@/lib/stats/comps";
+import { curatedPerformance, matchCuratedComps, type CuratedCompShape } from "@/lib/stats/curated-match";
 import { selectMatches } from "@/lib/stats/filter";
 import { summarize } from "@/lib/stats/summary";
 import { DEFAULT_FILTER, LAST_N_OPTIONS, type LastN, type MatchRow, type StatsFilter } from "@/lib/stats/types";
 import { EmptyState } from "./empty-state";
+import { MeCuratedComps } from "./me-curated-comps";
 import { MeFavoriteComps } from "./me-favorite-comps";
 import { MeMatchHistory } from "./me-match-history";
 import { PlacementHistogram } from "./placement-histogram";
@@ -37,22 +39,29 @@ export function MeDashboard({
   names,
   currentSet,
   setName,
+  curatedComps,
 }: {
   rows: MatchRow[];
   names: NameBook;
   currentSet: number | null;
   setName: string | null;
+  curatedComps: CuratedCompShape[];
 }) {
   const [filter, setFilter] = useState<StatsFilter>(DEFAULT_FILTER);
 
-  const { visible, summary, comps } = useMemo(() => {
+  const { visible, summary, comps, curatedMatches, curated } = useMemo(() => {
     const selected = selectMatches(rows, filter, { currentSet });
+    // Matched once per filter change, then read by both the history rows and the
+    // per-comp table, so the two can never name a board differently.
+    const matches = matchCuratedComps(selected, curatedComps);
     return {
       visible: selected,
       summary: summarize(selected),
       comps: favoriteComps(selected, names, { limit: 6 }),
+      curatedMatches: matches,
+      curated: curatedPerformance(selected, matches),
     };
-  }, [rows, filter, currentSet, names]);
+  }, [rows, filter, currentSet, names, curatedComps]);
 
   const lastNOptions = LAST_N_OPTIONS.map((n) => ({ value: n, label: String(n) }));
 
@@ -129,9 +138,16 @@ export function MeDashboard({
             </section>
           )}
 
+          {curatedComps.length > 0 && (
+            <section>
+              <h3 className="mb-1.5 text-[11px] tracking-wider text-faint uppercase">On curated comps</h3>
+              <MeCuratedComps performance={curated} />
+            </section>
+          )}
+
           <section>
             <h3 className="mb-1.5 text-[11px] tracking-wider text-faint uppercase">Match history</h3>
-            <MeMatchHistory rows={visible} names={names} />
+            <MeMatchHistory rows={visible} names={names} curatedMatches={curatedMatches} />
           </section>
         </>
       )}

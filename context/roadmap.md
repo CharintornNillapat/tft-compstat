@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–29 deployed and verified (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–29 deployed and verified and Task 30 awaiting review (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–29 deployed and verified (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–29 deployed and verified, Task 30 in review (2026-09-16) |
 
 ---
 
@@ -154,7 +154,7 @@
   - [x] Board carry marker made distinct from the 5-cost border: a new `--color-carry` token outside the cost ramp, plus a `CarryMark` glyph so **shape** carries the meaning too (architecture §9).
   - [x] Fixed a Phase 4 bug found while wiring the refresh: `refreshMyMatches` only re-rendered when new matches landed, so a "you're up to date" refresh left the sync badge and cooldown countdown stale. Now an unconditional `refresh()`, and every `SyncResult` carries `nextAllowedAt` (architecture §8).
   - [x] `PalettePreview` removed from `/`, as Phase 1 said it should be.
-- [ ] Optional, **deliberately out of scope** (agreed 2026-09-12): match games to curated comps ("your results on curated comps")
+- [x] Optional at the time, **built in Phase 6 Task 30** (2026-09-16): match games to curated comps ("your results on curated comps"), architecture §6.2 step 4
 - [ ] Optional admin UI, **deliberately out of scope**; realistically its own phase:
   - single-user Supabase Auth with an email allowlist
   - Server Actions to edit tiers and comps
@@ -789,6 +789,22 @@ Approved task by task rather than as a whole phase.
 - **Deployed (2026-09-16, commit `8114787`, trailer `AGY-Task: 29`)**: pushed to `main` and live. CI green in 53s; Vercel production deploy READY; the live prerendered header ships the grey "freshness unknown" dot rather than a green pulse, with the real age filled in on hydration.
 - **Cloud rehearsal of the workflow:** a manual `sync-meta.yml` run (35103651723) was green in 1m10s. The new `sync:static` step wrote set 18 with the exact §4.8 counts (36 traits, 74 champions, 771 items, abilities 65 of 74) and only the nine known Lux-form warnings; the rollover guard took its no-op path. The run built and pushed `73ec1fa` (28 files under `data/curated/`), and `patch-consistency.test.ts` is 3/3 green against that freshly synced output.
 - **Found during that run, pre-existing:** `SITE_URL` and `REVALIDATE_SECRET` are empty in the workflow environment, so the daily sync never revalidates the live cache — it only refreshes via the auto-commit's redeploy and `cacheLife("days")`. Architecture §10 lists both as required repository secrets. Unrelated to this task; the two secrets want setting.
+
+- [x] **Task 30 — Curated comp matching on `/me`, and the page at phone width** (approved 2026-09-16)
+  - **`src/lib/stats/curated-match.ts`** (pure, 12 tests) implements architecture §6.2 step 4: a played board matches a curated comp when it fielded ≥60% of that comp's **board** units. Early and flex units are excluded on purpose, the share is of the comp's core rather than of the board, matching is set-scoped, and an equal overlap goes to the comp with more core units so a short comp cannot win every board that contains it.
+  - **`getCuratedCompShapes()`** (`src/lib/curated/queries.ts`): slug, name, tier, set and board names only, cached under the `comps` tag. Deliberately not `getComps()`, whose icons, items, traits and guides must not cross to the browser.
+  - **`MeCuratedComps`** — a per-comp record (games, average placement, top 4) that answers "how do I actually do when I force Comp X?", with a footer counting matched games; and **`CuratedCompTag`**, which marks each history row with the comp it came closest to and prints the share when it is under 100%.
+  - **`/me` at 400px**: history rows keep placement, carry and name on one line and fold their metadata onto a second; both comp tables became `table-fixed` with pinned numeric columns, which removed the favorite-comps table's horizontal scroller — the one part of the site a phone had to scroll sideways; LP and its delta became one nowrap group; panels, rows and the Refresh button got phone-sized padding.
+  - **Revalidation secrets confirmed wired** end to end, the open item left by Task 29.
+
+**Verified — Task 30 (2026-09-16):**
+- **Gates:** `pnpm check` green — 50 test files, **589 tests** (up from 577: 12 in `curated-match.test.ts`), 0 lint errors, 0 type errors, `knip` 0 findings. `pnpm build` green with the fetch cache cleared: 42/42 routes, every route keeping its shape and lifetime (`/me` stays Partial Prerender at 1d / 1w).
+- **Against real synced matches** (`next start`, 18 ranked Set 18 games): **13 of 18 matched a curated comp.** The table reads Riftbeast Malphite 4 games / 6.25 avg / 25% top 4, Draven Fast 9 2 / 1.00 / 100%, Elderwood Kayle 2 / 2.00 / 100%, Sprykin Teemo 2 / 2.50 / 100%, then three single games — which is exactly the question the feature exists to answer, and the first of those rows is a real finding about the account's play.
+- **Layout (headless Edge at 400px and 960px):** neither width scrolls horizontally (`scrollWidth === clientWidth` on both) and nothing crosses the viewport edge at 960px. At 400px both comp tables now fit without a scroll container, and the history rows read as two clean lines. The only remaining `scrollWidth > clientWidth` elements are `truncate` spans doing their job, the pre-existing 3px sparkline wrapper, and the nav strip's own scroller.
+- **Matching is honest but carry-blind.** A Hecarim board matched *Vanguard Kha'Zix* at 71% because it shared 5 of that comp's 7 units. That is the documented cost of a pure unit-overlap rule (architecture §6.2); the printed share is what keeps it from reading as a stated fact. A carry-aware refinement would be a change to that contract, not a bug fix.
+- **Revalidation secrets (the Task 29 finding) are fixed and proven.** Production returns 401 for a wrong secret and `{"revalidated":["static"]}` for the real one; and the `sync-meta.yml` runs since the secrets were set log `Revalidated "static"` and `Revalidated "tiers, comps"` with no skip warning (runs 35106510756 and 35108479646, both green).
+- **Rebased onto three `chore(auto)` sync commits (2026-09-17)** with no conflicts; gates re-run green on the rebased tree, and because those syncs re-seeded the curated comps the match figures above were re-measured against the new boards — unchanged.
+- **Not done:** no test covers `getCuratedCompShapes()` itself — it is a Supabase read, the same shape as its neighbours in that file, and the suite has no DB. The threshold is a constant rather than a control, so a curious player cannot ask "what if I count 50%?".
 
 - [ ] Further tasks — not yet specified.
 

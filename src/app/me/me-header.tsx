@@ -45,7 +45,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <section className="rounded-md border border-line bg-panel p-3">{children}</section>;
+  return <section className="rounded-md border border-line bg-panel p-2.5 sm:p-3">{children}</section>;
 }
 
 export async function MeHeader() {
@@ -87,25 +87,34 @@ export async function MeHeader() {
     <div className="space-y-3">
       <SyncNotice state={state ?? null} now={now} />
       <Panel>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-medium">
+        <div className="flex items-baseline justify-between gap-2">
+          <h2 className="min-w-0 truncate font-medium">
             {account ? `${account.game_name}#${account.tag_line}` : "Match sync"}{" "}
             {account && <span className="text-faint">· {account.platform}</span>}
           </h2>
-          <span className="text-muted">{STATUS_LABELS[state?.status ?? "idle"] ?? state?.status}</span>
+          <span className="shrink-0 text-muted">{STATUS_LABELS[state?.status ?? "idle"] ?? state?.status}</span>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-baseline gap-2">
+        {/* LP and its delta stay one unit: at 400px a bare wrap put "+18" alone on
+            the next line, reading as a number with nothing to attach it to. */}
+        <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 sm:mt-2">
           <span className="text-lg font-semibold text-accent">{formatRank(rank.current)}</span>
-          {lp && <span className="text-muted tabular-nums">{lp}</span>}
-          {delta !== null && delta !== 0 && (
-            <span className={`tabular-nums ${delta > 0 ? "text-place-top4" : "text-tier-s"}`}>
-              {delta > 0 ? `+${delta}` : delta}
+          {lp && (
+            <span className="flex items-baseline gap-2 whitespace-nowrap">
+              <span className="text-muted tabular-nums">{lp}</span>
+              {delta !== null && delta !== 0 && (
+                <span
+                  aria-label={`${Math.abs(delta)} LP ${delta > 0 ? "gained" : "lost"} since the previous snapshot`}
+                  className={`tabular-nums ${delta > 0 ? "text-place-top4" : "text-tier-s"}`}
+                >
+                  {delta > 0 ? `+${delta}` : delta}
+                </span>
+              )}
             </span>
           )}
         </div>
 
-        <div className="mt-2">
+        <div className="mt-1.5 sm:mt-2">
           <Row label="Cached matches">{matches.length}</Row>
           <Row label="Last success">
             <RelativeTime iso={state?.last_success_at ?? null} fallback="never" />

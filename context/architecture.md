@@ -108,7 +108,8 @@ src/components/              ChampionIcon, ItemIcon, TraitHex (trait-badge.tsx),
                              PlaystyleBadge, DifficultyBadge, ContestedBadge (comp-badges.tsx),
                              AugmentBoard, RarityPill, AugmentFace, AugmentDetails (augment-parts.tsx),
                              PlacementPill, StatTile, Sparkline, PlacementHistogram, Segmented, Skeleton, SyncNotice,
-                             MeDashboard, MeMatchHistory, MeFavoriteComps, CarryCell (me-comp-cell.tsx),
+                             MeDashboard, MeMatchHistory, MeFavoriteComps, MeCuratedComps + CuratedCompTag (me-curated-comps.tsx),
+                             CarryCell (me-comp-cell.tsx),
                              Shortcuts, and the pure helpers placement-styles.ts, sparkline-geometry.ts, shortcut-match.ts
   planner/                   PlannerApp, PlannerBoard, ChampionPicker, ItemPicker, UnitInspector, SavedCompList,
                              ConfirmButton; hooks use-stored-value.ts (localStorage store, with quota and blocked-storage tests), use-pointer-drag.ts
@@ -551,9 +552,19 @@ ParticipantDto = { puuid: string; placement: number; level: number; last_round: 
 1. Active traits are those with `style ≥ 1`, excluding unique traits (`tier_total = 1`). Sort by `style` desc, then `num_units` desc. The top 2 become `primary_traits`.
 2. The carry is the unit with the most items, tie-broken by stars desc, then cost desc.
 3. `comp_key = carry + '|' + sorted(primary_traits).join('+')`. The display label is "Trait1 Trait2 · CarryName", resolved from static tables.
-4. *(Phase 5 option)* Match against a curated comp when ≥60% of the comp's core units are present, which enables "your results on curated comps".
+4. Match against a curated comp when ≥60% of the comp's core units are present, which is what "your results on curated comps" on `/me` is built from.
 
 Changing the algorithm means bumping `derived_version` and running `scripts/rederive.ts`. It recomputes from `matches.raw` with 0 API calls.
+
+**Step 4, as built (Task 30).** `src/lib/stats/curated-match.ts` is pure and, unlike steps 1–3, **unversioned**: nothing it produces is stored, so the threshold can move without a `derived_version` bump or a re-derive. It runs in the browser on the rows `/me` already holds, re-running on every filter change like the rest of `src/lib/stats`.
+
+- **Core units are the comp's final board** (`comp_units`). `early_units` and `flex_units` are deliberately excluded: early units are a stage-2 holder the comp expects you to sell, and flex units are alternatives, so counting either would make "you played this comp" easier to claim the *less* of it you actually built.
+- **The share is of the comp's core, not of the board.** Padding a board with unrelated units can never dilute a match, and a 9-unit board matching a 5-unit comp still reads 100%.
+- **Set-scoped.** A board only matches a comp of its own `tft_sets` row, so last set's games never borrow this set's names.
+- **Ties go to the comp with more core units**, then to the lower slug. Two comps fully present on one board means the longer one is the more specific claim; without this a 4-unit comp would win every board that happened to contain it.
+- **A board matches at most one comp, and the share is printed when it is under 100%** — a 60% match is a guess, and §6.4's rule is that it should be labelled as one rather than presented as a fact.
+- **It does not look at the carry.** A board whose itemized carry belongs to neither comp can still be named after one it shares units with (seen live: a Hecarim board matched *Vanguard Kha'Zix* at 71%). That is the documented cost of a pure unit-overlap rule; a carry-aware refinement is a separate change to this contract.
+- `getCuratedCompShapes()` (`src/lib/curated/queries.ts`) feeds it: four fields and ~10 api names a comp, cached under the `comps` tag. Deliberately not `getComps()`, whose payload carries icons, items, traits, stats and guides for every comp and must not cross to the browser.
 
 ### 6.3 Stats (`src/lib/stats`, pure TS over ≤N cached rows, computed on read)
 ```ts
@@ -562,6 +573,8 @@ type PlayerSummary = { games: number; avgPlacement: number; top4Rate: number; wi
                        avgLevel: number; placementDist: PlacementDist; recent: number[/*newest first*/] };
 type CompStat      = { compKey: string; label: string; games: number; avgPlacement: number; top4Rate: number };
 type UnitStat      = { apiName: string; games: number; avgPlacement: number };   // also used for items
+type CuratedCompStat = { slug: string; name: string; tier: TierRank;            // §6.2 step 4
+                         games: number; avgPlacement: number; top4Rate: number };
 ```
 Computing on read is sub-millisecond over 20–50 rows and never goes stale. Raw data is the only thing cached.
 
@@ -593,6 +606,14 @@ Computing on read is sub-millisecond over 20–50 rows and never goes stale. Raw
 - **Name resolution:** `getStaticNames()` caches the whole api-name dictionary under the `static`
   tag, and `pickNames` trims it to what the fetched rows reference before it crosses to the client —
   measured at 135 names rather than the 881 rows in the full tables.
+- **Curated matching rides the same path** (Task 30). `getDashboardData()` is otherwise uncached, but
+  it also awaits `getCuratedCompShapes()`, a `"use cache"` read tagged `comps`: curated comps change
+  on a seed, not on a sync, so caching them costs nothing in freshness and keeps the shapes out of
+  every dashboard round trip. The matching itself is client-side, done once per filter change and
+  shared by the history rows and the per-comp table so the two can never name a board differently.
+- **Two comp tables on purpose.** `favoriteComps` groups by `comp_key` — *what the board was* — while
+  `curatedPerformance` groups by the curated comp it came closest to — *what it was going for*. One
+  game is usually both, and collapsing them would lose whichever was not chosen.
 
 ### 6.4 Patch labels (`matches.patch`)
 Set 18 broke the old approach: `game_version` no longer carries a number (§6.1). `patch` is therefore derived from `game_datetime` against a table of TFT patch release dates in `src/lib/sync/patches.ts`, the same labels the curated YAML uses:
@@ -1281,7 +1302,13 @@ comps:                        # keyed by comp slug; a comp without an entry show
     - `Sparkline` draws the line as stretched SVG but positions its dots as HTML, because an SVG circle inside `preserveAspectRatio="none"` stretches into an ellipse at the ~3× horizontal scale this renders at.
     - **Direction:** the sparkline and its pill row both run oldest→newest, left to right, so time flows the way a reader expects; `PlayerSummary.recent` is newest-first per §6.3, so callers reverse it. Match history stays newest-first — a list is not a timeline.
     - `PlacementHistogram`'s text list is the axis *and* the accessible representation, so its bars are `aria-hidden` rather than duplicated content.
-- **States:** skeletons while loading, empty states ("No ranked games this set"), and a sync status badge ("synced 3m ago", "cooldown 1:12", "key expired").
+  - **`/me` at phone width** (Task 30). The page is built for a ~960px half-window, and these are what it takes for the same density to survive 400px:
+    - **A match history row keeps placement, carry and comp name on one line**, and folds the trailing metadata (trait hexes, level, queue, time) onto a second line under the name below `sm`. It used to be one `flex-wrap` row of seven items, which at 400px broke in the middle and put the traits under the placement pill.
+    - **Both comp tables are `table-fixed`** with the three numeric columns pinned narrow (`w-14`/`w-12`/`w-16`) and the label column truncating. `MeFavoriteComps` previously had `min-w-[20rem]` inside an `overflow-x-auto`, which made it the one part of the site a phone had to scroll sideways; the figures are 2-4 characters, so there was nothing to scroll *to*.
+    - **LP and its delta are one `whitespace-nowrap` group.** Wrapping put "+18" alone on a line, reading as a number with nothing to attach it to.
+    - Panels and rows drop to `p-2.5`/`px-2.5` under `sm` and the Refresh button grows to `py-1.5`, since on a phone it is a thumb target rather than a pointer one.
+  - **`MeCuratedComps`** (§6.2 step 4): the record on each curated comp, with a `TierBadge` and a link to its guide, and a footer counting the games that matched. `CuratedCompTag` marks a single history row with the comp it came closest to and prints the share whenever it is under 100%, so a fuzzy match never reads as a stated fact. It is a second table beside `MeFavoriteComps` rather than a column on it, for the reason in §6.3.
+- **States:** skeletons while loading, empty states ("No ranked games this set", "No game in this filter matched a curated comp"), and a sync status badge ("synced 3m ago", "cooldown 1:12", "key expired").
 
 ---
 
