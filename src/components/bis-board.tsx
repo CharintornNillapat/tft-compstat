@@ -2,8 +2,9 @@
 
 import { Fragment, useMemo, useState } from "react";
 import type { BisChampion, BisItem } from "@/lib/curated/bis";
+import { filterBisChampions } from "@/lib/curated/bis-filter";
 import type { ItemText } from "@/lib/static/tooltip-text";
-import { BIS_ROLES, isChampionCost, type BisRole, type ChampionCost } from "@/lib/static/game";
+import { BIS_ROLES, type BisRole, type ChampionCost } from "@/lib/static/game";
 import { ChampionIcon } from "./champion-icon";
 import { CostFilter } from "./cost-filter";
 import { COST_TEXT } from "./cost-styles";
@@ -16,12 +17,12 @@ import { ItemTextBlock } from "./tooltip-text";
 const ROLE_OPTIONS = BIS_ROLES.map((role) => ({ value: role, label: role }));
 
 /**
- * Champion item builds, filterable by cost and role (architecture §9).
+ * Champion item builds, filterable by cost, role, and search query (architecture §9).
  *
  * One row per champion rather than a card grid: the question this page answers is
  * "what do I put on this unit", which is a lookup, and a lookup wants every row in
  * the same columns so the eye can run down them. The board is a client component
- * only for the two filters and the shared tooltip — the data is prerendered.
+ * only for the filters, search and the shared tooltip — the data is prerendered.
  */
 export function BisBoard({
   champions,
@@ -33,30 +34,71 @@ export function BisBoard({
 }) {
   const [costs, setCosts] = useState<ReadonlySet<ChampionCost>>(() => new Set());
   const [roles, setRoles] = useState<ReadonlySet<BisRole>>(() => new Set());
+  const [query, setQuery] = useState("");
   const tip = useHoverTip<BisItem>();
 
   const visible = useMemo(
-    () =>
-      champions.filter(
-        (champion) =>
-          (costs.size === 0 || (isChampionCost(champion.cost) && costs.has(champion.cost))) &&
-          (roles.size === 0 || roles.has(champion.role)),
-      ),
-    [champions, costs, roles],
+    () => filterBisChampions(champions, { costs, roles, query }),
+    [champions, costs, roles, query],
   );
+
+  const isFiltered = query.trim() !== "" || costs.size > 0 || roles.size > 0;
+
+  const handleReset = () => {
+    setQuery("");
+    setCosts(new Set());
+    setRoles(new Set());
+  };
 
   return (
     <section aria-label="Champion item builds">
-      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <CostFilter selected={costs} onChange={setCosts} />
-        <ToggleGroup label="Role" options={ROLE_OPTIONS} selected={roles} onChange={setRoles} />
-        <p className="text-muted" aria-live="polite">
-          {visible.length} {visible.length === 1 ? "champion" : "champions"}
-        </p>
+      <div className="mb-3 space-y-2">
+        {/* Top bar: Search input + champion counter & Reset button */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="relative w-full sm:w-64">
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search champions, roles, items..."
+              aria-label="Search champions"
+              className="h-7 w-full min-w-0 rounded border border-line bg-panel pr-7 pl-2 text-xs placeholder:text-faint focus:border-accent focus:outline-none"
+            />
+            {!query && (
+              <kbd
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border border-line/80 bg-raised/70 px-1 py-px font-mono text-[10px] leading-none text-faint"
+              >
+                /
+              </kbd>
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted sm:ml-auto">
+            {isFiltered ? (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-accent hover:underline"
+              >
+                Reset filters
+              </button>
+            ) : null}
+            <p className="tabular-nums text-muted" aria-live="polite">
+              {visible.length === champions.length ? champions.length : `${visible.length} of ${champions.length}`}{" "}
+              {champions.length === 1 ? "champion" : "champions"}
+            </p>
+          </div>
+        </div>
+
+        {/* Filters bar */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line/60 pt-2 text-xs">
+          <CostFilter selected={costs} onChange={setCosts} />
+          <ToggleGroup label="Role" options={ROLE_OPTIONS} selected={roles} onChange={setRoles} />
+        </div>
       </div>
 
       {visible.length === 0 ? (
-        <EmptyState title="No champion matches those filters">Clear a filter to see more builds.</EmptyState>
+        <EmptyState title="No champions match">Clear a filter or change the search.</EmptyState>
       ) : (
         <ul className="divide-y divide-line rounded-md border border-line bg-panel">
           {visible.map((champion) => (

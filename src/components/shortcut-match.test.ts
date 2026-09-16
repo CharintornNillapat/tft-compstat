@@ -41,6 +41,10 @@ describe("shortcutAction", () => {
     expect(press("/")).toEqual({ type: "search" });
   });
 
+  it("maps ? to help", () => {
+    expect(press("?")).toEqual({ type: "help" });
+  });
+
   it("ignores digits with no route behind them", () => {
     expect(press("0")).toBeNull();
     expect(press("9")).toBeNull();

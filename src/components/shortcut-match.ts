@@ -17,13 +17,14 @@ export type ShortcutContext = {
   inEditable: boolean;
 };
 
-export type ShortcutAction = { type: "navigate"; index: number } | { type: "search" };
+export type ShortcutAction = { type: "navigate"; index: number } | { type: "search" } | { type: "help" };
 
 export function shortcutAction(context: ShortcutContext): ShortcutAction | null {
   // Never hijack a keystroke meant for a text field or for the browser itself.
   if (context.inEditable || context.hasModifier) return null;
 
   if (context.key === "/") return { type: "search" };
+  if (context.key === "?") return { type: "help" };
 
   const index = Number(context.key) - 1;
   if (Number.isInteger(index) && index >= 0 && index < NAV_ITEMS.length) {

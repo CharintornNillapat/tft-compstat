@@ -41,6 +41,12 @@ export function Shortcuts() {
         return;
       }
 
+      if (action.type === "help") {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent("toggle-shortcuts-help"));
+        return;
+      }
+
       const href = NAV_ITEMS[action.index]?.href;
       if (href) {
         event.preventDefault();

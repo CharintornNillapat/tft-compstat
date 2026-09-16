@@ -4,6 +4,36 @@ A chronological record of engineering tasks, feature implementations, and system
 
 ---
 
+## Task 27 — Immediate Gaming Ergonomics & Speed (Search, Hotkey Badges, Header Meta)
+* **Commit:** `d952fd0` — *feat(ui): add instant search on bis/augments, hotkey badges, and header meta pill*
+* **Scope:** UI / UX Enhancement, Instant Search, Hotkey Accessibility & Live Meta Header
+* **Date:** 2026-09-16
+* **Changes Delivered:**
+  1. **Instant Live Search on `/bis` ([`src/components/bis-board.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/bis-board.tsx), [`src/lib/curated/bis-filter.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/bis-filter.ts)):**
+     - Pure search algorithm matching champion names, roles, notes, completed items, components, and trait emblems.
+     - Redesigned two-row toolbar matching `/comps`: search input with autofocus `/` hotkey, champion counter (`X of Y champions`), and one-click `Reset filters` button.
+     - 8 unit tests in [`src/lib/curated/bis-filter.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/bis-filter.test.ts).
+  2. **Instant Live Search on `/augments` ([`src/components/augment-board.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/augment-board.tsx), [`src/lib/curated/augment-filter.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/augment-filter.ts)):**
+     - Pure search algorithm filtering augments in milliseconds across name, description/effects (e.g. "reroll", "xp", "gold", "health"), and rarity.
+     - Responsive toolbar with search bar, `<kbd>/</kbd>` shortcut badge, augment counter, and reset button.
+     - 7 unit tests in [`src/lib/curated/augment-filter.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/augment-filter.test.ts).
+  3. **Hotkey Badges (`<kbd>`) on Navigation & Search ([`src/components/nav-tabs.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/nav-tabs.tsx), [`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+     - Subtle `<kbd>` badges (`1` to `8`) on navigation tabs for `sm:`+ screens (hidden on mobile phones to prevent tab clipping).
+     - Dedicated `<kbd>/</kbd>` badge cleanly integrated inside the search bars on `/comps`, `/bis`, and `/augments`.
+  4. **Shortcuts Cheatsheet Popover ([`src/components/shortcuts-help.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/shortcuts-help.tsx), [`src/components/shortcut-match.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/shortcut-match.ts)):**
+     - Added global `?` shortcut trigger and a compact `[ ⌨ Shortcuts ? ]` button in the header.
+     - High-density cheatsheet popover showing all tab keys (`1`–`8`), search (`/`), help (`?`), and dismiss (`Esc`).
+     - Unit test for `?` mapping in [`src/components/shortcut-match.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/shortcut-match.test.ts).
+  5. **Header Meta Context Pill ([`src/components/header-meta-pill.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/header-meta-pill.tsx), [`src/lib/curated/header-meta.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/header-meta.ts)):**
+     - Ambient `Set 18 · Patch 18.2` pill with an animated emerald pulsating live sync dot beside the logo in [`src/components/site-header.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/site-header.tsx).
+     - Cached with `cacheTag("static")` and prerendered into the static shell.
+  6. **Verification & Checks:**
+     - `pnpm check` (562 tests passing, 0 lint errors, 0 type errors).
+     - `pnpm build` (42/42 routes successfully prerendered with Turbopack).
+     - `pnpm dlx knip` (0 unused dependencies, exports, or files).
+
+---
+
 ## Task 26 — Redesigned Comps Toolbar & Multi-Metric Sorting (`/comps`)
 * **Scope:** UI / UX Redesign & Client-Side Sorting Engine
 * **Date:** 2026-09-16

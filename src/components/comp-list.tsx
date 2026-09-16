@@ -134,14 +134,24 @@ export function CompList({ comps, traitDetails }: { comps: CompSummary[]; traitD
       <div className="mb-3 space-y-2">
         {/* Top bar: Search input + comp counter & Reset button */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search comps, units, traits, items  ( / )"
-            aria-label="Search comps"
-            className="h-7 w-full min-w-0 rounded border border-line bg-panel px-2 text-xs placeholder:text-faint focus:border-accent focus:outline-none sm:w-64"
-          />
+          <div className="relative w-full sm:w-64">
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search comps, units, traits, items..."
+              aria-label="Search comps"
+              className="h-7 w-full min-w-0 rounded border border-line bg-panel pr-7 pl-2 text-xs placeholder:text-faint focus:border-accent focus:outline-none"
+            />
+            {!query && (
+              <kbd
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border border-line/80 bg-raised/70 px-1 py-px font-mono text-[10px] leading-none text-faint"
+              >
+                /
+              </kbd>
+            )}
+          </div>
           <div className="flex items-center gap-3 text-xs text-muted sm:ml-auto">
             {canReset ? (
               <button

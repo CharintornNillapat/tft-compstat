@@ -52,13 +52,23 @@ export function NavList({ active }: { active?: string }) {
                 href={href}
                 aria-current={isActive ? "page" : undefined}
                 aria-keyshortcuts={String(index + 1)}
-                className={`flex h-full items-center border-b-2 px-2.5 whitespace-nowrap transition-colors ${
+                className={`group flex h-full items-center gap-1.5 border-b-2 px-2.5 whitespace-nowrap transition-colors ${
                   isActive
                     ? "border-accent text-fg"
                     : "border-transparent text-muted hover:text-fg"
                 }`}
               >
-                {label}
+                <span>{label}</span>
+                <kbd
+                  aria-hidden="true"
+                  className={`hidden rounded border px-1 py-px font-mono text-[9px] leading-none transition-colors sm:inline-block ${
+                    isActive
+                      ? "border-accent/40 bg-accent/15 text-accent"
+                      : "border-line/70 bg-raised/70 text-faint group-hover:border-line group-hover:text-muted"
+                  }`}
+                >
+                  {index + 1}
+                </kbd>
               </Link>
             </li>
           );
