@@ -5,9 +5,9 @@ A chronological record of engineering tasks, feature implementations, and system
 ---
 
 ## Task 28 — Visual Polish, Arena HexBoard & Interactive Ergonomics (Phases B & C)
+* **Commit:** `9db293a` — *feat(ui): implement hextech visual polish, trait cross-highlighting, and planner breakpoint helper (Phases B & C)*
 * **Scope:** Hextech Visual Polish, Tier Glows, Arena HexBoard Styling, Trait Cross-Highlighting & Planner Breakpoint Helper
 * **Date:** 2026-09-16
-* **Status:** Ready for Review (Uncommitted in working tree per user instruction)
 * **Changes Delivered:**
   1. **Phase B — Visual Polish & Hextech Aesthetic:**
      - **Tier Glows & S-Tier Accent ([`src/components/tier-row.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/tier-row.tsx), [`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
