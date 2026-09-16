@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { CompUnit } from "@/lib/curated/queries";
 import { BOARD_COLS, BOARD_ROWS } from "@/lib/static/game";
 import { CarryMark, StarPips, UnitDetails } from "./comp-details";
-import { COST_BG } from "./cost-styles";
+import { COST_BG, COST_GLOW } from "./cost-styles";
 import { HoverTip, useHoverTip } from "./hover-tip";
 import { ItemIcon } from "./item-icon";
 
@@ -53,7 +53,11 @@ export type HexFaceUnit = {
  */
 export function HexUnitFace({ unit }: { unit: HexFaceUnit }) {
   return (
-    <>
+    <span
+      className={`block size-full transition-transform duration-200 group-hover:scale-105 ${
+        COST_GLOW[unit.cost] ?? ""
+      }`}
+    >
       {unit.isCarry ? <span aria-hidden className="hex absolute inset-0.5 bg-carry" /> : null}
       <span
         aria-hidden
@@ -83,17 +87,31 @@ export function HexUnitFace({ unit }: { unit: HexFaceUnit }) {
           ))}
         </span>
       ) : null}
+    </span>
+  );
+}
+
+/** An authentic recessed arena plate for empty hexes. */
+export function EmptyHex({ className = "" }: { className?: string }) {
+  return (
+    <>
+      <span aria-hidden className={`hex absolute inset-0.5 bg-line/35 transition-colors ${className}`} />
+      <span aria-hidden className="hex absolute inset-1 bg-surface/75" />
+      <span aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
+        <span className="size-1 rounded-full bg-faint" />
+      </span>
     </>
   );
 }
 
-/** An empty hex's plate. */
-export function EmptyHex({ className = "bg-line/60" }: { className?: string }) {
-  return <span aria-hidden className={`hex absolute inset-0.5 ${className}`} />;
-}
-
 /** The 4×7 board (architecture §9), front row at the top. Units show details on hover. */
-export function HexBoard({ units }: { units: CompUnit[] }) {
+export function HexBoard({
+  units,
+  highlightedTrait = null,
+}: {
+  units: CompUnit[];
+  highlightedTrait?: string | null;
+}) {
   const tip = useHoverTip<CompUnit>();
   const byHex = new Map(units.map((unit) => [`${unit.row},${unit.col}`, unit]));
 
@@ -108,6 +126,9 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
         {Array.from({ length: BOARD_ROWS }, (_, row) =>
           Array.from({ length: BOARD_COLS }, (_, col) => {
             const unit = byHex.get(`${row},${col}`);
+            const isMatch = highlightedTrait !== null && unit ? unit.traits.includes(highlightedTrait) : false;
+            const isDimmed = highlightedTrait !== null && unit ? !isMatch : false;
+
             return (
               <div key={`${row},${col}`} className="absolute" style={hexBox(row, col)}>
                 {unit ? (
@@ -115,7 +136,13 @@ export function HexBoard({ units }: { units: CompUnit[] }) {
                     type="button"
                     {...tip.triggerProps(unit)}
                     aria-label={unitLabel(unit)}
-                    className="group absolute inset-0 rounded-sm"
+                    className={`group absolute inset-0 rounded-sm transition-all duration-200 ${
+                      isMatch
+                        ? "z-20 scale-110 drop-shadow-[0_0_12px_rgba(200,170,110,0.9)] ring-2 ring-accent"
+                        : isDimmed
+                        ? "opacity-30 grayscale-[65%]"
+                        : ""
+                    }`}
                   >
                     <HexUnitFace unit={unit} />
                   </button>

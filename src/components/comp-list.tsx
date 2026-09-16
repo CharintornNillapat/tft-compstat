@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { isContested } from "@/lib/curated/comp-badges";
-import { filterComps } from "@/lib/curated/comp-filter";
+import { filterComps, normalize } from "@/lib/curated/comp-filter";
 import type { CompSummary, CompUnit } from "@/lib/curated/queries";
 import type { TraitDetailBook } from "@/lib/curated/trait-details";
 import type { TraitCount } from "@/lib/curated/traits";
@@ -105,6 +105,27 @@ export function CompList({ comps, traitDetails }: { comps: CompSummary[]; traitD
     label: COMP_STYLE_LABELS[style],
   }));
 
+  // Extract prominent carry units across comps to offer one-click carry filters
+  const topCarries = useMemo(() => {
+    const carryMap = new Map<string, { count: number; unit: CompUnit }>();
+    for (const comp of comps) {
+      for (const unit of comp.units) {
+        if (unit.isCarry) {
+          const entry = carryMap.get(unit.name);
+          if (entry) {
+            entry.count += 1;
+          } else {
+            carryMap.set(unit.name, { count: 1, unit });
+          }
+        }
+      }
+    }
+    return Array.from(carryMap.values())
+      .sort((a, b) => b.count - a.count || b.unit.cost - a.unit.cost || a.unit.name.localeCompare(b.unit.name))
+      .slice(0, 10)
+      .map((entry) => entry.unit);
+  }, [comps]);
+
   const filtered = filterComps(comps, { tiers, styles, query });
   const visible = sortComps(filtered, sortKey, direction);
 
@@ -168,6 +189,35 @@ export function CompList({ comps, traitDetails }: { comps: CompSummary[]; traitD
             </p>
           </div>
         </div>
+
+        {/* Carry Champion Quick Filters */}
+        {topCarries.length > 0 ? (
+          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 text-xs">
+            <span className="shrink-0 text-[11px] font-medium tracking-wider text-faint uppercase">Carries</span>
+            <div className="flex flex-wrap items-center gap-1">
+              {topCarries.map((carry) => {
+                const isSelected = normalize(query) === normalize(carry.name);
+                return (
+                  <button
+                    key={carry.apiName}
+                    type="button"
+                    onClick={() => setQuery(isSelected ? "" : carry.name)}
+                    aria-pressed={isSelected}
+                    title={isSelected ? `Clear filter for ${carry.name}` : `Filter comps with ${carry.name} carry`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium transition-all ${
+                      isSelected
+                        ? "border-accent bg-accent/15 text-accent shadow-[0_0_8px_rgba(200,170,110,0.25)]"
+                        : "border-line bg-panel text-muted hover:border-zinc-500 hover:bg-raised hover:text-fg"
+                    }`}
+                  >
+                    <ChampionIcon name={carry.name} cost={carry.cost} iconUrl={carry.iconUrl} size={16} alt="" />
+                    <span>{carry.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         {/* Filters and Sort Controls */}
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line/60 pt-2 text-xs">
@@ -250,7 +300,11 @@ function CompRow({ comp, tip, sortKey }: { comp: CompSummary; tip: Tip; sortKey:
   const others = comp.units.filter((unit) => !unit.isCarry);
 
   return (
-    <li className="relative flex flex-wrap items-center gap-x-4 gap-y-2 px-2.5 py-2 transition-colors hover:bg-raised/40">
+    <li
+      className={`relative flex flex-wrap items-center gap-x-4 gap-y-2 px-2.5 py-2 transition-colors hover:bg-raised/40 ${
+        comp.tier === "S" ? "border-l-2 border-l-tier-s bg-gradient-to-r from-tier-s/[0.04] to-transparent" : ""
+      }`}
+    >
       <div className="flex w-full min-w-0 items-start gap-2.5 sm:w-64 sm:shrink-0">
         <TierBadge tier={comp.tier} className="size-8 shrink-0 text-sm" />
         <div className="min-w-0 flex-1">

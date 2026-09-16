@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TraitBreakpoint, TraitStyle } from "@/lib/static/game";
-import { computeActiveTraits, isActive, type TraitInfo, type TraitUnit } from "./traits";
+import { computeActiveTraits, isActive, isOneAwayFromBreakpoint, type TraitInfo, type TraitUnit } from "./traits";
 
 /** "3b 5s 7g" → breakpoints, the notation used when checking boards by hand. */
 const bp = (spec: string): TraitBreakpoint[] => {
@@ -150,5 +150,38 @@ describe("computeActiveTraits", () => {
 
   it("returns nothing for an empty board", () => {
     expect(computeActiveTraits([], traits)).toEqual([]);
+  });
+});
+
+describe("isOneAwayFromBreakpoint", () => {
+  it("returns true when 1 unit away from the first breakpoint", () => {
+    expect(isOneAwayFromBreakpoint({ count: 1, breakpoints: [2, 4, 6] })).toBe(true);
+    expect(isOneAwayFromBreakpoint({ count: 2, breakpoints: [3, 5, 7] })).toBe(true);
+  });
+
+  it("returns true when 1 unit away from leveling up to the next breakpoint", () => {
+    expect(isOneAwayFromBreakpoint({ count: 3, breakpoints: [2, 4, 6] })).toBe(true);
+    expect(isOneAwayFromBreakpoint({ count: 5, breakpoints: [2, 4, 6] })).toBe(true);
+  });
+
+  it("returns false when exactly at a breakpoint or more than 1 away", () => {
+    expect(isOneAwayFromBreakpoint({ count: 2, breakpoints: [2, 4, 6] })).toBe(false);
+    expect(isOneAwayFromBreakpoint({ count: 0, breakpoints: [2, 4, 6] })).toBe(false);
+    expect(isOneAwayFromBreakpoint({ count: 1, breakpoints: [3, 5, 7] })).toBe(false);
+  });
+
+  it("returns false when at or above the maximum breakpoint", () => {
+    expect(isOneAwayFromBreakpoint({ count: 6, breakpoints: [2, 4, 6] })).toBe(false);
+    expect(isOneAwayFromBreakpoint({ count: 8, breakpoints: [2, 4, 6] })).toBe(false);
+  });
+
+  it("handles unique traits with breakpoint [1]", () => {
+    expect(isOneAwayFromBreakpoint({ count: 0, breakpoints: [1] })).toBe(true);
+    expect(isOneAwayFromBreakpoint({ count: 1, breakpoints: [1] })).toBe(false);
+  });
+
+  it("handles empty breakpoints gracefully", () => {
+    expect(isOneAwayFromBreakpoint({ count: 0, breakpoints: [] })).toBe(false);
+    expect(isOneAwayFromBreakpoint({ count: 2, breakpoints: [] })).toBe(false);
   });
 });

@@ -10,16 +10,26 @@ import { TIER_TEXT } from "./tier-row";
  * it is the solid one, and the word carries the meaning without the colour.
  */
 const RARITY_CLASSES: Record<AugmentRarity, string> = {
-  Silver: "border-trait-silver/40 bg-trait-silver/10 text-trait-silver",
-  Gold: "border-trait-gold/40 bg-trait-gold/10 text-trait-gold",
-  Prismatic: "border-trait-prismatic/40 bg-trait-prismatic/10 text-trait-prismatic",
+  Silver: "border-slate-400/50 bg-slate-400/10 text-slate-300 shadow-[0_0_8px_rgba(148,163,184,0.12)]",
+  Gold: "border-amber-400/50 bg-amber-400/10 text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.18)]",
+  Prismatic: "border-purple-400/60 bg-gradient-to-r from-purple-500/15 via-fuchsia-500/15 to-indigo-500/15 text-purple-200 shadow-[0_0_12px_rgba(192,132,252,0.25)]",
 };
 
 export function RarityPill({ rarity, className = "" }: { rarity: AugmentRarity; className?: string }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-full border px-1.5 text-[10px] leading-4 font-semibold tracking-wide uppercase ${RARITY_CLASSES[rarity]} ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-px text-[10px] leading-4 font-semibold tracking-wide uppercase ${RARITY_CLASSES[rarity]} ${className}`}
     >
+      <span
+        aria-hidden="true"
+        className={`size-1.5 rounded-full ${
+          rarity === "Silver"
+            ? "bg-slate-300 shadow-[0_0_4px_rgba(148,163,184,0.8)]"
+            : rarity === "Gold"
+            ? "bg-amber-300 shadow-[0_0_4px_rgba(251,191,36,0.8)]"
+            : "bg-purple-300 shadow-[0_0_4px_rgba(192,132,252,0.9)]"
+        }`}
+      />
       {rarity}
     </span>
   );

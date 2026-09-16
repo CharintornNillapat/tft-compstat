@@ -10,10 +10,9 @@ import { CONTESTED_TOOLTIP, ContestedBadge, DifficultyBadge, PlaystyleBadge } fr
 import { GEM_TOOLTIP, GemBadge } from "./comp-details";
 import { CompItemBuilds } from "./comp-item-builds";
 import { CompStatsRow } from "./comp-stats";
-import { CompTraitList } from "./comp-traits";
+import { CompBoardSection } from "./comp-board-section";
 import { CopyTeamCodeButton } from "./copy-team-code-button";
 import { GuideTimeline } from "./guide-timeline";
-import { HexBoard } from "./hex-board";
 import { PageHeader } from "./page-header";
 import { TierBadge } from "./tier-row";
 
@@ -68,18 +67,7 @@ export function CompGuide({ comp, augments = null }: { comp: CompDetail; augment
       {comp.summary ? <p className="mb-2 text-fg">{comp.summary}</p> : null}
       <CompStatsRow stats={comp} className="mb-3 text-xs" />
 
-      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem]">
-        <Panel title="Board">
-          <HexBoard units={comp.units} />
-        </Panel>
-        <Panel title="Traits">
-          <CompTraitList
-            traits={comp.traits}
-            details={comp.traitDetails}
-            board={comp.units.map((unit) => unit.name)}
-          />
-        </Panel>
-      </div>
+      <CompBoardSection comp={comp} />
 
       {/* `md`, not `lg`: the half-width 1080p window (~960px) this site is built for
           should get both columns. `items-start` so a short column does not stretch. */}

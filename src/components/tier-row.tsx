@@ -2,8 +2,8 @@ import { Children, type ReactNode } from "react";
 import type { TierRank } from "@/lib/static/game";
 
 const TIER_BG: Record<TierRank, string> = {
-  S: "bg-tier-s",
-  A: "bg-tier-a",
+  S: "bg-tier-s shadow-[0_0_10px_rgba(251,113,133,0.35)]",
+  A: "bg-tier-a shadow-[0_0_6px_rgba(251,146,60,0.2)]",
   B: "bg-tier-b",
   C: "bg-tier-c",
 };

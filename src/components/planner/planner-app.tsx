@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { buildTeamCode, TEAM_PLANNER_SLOTS, teamCodeHint } from "@/lib/curated/team-code";
-import { computeActiveTraits, isActive } from "@/lib/curated/traits";
+import { computeActiveTraits, isActive, isOneAwayFromBreakpoint } from "@/lib/curated/traits";
 import {
   equipItem,
   moveUnit,
@@ -183,6 +183,8 @@ export function PlannerApp({ data }: { data: PlannerData }) {
   const { drag, dragProps, wasDrag } = usePointerDrag(onDrop);
 
   const traits = useMemo(() => computeActiveTraits(toTraitUnits(board, catalog), traitMap), [board, catalog, traitMap]);
+  const activeTraitCount = useMemo(() => traits.filter(isActive).length, [traits]);
+  const nearBpCount = useMemo(() => traits.filter(isOneAwayFromBreakpoint).length, [traits]);
   const teamCode = useMemo(() => buildTeamCode(toPlannerUnits(board, catalog), mutator), [board, catalog, mutator]);
   const selectedUnit = selected ? unitAt(board, selected) : undefined;
   const editing = saved.comps.find((comp) => comp.id === draft.id);
@@ -384,11 +386,18 @@ export function PlannerApp({ data }: { data: PlannerData }) {
           </Panel>
 
           <Panel
-            title={`Traits${traits.some(isActive) ? ` · ${traits.filter(isActive).length} active` : ""}`}
+            title={`Traits${activeTraitCount > 0 ? ` · ${activeTraitCount} active` : ""}${
+              nearBpCount > 0 ? ` · ${nearBpCount} near breakpoint` : ""
+            }`}
             className="order-3 md:order-2 md:col-span-5"
           >
             {traits.length ? (
-              <CompTraitList traits={traits} details={traitDetails} board={board.map((unit) => nameOf(unit.apiName))} />
+              <CompTraitList
+                traits={traits}
+                details={traitDetails}
+                board={board.map((unit) => nameOf(unit.apiName))}
+                showNearBreakpoints={true}
+              />
             ) : (
               <p className="text-muted">Place champions to see their traits.</p>
             )}

@@ -85,3 +85,12 @@ export function computeActiveTraits(
     })
     .sort(displayOrder);
 }
+
+/**
+ * True when fielding one more champion with this trait reaches the next breakpoint
+ * (activating the trait or leveling up to a higher tier).
+ */
+export function isOneAwayFromBreakpoint(trait: Pick<TraitCount, "count" | "breakpoints">): boolean {
+  const nextBreakpoint = trait.breakpoints.find((bp) => bp > trait.count);
+  return nextBreakpoint !== undefined && nextBreakpoint - trait.count === 1;
+}

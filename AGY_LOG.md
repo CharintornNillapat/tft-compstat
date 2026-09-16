@@ -4,6 +4,40 @@ A chronological record of engineering tasks, feature implementations, and system
 
 ---
 
+## Task 28 — Visual Polish, Arena HexBoard & Interactive Ergonomics (Phases B & C)
+* **Scope:** Hextech Visual Polish, Tier Glows, Arena HexBoard Styling, Trait Cross-Highlighting & Planner Breakpoint Helper
+* **Date:** 2026-09-16
+* **Status:** Ready for Review (Uncommitted in working tree per user instruction)
+* **Changes Delivered:**
+  1. **Phase B — Visual Polish & Hextech Aesthetic:**
+     - **Tier Glows & S-Tier Accent ([`src/components/tier-row.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/tier-row.tsx), [`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+       - Enhanced `TIER_BG.S` with ambient glow `shadow-[0_0_10px_rgba(251,113,133,0.35)]` and `TIER_BG.A` with `shadow-[0_0_6px_rgba(251,146,60,0.2)]`.
+       - Added accent left border and soft gradient to S-tier comp cards in `CompRow` (`border-l-2 border-l-tier-s bg-gradient-to-r from-tier-s/[0.04] to-transparent`).
+     - **Augment Rarity Badges ([`src/components/augment-parts.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/augment-parts.tsx)):**
+       - Styled `RarityPill` with distinct glowing rarity borders (`Silver`, `Gold`, `Prismatic`) and color-coded interior indicator pips.
+     - **HexBoard Arena Polish ([`src/components/hex-board.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/hex-board.tsx), [`src/components/cost-styles.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/cost-styles.ts)):**
+       - Redesigned `EmptyHex` into authentic dual-polygon recessed arena plates (`bg-surface/75` plate with central coordinate dots).
+       - Added `COST_GLOW` with drop-shadows matching unit cost tiers (gray, green, blue, purple, amber) and hover elevation transition (`group-hover:scale-105`).
+       - Supported `highlightedTrait` on `HexBoard`: matching units receive `scale-110 drop-shadow-[0_0_12px_rgba(200,170,110,0.9)] ring-2 ring-accent z-20`, while unrelated units dim with `opacity-30 grayscale-[65%]`.
+     - **Copy Toast Feedback ([`src/components/copy-team-code-button.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/copy-team-code-button.tsx)):**
+       - Added visual feedback toast styling with buff glow (`border-buff/50 bg-buff/15 text-buff shadow-[0_0_12px_rgba(74,222,128,0.2)]`) and an inline `"Ready to paste in-game"` status pill badge.
+  2. **Phase C — Interactive Ergonomics:**
+     - **Trait Cross-Highlighting ([`src/components/comp-board-section.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-board-section.tsx), [`src/components/comp-traits.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-traits.tsx), [`src/components/comp-guide.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-guide.tsx)):**
+       - Created client component `CompBoardSection` to manage synchronized hover state between `HexBoard` and `CompTraitList`.
+       - Hovering or focusing any trait instantly highlights all fielded units that have that trait on the arena board. Includes an active indicator with a quick clear button.
+     - **Champion Quick Filter on Comps ([`src/components/comp-list.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/comp-list.tsx)):**
+       - Extracted top 10 carry champions across all comps via `useMemo`.
+       - Rendered interactive carry champion filter chips with champion portrait and cost border. Clicking a carry filters the comps down to those featuring that carry, clicking again clears.
+     - **Planner Breakpoint Helper ([`src/lib/curated/traits.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/traits.ts), [`src/lib/curated/traits.test.ts`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/lib/curated/traits.test.ts), [`src/components/planner/planner-app.tsx`](file:///C:/Users/MRmar/Desktop/Mid%20years%20projects/TFT-CompStat/src/components/planner/planner-app.tsx)):**
+       - Implemented `isOneAwayFromBreakpoint(trait)` helper determining if fielding 1 more unit activates or upgrades a trait.
+       - Added 6 unit tests covering initial tiers, upgrades, maxed traits, unique traits, and empty breakpoints.
+       - Enabled `showNearBreakpoints={true}` in `planner-app.tsx`, displaying an accent `+1 away` chip beside qualifying traits and tallying near-breakpoint traits in the panel title.
+  3. **Verification & Checks:**
+     - `pnpm check`: 47 test files passed (568/568 unit tests passing), 0 lint errors, 0 type errors.
+     - `pnpm build`: Next.js 16.3.4 (Turbopack) successfully compiled and prerendered all 42 routes.
+
+---
+
 ## Task 27 — Immediate Gaming Ergonomics & Speed (Search, Hotkey Badges, Header Meta)
 * **Commit:** `a32874c` — *feat(ui): add instant search on bis/augments, hotkey badges, and header meta pill*
 * **Scope:** UI / UX Enhancement, Instant Search, Hotkey Accessibility & Live Meta Header

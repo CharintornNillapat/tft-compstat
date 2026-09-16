@@ -33,21 +33,29 @@ export function CopyTeamCodeButton({ code, hint }: { code: string; hint: string 
         onClick={copy}
         title={hint}
         aria-label={copied ? "Team code copied" : "Copy team code for the TFT Team Planner"}
-        className={`inline-flex min-h-11 items-center gap-1.5 rounded border px-2.5 text-[13px] transition-colors sm:min-h-8 ${
-          copied ? "border-emerald-700 text-emerald-300" : "border-line bg-panel text-fg hover:border-zinc-600"
+        className={`inline-flex min-h-11 items-center gap-1.5 rounded border px-2.5 text-[13px] font-medium transition-all sm:min-h-8 ${
+          copied
+            ? "border-buff/50 bg-buff/15 text-buff shadow-[0_0_12px_rgba(74,222,128,0.2)]"
+            : "border-line bg-panel text-fg hover:border-zinc-600 hover:bg-raised"
         } focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400`}
       >
         {copied ? <CheckIcon /> : <ClipboardIcon />}
-        {copied ? "Copied!" : "Copy team code"}
+        {copied ? "Copied to clipboard!" : "Copy team code"}
       </button>
+      {copied ? (
+        <span
+          role="status"
+          className="hidden items-center gap-1 rounded-full border border-buff/40 bg-buff/10 px-2 py-0.5 text-xs text-buff sm:inline-flex"
+        >
+          Ready to paste in-game
+        </span>
+      ) : null}
       <span aria-live="polite" className="min-w-0 text-muted">
         {status === "failed" ? (
           <>
             Copy blocked — select:{" "}
             <code className="break-all text-fg select-all">{code}</code>
           </>
-        ) : copied ? (
-          <span className="sr-only">Team code copied to the clipboard</span>
         ) : null}
       </span>
     </div>

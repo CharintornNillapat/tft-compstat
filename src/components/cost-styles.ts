@@ -31,3 +31,11 @@ export const COST_SELECTED: Record<number, string> = {
   4: "border-cost-4 bg-cost-4/15",
   5: "border-cost-5 bg-cost-5/15",
 };
+
+export const COST_GLOW: Record<number, string> = {
+  1: "group-hover:drop-shadow-[0_0_8px_rgba(161,161,170,0.45)]",
+  2: "group-hover:drop-shadow-[0_0_8px_rgba(34,197,94,0.55)]",
+  3: "group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]",
+  4: "group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.65)]",
+  5: "group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,0.7)]",
+};
