@@ -30,12 +30,12 @@ openers:
       - DA_Karma18
     slammable_items:
       - DA_SpearOfShojin
-      - DA_GargoyleStoneplate
       - DA_RedBuff
+      - DA_StrikersFlail
     transition_to:
       - invoker-ahri
-      - blossom-sett-sivir
       - juggernaut-sivir
+      - blossom-sett-sivir
     notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Ashe.
   - name: Inferno Defenders
     tier: S
@@ -46,8 +46,8 @@ openers:
       - DA_18_Varus
     slammable_items:
       - DA_SpearOfShojin
-      - DA_LastWhisper
-      - DA_RedBuff
+      - DA_InfinityEdge
+      - DA_StrikersFlail
     transition_to:
       - hunter-sivir
       - elderwood-aphelios-ezreal

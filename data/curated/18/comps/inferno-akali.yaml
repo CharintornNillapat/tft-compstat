@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster inferno-akali, DIAMOND+.
-# Sample: 25,459 boards, avg 4.50, patch 18.2, set 18.
+# Sample: 24,115 boards, avg 4.48, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -14,17 +14,17 @@ tier: A
 style: reroll_1
 difficulty: 2
 patch: "18.2"
-order: 7
-summary: "Ends at level 7 with Camille carrying. MetaTFT DIAMOND+: 25,459 boards, avg 4.50, picked 2.9% of boards."
-avg_place: 4.5
-pick_rate: 2.92
+order: 8
+summary: "Ends at level 7 with Camille carrying. MetaTFT DIAMOND+: 24,115 boards, avg 4.48, picked 2.7% of boards."
+avg_place: 4.48
+pick_rate: 2.68
 level_recommended: 7
 early_units: [ DA_18_Akali_AD, DA_18_Camille, DA_18_Leona, DA_18_Ornn ]
 flex_units: [ DA_Amumu18 ]
 board:
   - { unit: DA_18_Camille, row: 2, col: 1, star: 3, carry: true, priority: 1, items: [ DA_InfinityEdge, DA_Quicksilver, DA_SteraksGage ] }
-  - { unit: DA_18_Leona, row: 0, col: 2, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Akali_AD, row: 2, col: 0, star: 3, carry: true, priority: 2, items: [ DA_EdgeOfNight, DA_HandOfJustice, DA_JeweledGauntlet ] }
+  - { unit: DA_18_Leona, row: 0, col: 2, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Varus, row: 3, col: 0, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Kayle, row: 3, col: 6, items: [ DA_GuinsoosRageblade ] }
   - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 25,459 boards, avg 4.50. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 24,115 boards, avg 4.48. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
