@@ -5,7 +5,7 @@ A chronological record of engineering tasks, feature implementations, and system
 ---
 
 ## Task 27 — Immediate Gaming Ergonomics & Speed (Search, Hotkey Badges, Header Meta)
-* **Commit:** `d952fd0` — *feat(ui): add instant search on bis/augments, hotkey badges, and header meta pill*
+* **Commit:** `a32874c` — *feat(ui): add instant search on bis/augments, hotkey badges, and header meta pill*
 * **Scope:** UI / UX Enhancement, Instant Search, Hotkey Accessibility & Live Meta Header
 * **Date:** 2026-09-16
 * **Changes Delivered:**
