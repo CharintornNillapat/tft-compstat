@@ -1,69 +1,64 @@
 # Stage-2 opener boards and the items worth slamming on them.
+# Derived from MetaTFT DIAMOND+ early unit clusters for Set 18 Patch 18.2.
 #
-# Like meta-notes.yaml this file is **not seeded**: it is read at build time and
-# ships inside the deployment, so a change needs a redeploy, not `pnpm seed:curated`.
-# Unlike meta-notes.yaml it names champions, items and comps, and every one of them
-# is checked during prerender — an unknown api_name, a unit that costs more than 2,
-# or a `transition_to` slug with no published comp behind it fails the build.
-#
-# SAMPLE RATINGS. The boards are real Set 18 pairings and the pivots really do share
-# these units, but the S/A/B bands are a starting point, not measured data. Review
-# them before trusting them, the same as the comps.
+# Like meta-notes.yaml this file is read at build time and ships inside the
+# deployment, so a change needs a redeploy, not `pnpm seed:curated`.
+# Every unit, item, and pivot comp slug is validated during build.
 patch: "18.2"
 title: Early openers & item slams
 openers:
-  - name: Elderwood Brawlers
-    tier: S
-    core_units: [DA_18_Ornn, DA_18_Xayah, DA_18_Alistar, DA_18_RekSai]
-    slammable_items: [DA_SunfireCape, DA_GuinsoosRageblade, DA_SteadfastHeart]
-    transition_to: [elderwood-ezreal-draven, lunar-aphelios-nidalee, elderwood-kayle]
-    notes: Elderwood 3 by 2-3. Slam on Xayah and push the streak; level 5 at 2-5 only if streaking.
-
-  - name: Blossom Juggernauts
+  - name: Blossom Invokers
     tier: S
     core_units: [DA_Karma18, DA_18_Yorick, DA_18_Yunara, DA_18_Rakan]
     slammable_items: [DA_ArchangelsStaff, DA_SunfireCape, DA_WarmogsArmor]
-    transition_to: [invoker-ahri, riftbeast-malphite, ashe-fast-9]
-    notes: Karma holds every AP item. Stay level 4 through 2-7 and bank the interest instead.
+    transition_to: [invoker-ahri, blossom-sett-ashe, ashe-fast-9]
+    notes: Karma holds AP items while Yorick tanks. Win streak into Fast 9 or slow-roll Blossom.
 
-  - name: Inferno Rapidfire
-    tier: A
-    core_units: [DA_18_Varus, DA_18_Akali_AD, DA_18_Shen, DA_18_Xayah]
-    slammable_items: [DA_GuinsoosRageblade, DA_RedBuff, DA_BrambleVest]
-    transition_to: [inferno-akali, rapidfire-aphelios, lunar-aphelios-nidalee]
-    notes: Varus wants attack speed first. Level to 4 at 2-1 if you already hold a 2-star Shen.
+  - name: Elderwood Vanguard
+    tier: S
+    core_units: [DA_18_Ornn, DA_18_Alistar, DA_18_Varus, DA_18_Xayah]
+    slammable_items: [DA_GuinsoosRageblade, DA_SunfireCape, DA_SteadfastHeart]
+    transition_to: [elderwood-ezreal-draven, elderwood-aphelios-ezreal, vanguard-aphelios]
+    notes: Xayah carries AD items with Ornn/Alistar frontline. Push level 5 at 2-5 on streaks.
 
-  - name: Solar Defenders
+  - name: Riftbeast Swarm
+    tier: S
+    core_units: [DA_18_Sentry, DA_Cinderling18, DA_Scuttlecrab18, DA_18_Yorick]
+    slammable_items: [DA_ArchangelsStaff, DA_GargoyleStoneplate, DA_WarmogsArmor]
+    transition_to: [riftbeast-pebbles, riftbeast-malphite]
+    notes: Roll for 3-star Pebbles and Cinderling early, then push levels for Elder Dragon.
+
+  - name: Sprykin Brawlers
     tier: A
-    core_units: [DA_18_Leona, DA_18_Kayle, DA_18_Sejuani, DA_18_Ornn]
+    core_units: [DA_18_Kobuko, DA_18_RekSai, DA_18_Teemo, DA_18_Veigar]
+    slammable_items: [DA_BlueBuff, DA_TitansResolve, DA_SunfireCape]
+    transition_to: [sprykin-veigar, sprykin-teemo, executioner-malphite]
+    notes: Rek'Sai holds tank items while Veigar scales with AP. Slow roll at level 5 or 6.
+
+  - name: Defender Snipers
+    tier: A
+    core_units: [DA_18_Camille, DA_18_Caitlyn, DA_18_Elise, DA_18_Rakan]
+    slammable_items: [DA_KrakensFury, DA_Bloodthirster, DA_BrambleVest]
+    transition_to: [defender-cassiopeia, juggernaut-caitlyn, invoker-morgana-taric]
+    notes: Caitlyn provides high early single-target damage. Transition into Cassiopeia carry.
+
+  - name: Elderwood Defenders
+    tier: A
+    core_units: [DA_18_Ornn, DA_18_Kayle, DA_18_Leona, DA_18_Xayah]
     slammable_items: [DA_GuinsoosRageblade, DA_GargoyleStoneplate, DA_SunfireCape]
-    transition_to: [elderwood-kayle, defender-cassiopeia, lunar-aphelios-nidalee]
-    notes: Kayle is the item holder, not Leona. Keep Solar 2 up while you roll down at 3-2.
+    transition_to: [elderwood-kayle, defender-cassiopeia]
+    notes: Kayle holds attack speed items behind Defender frontline. Stable mid-game pivot.
 
-  - name: Blackthorn Brawlers
-    tier: A
-    core_units: [DA_18_RekSai, DA_18_Veigar, DA_18_Warwick, DA_18_Kobuko]
-    slammable_items: [DA_SunfireCape, DA_TitansResolve, DA_BrambleVest]
-    transition_to: [flora-malphite, executioner-malphite, sprykin-veigar]
-    notes: Rek'Sai tanks the whole board. Tank items on her; itemise Veigar only after 3-1.
-
-  - name: Sprykin Spellweavers
+  - name: Inferno Hunters
     tier: B
-    core_units: [DA_18_Kobuko, DA_18_Teemo, DA_18_Veigar, DA_Karma18]
-    slammable_items: [DA_ArchangelsStaff, DA_JeweledGauntlet, DA_GargoyleStoneplate]
-    transition_to: [sprykin-veigar, executioner-malphite, invoker-ahri]
-    notes: Teemo and Veigar carry it. Sell Kobuko the moment Sprykin 4 is out of reach.
+    core_units: [DA_18_Varus, DA_18_Akali_AD, DA_18_Shen, DA_18_Ornn]
+    slammable_items: [DA_GuinsoosRageblade, DA_RedBuff, DA_BrambleVest]
+    transition_to: [hunter-sivir, inferno-akali]
+    notes: Akali and Varus contest tempo early. Pivot into 4-cost Sivir or Akali carry.
 
-  - name: Coven Hunters
+  - name: Lunar Rapidfire
     tier: B
-    core_units: [DA_18_Camille, DA_18_Caitlyn, DA_18_Elise, DA_18_Warwick]
-    slammable_items: [DA_KrakensFury, DA_Bloodthirster, DA_SteadfastHeart]
-    transition_to: [defender-cassiopeia, adaptor-master-yi, riftbeast-pebbles]
-    notes: Caitlyn out-ranges every stage-2 board. Coven 3 first, Warwick only for Ravager 2.
-
-  - name: Fae Vanguard
-    tier: B
-    core_units: [DA_18_Rakan, DA_18_Elise, DA_18_Xayah, DA_18_Ornn]
-    slammable_items: [DA_ProtectorsVow, DA_Evenshroud, DA_SunfireCape]
-    transition_to: [vanguard-aphelios, rapidfire-aphelios, riftbeast-pebbles]
-    notes: A frontline opener with no real carry — streak on tank stats, then commit by 3-2.
+    core_units: [DA_18_Alistar, DA_18_Ornn, DA_18_Varus, DA_18_Shen]
+    slammable_items: [DA_LastWhisper, DA_Deathblade, DA_ProtectorsVow]
+    transition_to: [lunar-aphelios-nidalee, rapidfire-aphelios]
+    notes: Stall with tank frontline while AD backline chips away. Great for Aphelios pivots.

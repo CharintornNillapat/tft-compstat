@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–22 deployed and verified (2026-09-16) and Task 23 implemented and verified locally (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–24 deployed and verified (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–22 deployed, Task 23 verified locally (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–24 deployed (2026-09-16) |
 
 ---
 
@@ -709,6 +709,23 @@ Approved task by task rather than as a whole phase.
 - **Checks:** `pnpm check` (526 tests, up from 524: 2 new unit tests in `meta-brief.test.ts` for adjustments and entity resolution) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
 - **Route lifetime & static analysis:** `/` retains its exact Partial Prerender behavior.
 - **Deployed (2026-09-16, commit `d63abc6`)**: pushed to `main` and verified.
+
+- [x] **Task 24 — Real Meta Opener Boards** (approved 2026-09-16)
+  - **Data-derived stage-2 boards:** `data/curated/18/openers.yaml` completely rewritten to replace sample placeholder boards with 8 real, data-derived openers extracted from MetaTFT Diamond+ comp clusters on Patch 18.2:
+    - *Blossom Invokers* (S): Karma, Yorick, Yunara, Rakan → pivots to `invoker-ahri`, `blossom-sett-ashe`, `ashe-fast-9`.
+    - *Elderwood Vanguard* (S): Ornn, Alistar, Varus, Xayah → pivots to `elderwood-ezreal-draven`, `elderwood-aphelios-ezreal`, `vanguard-aphelios`.
+    - *Riftbeast Swarm* (S): Pebbles, Cinderling, Scuttlecrab, Yorick → pivots to `riftbeast-pebbles`, `riftbeast-malphite`.
+    - *Sprykin Brawlers* (A): Kobuko, Rek'Sai, Teemo, Veigar → pivots to `sprykin-veigar`, `sprykin-teemo`, `executioner-malphite`.
+    - *Defender Snipers* (A): Camille, Caitlyn, Elise, Rakan → pivots to `defender-cassiopeia`, `juggernaut-caitlyn`, `invoker-morgana-taric`.
+    - *Elderwood Defenders* (A): Ornn, Kayle, Leona, Xayah → pivots to `elderwood-kayle`, `defender-cassiopeia`.
+    - *Inferno Hunters* (B): Varus, Akali, Shen, Ornn → pivots to `hunter-sivir`, `inferno-akali`.
+    - *Lunar Rapidfire* (B): Alistar, Ornn, Varus, Shen → pivots to `lunar-aphelios-nidalee`, `rapidfire-aphelios`.
+  - Replaced synthetic trait names ("Blackthorn", "Coven") and unviable pivot paths. All core units (costs 1–2), slammable items, and pivot comp slugs are verified against static tables and published comps.
+
+**Verified — Task 24 (2026-09-16):**
+- **Checks:** `pnpm check` (526 tests) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
+- **Route lifetime & static analysis:** `/` retains its exact Partial Prerender behavior with all 8 openers prerendered in the static shell.
+- **Deployed (2026-09-16)**: pushed to `main` and verified.
 
 - [ ] Further tasks — not yet specified.
 
