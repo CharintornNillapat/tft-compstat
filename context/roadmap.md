@@ -807,6 +807,21 @@ Approved task by task rather than as a whole phase.
 - **Deployed (2026-09-17, commit `51008e7`, trailer `AGY-Task: 30`)**: CI green in 68s; production serves the curated table and the per-row tags, all eight routes 200. The figures on the live site match the local measurement exactly.
 - **Not done:** no test covers `getCuratedCompShapes()` itself — it is a Supabase read, the same shape as its neighbours in that file, and the suite has no DB. The threshold is a constant rather than a control, so a curious player cannot ask "what if I count 50%?".
 
+- [x] **Task 31 — Curated-match carry weighting, sync-failure alarm, and housekeeping** (approved 2026-09-16)
+  - **Carry gate and weighting** (`src/lib/stats/curated-match.ts`, architecture §6.2 step 4, 5 new tests): a comp with a stated priority-1 carry is only a candidate when the board built that exact unit; a comp whose carries state no priority falls back to requiring any of them; a comp with no stated carry skips the gate. Among comps that clear the threshold and the gate, a tie in the raw `overlap` breaks toward the comp whose matched units weigh more heavily toward its own carries. `getCuratedCompShapes()` now joins `is_carry`/`carry_priority` to feed it.
+  - **Sync-failure alarm** (`.github/workflows/sync-meta.yml`): a final `if: failure()` step opens or updates a `sync-failure`-labelled GitHub issue, closing the Task 29 gap where a red run was visible only in the Actions tab. `issues: write` added to the workflow's `permissions:`.
+  - **Housekeeping:** a new migration (`20260917120000_shop_unit_comment.sql`) corrects `champions.is_shop_unit`'s database comment, which had described the pre-Task-12 Data Dragon rule as current; `CLAUDE.md`'s "Domain docs" bullet no longer implies `CONTEXT.md`/`docs/adr/` exist.
+* **Verified — Task 31 (2026-09-17):**
+  - **Gates:** `pnpm check` green — 50 test files, **594 tests** (up from 589: 5 in `curated-match.test.ts`), 0 lint errors, 0 type errors, `knip` 0 findings. `pnpm build` green with the fetch cache cleared: 42/42 routes, every route keeping its shape (`/me` still Partial Prerender, 1d / 1w).
+  - **Against the same real synced matches Task 30 measured** (18 ranked Set 18 games): the total match rate held exactly at **13 of 18**, but two comps' attributions corrected. `Sprykin Teemo` (priority-1 carry Alistar) lost the 2 games it had matched to `Sprykin Veigar` (priority-1 carry Veigar) — same 2 games, same 2.50 average, only the label changed. `Riftbeast Malphite` (priority-1 carry Malphite) dropped from 4 games (6.25 avg) to 3 (6.00 avg) — the removed game's 7th place had no Malphite on its board. The originally-cited `Vanguard Kha'Zix` 71% match still stands: inspecting that board directly showed Kha'Zix genuinely present, just less itemized that game than Hecarim (the board's *derived* carry, §6.2 step 2) — a real execution of the comp, not the false-positive class the gate targets.
+  - **Migration not applied.** `20260917120000_shop_unit_comment.sql` was written and confirmed as the only pending migration (`supabase db push --dry-run --linked`), but auto mode's classifier refused the actual `db push` as a shared-resource write requiring explicit confirmation. It needs a manual `pnpm db:push` (or equivalent) once reviewed.
+* **Not done:**
+  - The migration above is unapplied (see previous line).
+  - The carry gate's fallback paths (no priority-1 carry stated; no carry stated at all) are unit-tested but have no live rehearsal against a real such comp.
+  - `docs/agents/domain.md` itself was left as-is — it already says to proceed silently when `CONTEXT.md`/`docs/adr/` don't exist, so only the CLAUDE.md bullet asserting their presence needed correcting.
+  - Still open from earlier tasks: the set rollover guard's throw path has no live rehearsal or unit test; matching is still bounded by the ≥60% threshold being a constant, not a control.
+* **Deployed:** no — left uncommitted in the working tree for review, as asked.
+
 - [ ] Further tasks — not yet specified.
 
 **Verified — Tasks 9 and 10 (2026-09-13):**

@@ -25,6 +25,34 @@ Newest entry first. One entry per finished task, in this template — **every fi
 
 ---
 
+## Task 31 — Carry-Aware Matching, Sync-Failure Alarm & Housekeeping
+* **AGY-Task:** 31
+* **Date:** 2026-09-17
+* **Roadmap:** context/roadmap.md Task 31
+* **Scope:** Polish & pipeline hardening — weigh carries into the curated-match overlap so shared frontlines can't win a match away from the comp whose carry was actually built, add the `if: failure()` alarm Task 29 flagged as missing, and clean up two stale doc/DB references the audit named.
+* **Changes Delivered:**
+  1. **Carry-aware matching ([`src/lib/stats/curated-match.ts`](src/lib/stats/curated-match.ts), architecture §6.2 step 4, 5 new tests in [`src/lib/stats/curated-match.test.ts`](src/lib/stats/curated-match.test.ts)):**
+     - **Gate:** a comp with a stated priority-1 carry (`comp_units.carry_priority`) is only a candidate when the board contains **that exact unit**, anywhere on the board — not necessarily the board's own *derived* carry (§6.2 step 2, most items/star/cost). A comp whose carries state no priority falls back to requiring **any** of them; a comp with no stated carry at all (a data gap the seed schema should prevent) skips the gate rather than becoming permanently unmatchable.
+     - **Weighting:** among comps clearing both the threshold and the gate, a tie in the raw `overlap` breaks toward the comp whose matched units weigh more heavily toward its own carries — priority-1 highest, any other stated carry next, everything else 1. The weighting only ever decides a tie; `overlap` itself, what `MeCuratedComps`/`CuratedCompTag` show, is unchanged — still the plain share architecture §6.2 documents.
+     - `getCuratedCompShapes()` ([`src/lib/curated/queries.ts`](src/lib/curated/queries.ts)) now joins `comp_units.is_carry`/`carry_priority` and returns a `carries` list per comp.
+  2. **Sync-failure alarm ([`.github/workflows/sync-meta.yml`](.github/workflows/sync-meta.yml)):** a final `if: failure()` step, which fires on a failure anywhere earlier in the job (a broken API shape, the rollover guard, the build gate, even the push), opens a GitHub issue labelled `sync-failure` — or comments on one already open under that label, so a multi-day outage gets one issue, not one a day. Needs `issues: write`, added to the workflow's `permissions:` alongside `contents: write`.
+  3. **Housekeeping:**
+     - New migration [`supabase/migrations/20260917120000_shop_unit_comment.sql`](supabase/migrations/20260917120000_shop_unit_comment.sql) corrects `champions.is_shop_unit`'s database comment, which still described the pre-Task-12 Data Dragon rule (architecture §4.8 already documented the staleness; this closes it).
+     - [`CLAUDE.md`](CLAUDE.md)'s "Domain docs" bullet no longer asserts a `CONTEXT.md`/`docs/adr/` this repo doesn't have; it now says so and points at `docs/agents/domain.md`'s own "proceed silently" rule for if they're ever added. `AGENTS.md` never referenced these paths, so it needed no change.
+* **Gates:** check 594/594 across 50 test files (up from 589/50) · lint 0 · types 0 · knip 0 · build 42/42 routes with the fetch cache cleared · route shapes unchanged (`/me` still Partial Prerender, 1d / 1w).
+* **Verified against real synced matches, the same 18-game account Task 30 measured:**
+  - **Total match rate held exactly at 13 of 18**, but two comps' attributions corrected. `Sprykin Teemo` (priority-1 carry Alistar) lost the 2 games it had matched to `Sprykin Veigar` (priority-1 carry Veigar) — same 2 games, same 2.50 average, only the label changed: those boards' priority-1 carry was Veigar, and neither had Alistar. `Riftbeast Malphite` (priority-1 carry Malphite) dropped from 4 games (6.25 avg) to 3 (6.00 avg) — the removed game placed 7th and had no Malphite on its board (25 − 18 = 7 checks out against the averages).
+  - **The originally-cited Vanguard Kha'Zix 71% match still stands, and correctly so.** Inspecting that specific board directly — the case the gate was written for — showed Kha'Zix genuinely present on it, just less itemized that game than Hecarim, the board's *derived* carry. That is a real, if imperfect, execution of the comp, not the false-positive class the gate targets, and it is a better outcome than the alternative design (gating on the *derived* carry) would have given: this board would have wrongly lost its match.
+  - **Migration written but not applied.** `pnpm exec supabase db push --dry-run --linked` confirmed it as the only pending migration against the linked project (no drift otherwise), but the actual `db push` was refused by auto mode's classifier as a shared-resource write needing explicit confirmation. Left for you to run.
+* **Not done:**
+  - **The migration above is unapplied** — run `pnpm db:push` (or `pnpm exec supabase db push --linked`) once reviewed; `--dry-run --linked` first if you want to see it listed without pushing.
+  - **The carry gate's fallback paths** (no priority-1 carry stated; no carry stated at all) are unit-tested but have no live rehearsal against a real curated comp in that shape — every comp in `data/curated/18/comps/` currently states a priority-1 carry.
+  - `docs/agents/domain.md` itself was left untouched — it already handles `CONTEXT.md`/`docs/adr/` not existing; only the `CLAUDE.md` bullet asserting they do needed the fix.
+  - Still open from earlier tasks: no live rehearsal or unit test for the set rollover guard's throw path; the 60% match threshold is a constant, not a control; `is_shop_unit`'s readers (`shopUnits`) remain unused by anything that ever sets the column false — correcting the comment doesn't change that a future set needs a real source for it.
+* **Deployed:** no — left uncommitted in the working tree for review, as asked.
+
+---
+
 ## Task 30 — Curated Comp Matching & `/me` at Phone Width
 * **AGY-Task:** 30
 * **Date:** 2026-09-16

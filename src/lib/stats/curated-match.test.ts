@@ -4,6 +4,7 @@ import {
   curatedPerformance,
   matchCuratedComp,
   matchCuratedComps,
+  type CuratedCompCarry,
   type CuratedCompShape,
 } from "./curated-match";
 
@@ -11,15 +12,23 @@ const shape = (overrides: Partial<CuratedCompShape> & { slug: string; coreUnits:
   name: overrides.slug,
   tier: "A",
   setId: 18,
+  carries: [],
   ...overrides,
 });
 
-/** A five-unit curated comp, so a "3 of 5" board sits exactly on the 60% threshold. */
+const carry = (apiName: string, priority: number | null = null): CuratedCompCarry => ({ apiName, priority });
+
+/**
+ * A five-unit curated comp, so a "3 of 5" board sits exactly on the 60% threshold.
+ * Its stated carry matches architecture §6.2's own YAML example (`carry: true,
+ * priority: 1` on the Draven unit).
+ */
 const draven = shape({
   slug: "draven-fast-9",
   name: "Draven Fast 9",
   tier: "S",
   coreUnits: ["DA_Draven18", "DA_18_Sivir", "DA_18_Maokai", "DA_18_Shen", "DA_18_Ahri"],
+  carries: [carry("DA_Draven18", 1)],
 });
 
 const board = (units: string[], overrides: Partial<Parameters<typeof matchRow>[0]> = {}) =>
@@ -84,6 +93,69 @@ describe("matchCuratedComp", () => {
     const half = board(["DA_Draven18", "DA_18_Sivir"]);
     expect(matchCuratedComp(half, [draven], 0.4)?.overlap).toBe(0.4);
     expect(matchCuratedComp(board(draven.coreUnits), [draven], 1)?.overlap).toBe(1);
+  });
+});
+
+describe("matchCuratedComp — carry gate and weighting (Task 31)", () => {
+  // Reproduces the failure that motivated this: a Hecarim-only board read as
+  // "Vanguard Kha'Zix" at 71%, sharing 5 of 7 board units, none of them Kha'Zix —
+  // the comp's own stated priority-1 carry (data/curated/18/comps/vanguard-khazix.yaml).
+  const vanguardKhazix = shape({
+    slug: "vanguard-khazix",
+    name: "Vanguard Kha'Zix",
+    coreUnits: [
+      "DA_18_KhaZix",
+      "DA_18_Hecarim",
+      "DA_18_Diana",
+      "DA_Fiddlesticks18",
+      "DA_18_Ezreal",
+      "DA_18_Ornn",
+      "DA_18_Soraka",
+    ],
+    carries: [carry("DA_18_KhaZix", 1), carry("DA_18_Hecarim", 2)],
+  });
+
+  it("rejects a comp when its stated primary carry never made the board, however high the overlap", () => {
+    const hecarimOnly = board(["DA_18_Hecarim", "DA_18_Diana", "DA_Fiddlesticks18", "DA_18_Ezreal", "DA_18_Ornn"]);
+    // 5 of 7 = 71%, clears the threshold, but Kha'Zix itself is absent.
+    expect(matchCuratedComp(hecarimOnly, [vanguardKhazix])).toBeNull();
+  });
+
+  it("matches once the primary carry is on the board, even swapping out a support unit", () => {
+    const khazixBuilt = board(["DA_18_KhaZix", "DA_18_Diana", "DA_Fiddlesticks18", "DA_18_Ezreal", "DA_18_Ornn"]);
+    expect(matchCuratedComp(khazixBuilt, [vanguardKhazix])?.slug).toBe("vanguard-khazix");
+  });
+
+  it("falls back to requiring any stated carry when none of them states priority 1", () => {
+    const flex = shape({ slug: "flex-carry", coreUnits: ["A", "B", "C", "D", "E"], carries: [carry("A"), carry("B")] });
+    // Support alone clears 60% but touches neither stated carry.
+    expect(matchCuratedComp(board(["C", "D", "E"]), [flex])).toBeNull();
+    // Either carry is enough once one of them is actually built.
+    expect(matchCuratedComp(board(["A", "C", "D"]), [flex])?.slug).toBe("flex-carry");
+  });
+
+  it("skips the gate for a comp with no stated carry at all, a data gap rather than a real state", () => {
+    const noCarryData = shape({ slug: "legacy", coreUnits: ["A", "B", "C", "D", "E"] });
+    expect(matchCuratedComp(board(["A", "B", "C"]), [noCarryData])?.slug).toBe("legacy");
+  });
+
+  it("breaks an overlap tie toward the comp whose matched units weigh more toward its own carries", () => {
+    const heavy = shape({
+      // Alphabetically last, so a slug-only tie-break would lose this comp — proves
+      // the win comes from the weighting, not from the pre-existing tie-break chain.
+      slug: "zzz-heavy-carry",
+      coreUnits: ["CarryX", "SecondaryX", "S1", "S2", "S3"],
+      carries: [carry("CarryX", 1), carry("SecondaryX", 2)],
+    });
+    const light = shape({
+      slug: "aaa-light-carry",
+      coreUnits: ["CarryY", "T1", "T2", "T3", "T4"],
+      carries: [carry("CarryY", 1)],
+    });
+    // Both sit at exactly 3 of 5 (60%): heavy's three include its primary AND
+    // secondary carry; light's three include only its (lone) carry.
+    const shared = board(["CarryX", "SecondaryX", "S1", "CarryY", "T1", "T2"]);
+    expect(matchCuratedComp(shared, [heavy, light])?.slug).toBe("zzz-heavy-carry");
   });
 });
 

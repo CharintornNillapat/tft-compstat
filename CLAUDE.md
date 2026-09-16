@@ -35,4 +35,4 @@ The five default role labels: `needs-triage`, `needs-info`, `ready-for-agent`, `
 
 ### Domain docs
 
-Single-context: one root `CONTEXT.md` plus `docs/adr/`, with `context/` as the source of truth for plans and data contracts. See `docs/agents/domain.md`.
+This repo has no root `CONTEXT.md` or `docs/adr/` yet (Task 31: the reference to them here previously implied they existed) — `context/architecture.md` and `context/roadmap.md` are the source of truth for plans and data contracts, per the first bullet above. See `docs/agents/domain.md` for how to use a `CONTEXT.md` and ADRs if this repo ever adopts them; that doc already says to proceed silently when they're absent, which is the case today.

@@ -549,7 +549,9 @@ export async function getCuratedCompShapes(): Promise<CuratedCompShape[]> {
   const rows = must(
     await getCachedSupabase()
       .from("comps")
-      .select("slug, name, tier, set_id, set:tft_sets!inner(is_active), units:comp_units(champion_api_name)")
+      .select(
+        "slug, name, tier, set_id, set:tft_sets!inner(is_active), units:comp_units(champion_api_name, is_carry, carry_priority)",
+      )
       .eq("is_published", true)
       .eq("set.is_active", true),
     "curated comp shapes",
@@ -560,5 +562,10 @@ export async function getCuratedCompShapes(): Promise<CuratedCompShape[]> {
     tier: row.tier,
     setId: row.set_id,
     coreUnits: row.units.map((unit) => unit.champion_api_name),
+    // Carry weighting (Task 31): only the comp's own carries, with the item priority
+    // that distinguishes a primary carry from a secondary one when the comp states it.
+    carries: row.units
+      .filter((unit) => unit.is_carry)
+      .map((unit) => ({ apiName: unit.champion_api_name, priority: unit.carry_priority })),
   }));
 }

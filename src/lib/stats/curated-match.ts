@@ -13,6 +13,14 @@ import { TOP4_CUTOFF, type MatchRow } from "./types";
  */
 
 /**
+ * One of a comp's stated carries (`carry: true` on its board), architecture §7's
+ * "at least one unit is a carry" rule — a comp can have several (`sprykin-teemo`
+ * has five). `priority` is the item-build order (1 first) when the comp states one,
+ * null otherwise; it is what makes a "primary" carry identifiable at all.
+ */
+export type CuratedCompCarry = { apiName: string; priority: number | null };
+
+/**
  * A curated comp reduced to what matching needs. Built by `getCuratedCompShapes()`
  * rather than `getComps()` so the browser gets ~10 strings a comp instead of icons,
  * items, traits and guides.
@@ -30,10 +38,35 @@ export type CuratedCompShape = {
    * claim the *less* of it you actually built.
    */
   coreUnits: string[];
+  /** The comp's carries — a subset of `coreUnits` (Task 31, see `matchCuratedComp`). */
+  carries: CuratedCompCarry[];
 };
 
 /** Share of a comp's core units that must be on the board to call it a match (§6.2). */
 export const MATCH_THRESHOLD = 0.6;
+
+/**
+ * Weights for the carry-aware tie-break (Task 31): a comp's priority-1 carry counts
+ * for `PRIMARY_CARRY_WEIGHT`, any other stated carry for `SECONDARY_CARRY_WEIGHT`,
+ * and every other core unit for 1. Large enough that one matched carry outweighs
+ * several matched support units, without letting it override the raw `overlap`
+ * threshold above, which stays the one the player sees and the one architecture
+ * §6.2 documents.
+ */
+const PRIMARY_CARRY_WEIGHT = 3;
+const SECONDARY_CARRY_WEIGHT = 2;
+const CORE_WEIGHT = 1;
+
+/** The carry with stated priority 1, or null when none of the comp's carries states one. */
+function primaryCarry(carries: readonly CuratedCompCarry[]): string | null {
+  return carries.find((carry) => carry.priority === 1)?.apiName ?? null;
+}
+
+function unitWeight(apiName: string, carrySet: ReadonlySet<string>, primary: string | null): number {
+  if (apiName === primary) return PRIMARY_CARRY_WEIGHT;
+  if (carrySet.has(apiName)) return SECONDARY_CARRY_WEIGHT;
+  return CORE_WEIGHT;
+}
 
 export type CuratedMatch = {
   slug: string;
@@ -49,9 +82,29 @@ export type CuratedMatch = {
 
 /**
  * The curated comp this board came closest to, or null when none clears the
- * threshold. Ties go to the comp with **more** core units: two comps fully present
+ * threshold. Ties go first to the comp whose carries the board matches better
+ * (see below), then to the comp with **more** core units — two comps fully present
  * on the same board means the longer one is the more specific claim, and a 4-unit
- * comp would otherwise win every board that happened to contain it.
+ * comp would otherwise win every board that happened to contain it — then to the
+ * lower slug.
+ *
+ * **Carry gate (Task 31).** A board that shares a comp's frontline and supports but
+ * never built its carry isn't that comp, however high the raw share reads — the
+ * failure this closes: a Hecarim-only board matched "Vanguard Kha'Zix" at 71%
+ * because it shared 5 of that comp's 7 units, none of them Kha'Zix, the comp's
+ * stated priority-1 carry. So a comp with a stated priority-1 carry is only a
+ * candidate when the board built **that** unit; a comp whose carries state no
+ * priority falls back to requiring **any** of them; a comp with no stated carry at
+ * all (a data gap, not expected given the seed schema's "at least one carry" rule)
+ * skips the gate rather than becoming permanently unmatchable.
+ *
+ * **Carry weighting.** Among comps that clear both the threshold and the gate, the
+ * tie-break prefers the one whose *matched* units weigh more toward its own
+ * carries — the priority-1 carry weighs `PRIMARY_CARRY_WEIGHT`, any other stated
+ * carry `SECONDARY_CARRY_WEIGHT`, everything else 1 — so a support-heavy overlap
+ * never outranks a comp whose actual carries the board built. This only ever
+ * decides a tie in `overlap`: the raw share stays what the player sees and what
+ * architecture §6.2 documents as the ≥60% rule.
  */
 export function matchCuratedComp(
   row: Pick<MatchRow, "setNumber" | "units">,
@@ -62,6 +115,9 @@ export function matchCuratedComp(
   if (board.size === 0) return null;
 
   let best: CuratedMatch | null = null;
+  // Tracked alongside `best` rather than on it: `weightedScore` only ever decides a
+  // tie in `overlap` (see above), so it has no reason to reach the caller.
+  let bestWeightedScore = -Infinity;
   for (const shape of shapes) {
     if (shape.setId !== row.setNumber) continue;
     // Deduplicated defensively: the seed schema already rejects a repeated unit, and
@@ -74,21 +130,32 @@ export function matchCuratedComp(
     const overlap = matched / core.size;
     if (overlap < threshold) continue;
 
-    const candidate: CuratedMatch = {
-      slug: shape.slug,
-      name: shape.name,
-      tier: shape.tier,
-      overlap,
-      matched,
-      core: core.size,
-    };
+    const carrySet = new Set(shape.carries.map((carry) => carry.apiName));
+    const primary = primaryCarry(shape.carries);
+    const carryPresent =
+      primary !== null ? board.has(primary) : carrySet.size === 0 || [...carrySet].some((carry) => board.has(carry));
+    if (!carryPresent) continue;
+
+    let weightedMatched = 0;
+    let weightedTotal = 0;
+    for (const unit of core) {
+      const weight = unitWeight(unit, carrySet, primary);
+      weightedTotal += weight;
+      if (board.has(unit)) weightedMatched += weight;
+    }
+    const weightedScore = weightedMatched / weightedTotal;
+
+    const candidate: CuratedMatch = { slug: shape.slug, name: shape.name, tier: shape.tier, overlap, matched, core: core.size };
     if (
       best === null ||
       candidate.overlap > best.overlap ||
       (candidate.overlap === best.overlap &&
-        (candidate.core > best.core || (candidate.core === best.core && candidate.slug < best.slug)))
+        (weightedScore > bestWeightedScore ||
+          (weightedScore === bestWeightedScore &&
+            (candidate.core > best.core || (candidate.core === best.core && candidate.slug < best.slug)))))
     ) {
       best = candidate;
+      bestWeightedScore = weightedScore;
     }
   }
   return best;

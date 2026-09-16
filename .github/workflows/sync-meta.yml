@@ -13,6 +13,11 @@
 # live site *before* this build gate runs, so a failure here stops a bad commit from landing on
 # main but does not undo that live write. Openers are derived directly from the current active comps
 # and validated before writing.
+#
+# A failure anywhere above — a broken API shape from MetaTFT or CommunityDragon, an expired
+# secret, a schema validation error — used to be visible only in the Actions tab (Task 29's audit
+# flagged this). The last step below files or updates a GitHub issue instead, so a red run has a
+# an alarm outside GitHub Actions itself.
 
 name: Sync static, meta, BIS, and openers
 
@@ -24,6 +29,8 @@ on:
 
 permissions:
   contents: write
+  # Only the failure-notification step below needs this.
+  issues: write
 
 # Never let a manual run and the scheduled run race each other to push.
 concurrency:
@@ -110,3 +117,27 @@ jobs:
           # Pick up anything pushed to main while the sync ran.
           git pull --rebase origin main
           git push origin HEAD:main
+
+      # `if: failure()` runs when any step above failed, whichever one it was — the
+      # catch-all this workflow didn't have before (Task 29's audit finding, closed
+      # here in Task 31). One issue per incident rather than one per day: an existing
+      # open `sync-failure` issue gets a comment naming this run instead of a pile of
+      # duplicates across a multi-day outage; closing it is what tells the next
+      # failure to file a fresh one.
+      - name: Open or update an issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # --force makes this idempotent: safe on every failure, not just the first.
+          gh label create sync-failure --color d73a4a \
+            --description "Automated: a sync-meta.yml run failed" --force
+          existing=$(gh issue list --label sync-failure --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Failed again: $run_url"
+          else
+            gh issue create --title "sync-meta.yml failed" --label sync-failure --body "$(
+              printf 'The daily static/meta/BIS/openers sync failed: %s\n\nClose this once the cause is fixed — the next failure opens a new issue rather than reopening this one, since a closed issue is how the next incident is told this one is done.' "$run_url"
+            )"
+          fi
