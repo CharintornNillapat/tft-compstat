@@ -69,7 +69,7 @@ champions:
       - DA_VoidStaff
       - DA_GiantSlayer
     avg_place: 3.94
-    games: 374
+    games: 375
   - api_name: DA_18_RekSai
     role: Main Tank
     primary_bis:
@@ -101,7 +101,7 @@ champions:
       - DA_Artifact_LudensTempest
       - DA_BlueBuffRadiant
     avg_place: 4.65
-    games: 1432
+    games: 1435
   - api_name: DA_18_Alistar
     role: Main Tank
     primary_bis:
@@ -131,7 +131,7 @@ champions:
       - DA_GuinsoosRagebladeRadiant
       - DA_Artifact_NavoriFlickerblade
     avg_place: 4.35
-    games: 912
+    games: 914
   - api_name: DA_18_Kayle
     role: AD Carry
     primary_bis:
@@ -191,7 +191,7 @@ champions:
       - DA_Artifact_TheIndomitable
       - DA_Artifact_ForbiddenIdol
     avg_place: 4.07
-    games: 332
+    games: 333
   - api_name: DA_18_Teemo
     role: AP Carry
     primary_bis:
@@ -232,8 +232,8 @@ champions:
       - DA_Artifact_EternalPact
       - DA_Artifact_Manazane
       - DA_Artifact_BlightingJewel
-    avg_place: 4.22
-    games: 373
+    avg_place: 4.21
+    games: 375
   - api_name: DA_18_Hecarim
     role: Main Tank
     primary_bis:
@@ -275,8 +275,8 @@ champions:
       - DA_BrambleVest
       - DA_ThiefsGloves
       - DA_Evenshroud
-    avg_place: 3.98
-    games: 262
+    avg_place: 3.99
+    games: 263
   - api_name: DA_18_Rammus
     role: Main Tank
     primary_bis:
@@ -454,7 +454,7 @@ champions:
     secondary_bis:
       - DA_Bloodthirster
       - DA_SteraksGage
-      - DA_HextechGunblade
+      - DA_Deathblade
     special_bis:
       - DA_Artifact_SilvermereDawn
       - DA_HandOfJusticeRadiant
@@ -578,17 +578,17 @@ champions:
     primary_bis:
       - DA_GuinsoosRageblade
       - DA_KrakensFury
-      - DA_KrakensFury
+      - DA_RedBuff
     secondary_bis:
       - DA_GiantSlayer
-      - DA_RedBuff
       - DA_Deathblade
+      - DA_HextechGunblade
     special_bis:
       - DA_Artifact_GoldCollector
       - DA_KrakensFury_Radiant
       - DA_GiantSlayer_Radiant
-    avg_place: 3.44
-    games: 1108
+    avg_place: 3.43
+    games: 552
   - api_name: DA_18_ElderDragon
     role: Utility / Bruiser
     primary_bis:
@@ -619,8 +619,8 @@ champions:
       - DA_ThiefsGlovesRadiant
       - DA_Artifact_InfinityForce
       - DA_Artifact_ZhonyasParadox
-    avg_place: 3.02
-    games: 265
+    avg_place: 3.01
+    games: 266
   - api_name: DA_Lux18_Base
     role: AP Carry
     primary_bis:
@@ -635,8 +635,8 @@ champions:
       - DA_JeweledGauntletRadiant
       - DA_Artifact_Manazane
       - DA_Artifact_Dawncore
-    avg_place: 3.27
-    games: 428
+    avg_place: 3.29
+    games: 430
   - api_name: DA_18_Maokai
     role: Main Tank
     primary_bis:

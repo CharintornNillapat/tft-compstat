@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster blossom-leblanc, DIAMOND+.
-# Sample: 13,181 boards, avg 5.00, patch 18.2, set 18.
+# Sample: 13,302 boards, avg 5.01, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,8 +15,8 @@ style: reroll_2
 difficulty: 2
 patch: "18.2"
 order: 20
-summary: "Ends at level 7 with Yunara carrying. MetaTFT DIAMOND+: 13,181 boards, avg 5.00, picked 1.5% of boards."
-avg_place: 5
+summary: "Ends at level 7 with Yunara carrying. MetaTFT DIAMOND+: 13,302 boards, avg 5.01, picked 1.5% of boards."
+avg_place: 5.01
 pick_rate: 1.46
 level_recommended: 7
 early_units: [ DA_18_LeBlanc, DA_18_Yorick, DA_18_Yunara, DA_Karma18 ]
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 13,181 boards, avg 5.00. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 13,302 boards, avg 5.01. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster rapidfire-aphelios, DIAMOND+.
-# Sample: 14,137 boards, avg 4.56, patch 18.2, set 18.
+# Sample: 14,132 boards, avg 4.56, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,9 +15,9 @@ style: fast8
 difficulty: 2
 patch: "18.2"
 order: 18
-summary: "Ends at level 8 with Brambleback carrying. MetaTFT DIAMOND+: 14,137 boards, avg 4.56, picked 1.6% of boards."
+summary: "Ends at level 8 with Brambleback carrying. MetaTFT DIAMOND+: 14,132 boards, avg 4.56, picked 1.6% of boards."
 avg_place: 4.56
-pick_rate: 1.56
+pick_rate: 1.55
 level_recommended: 8
 early_units: [ DA_18_Rakan, DA_18_Varus, DA_18_Xayah, DA_18_Yorick ]
 flex_units: [ DA_18_Diana, DA_Taric18, DA_18_Maokai ]
@@ -25,8 +25,8 @@ board:
   - { unit: DA_18_Aphelios, row: 3, col: 0, carry: true, priority: 2, items: [ DA_InfinityEdge, DA_KrakensFury, DA_StrikersFlail ] }
   - { unit: DA_CrimsonRaptor18, row: 3, col: 1, items: [ DA_LastWhisper ] }
   - { unit: DA_Brambleback18, row: 2, col: 0, carry: true, priority: 1, items: [ DA_18_EmblemRapidfire, DA_EdgeOfNight, DA_Quicksilver ] }
-  - { unit: DA_Amumu18, row: 0, col: 3, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
-  - { unit: DA_Sentinel18, row: 0, col: 4, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_Sentinel18, row: 0, col: 3, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_Amumu18, row: 0, col: 4, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
   - { unit: DA_18_Varus, row: 3, col: 6, items: [ DA_TacticiansCape ] }
   - { unit: DA_18_Xayah, row: 3, col: 2, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Rakan, row: 1, col: 3, items: [ DA_ThiefsGloves ] }
@@ -42,4 +42,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 14,137 boards, avg 4.56. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 14,132 boards, avg 4.56. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

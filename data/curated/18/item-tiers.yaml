@@ -3,7 +3,7 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 259,688 games on patch 18.2, set 18. Feed updated 2026-09-16T14:07:21.214Z.
+# Sample: 259,952 games on patch 18.2, set 18. Feed updated 2026-09-16T14:09:05.557Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
 # Where they fell, as size and worst average placement: S 13 to 4.02, A 27 to 4.19, B 31 to 4.43, C 18 to 5.24.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
@@ -11,7 +11,7 @@ slug: items-18.2
 kind: item
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 259,688 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 259,952 games over the last 3 days."
 tiers:
   S:
     - DA_TacticiansShield
@@ -64,10 +64,10 @@ tiers:
     - DA_SpearOfShojin
     - DA_InfinityEdge
     - DA_18_EmblemHunter
-    - DA_WarmogsArmor
     - DA_LastWhisper
-    - DA_Item_Artifact_TalismanOfAscension
+    - DA_WarmogsArmor
     - DA_Artifact_SeekersArmguard
+    - DA_Item_Artifact_TalismanOfAscension
     - DA_SpiritVisage
     - DA_18_EmblemRapidfire
     - DA_18_EmblemLunar
@@ -86,9 +86,9 @@ tiers:
     - DA_Artifact_HellfireHatchet
     - DA_GuinsoosRageblade
     - DA_18_EmblemFae
-    - DA_18_EmblemBlackthorn
-  C:
     - DA_18_EmblemFloraFatalisAugment
+  C:
+    - DA_18_EmblemBlackthorn
     - DA_Artifact_BlightingJewel
     - DA_Artifact_AegisOfDusk
     - DA_Artifact_RapidFireCannon
