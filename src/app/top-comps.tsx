@@ -2,11 +2,13 @@ import Link from "next/link";
 import { ChampionIcon } from "@/components/champion-icon";
 import { CompStatsRow } from "@/components/comp-stats";
 import { TierBadge } from "@/components/tier-row";
+import { TraitHex } from "@/components/trait-badge";
 import { getComps } from "@/lib/curated/queries";
 import { OverviewPanel } from "./overview-panel";
 
 const SHOWN = 3;
 const CARRIES_SHOWN = 3;
+const TRAITS_SHOWN = 3;
 
 /**
  * The curated half of the overview. Reuses the cached `getComps()` that `/comps`
@@ -44,7 +46,23 @@ export async function TopComps() {
                 <TierBadge tier={comp.tier} className="size-6 shrink-0 text-xs" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{comp.name}</p>
-                  <CompStatsRow stats={comp} fields={["avg", "top4"]} />
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+                    <CompStatsRow stats={comp} fields={["avg", "top4"]} />
+                    {comp.traits.length > 0 ? (
+                      <span aria-label="Key traits" className="flex items-center gap-1 border-l border-line pl-2">
+                        {comp.traits.slice(0, TRAITS_SHOWN).map((trait) => (
+                          <span
+                            key={trait.apiName}
+                            className="flex items-center gap-0.5 text-[11px]"
+                            title={`${trait.count} ${trait.name}`}
+                          >
+                            <TraitHex trait={trait} size={13} />
+                            <span className="font-medium tabular-nums text-muted">{trait.count}</span>
+                          </span>
+                        ))}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 {/* The name already identifies the comp; the carries are a visual cue. */}
                 <span aria-hidden className="flex shrink-0 gap-0.5">

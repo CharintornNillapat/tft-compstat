@@ -155,4 +155,19 @@ describe("validateOpeners", () => {
       "needs at least one opener; an empty file would render an empty section",
     ]);
   });
+
+  it("attaches carry to a pivot when the comp reference supplies one", () => {
+    const customRefs: OpenerReferences = {
+      names,
+      comps: new Map([
+        ["ashe-fast-9", { name: "Ashe Fast 9", tier: "S" as const, carry: { name: "Ashe", cost: 5, iconUrl: "ashe.png" } }],
+        ["elderwood-kayle", { name: "Elderwood Kayle", tier: "C" as const }],
+      ]),
+    };
+    const result = validateOpeners({ file: FILE, text: VALID, refs: customRefs });
+    expect(result.openers?.openers[0]?.pivots).toEqual([
+      { slug: "ashe-fast-9", name: "Ashe Fast 9", tier: "S", carry: { name: "Ashe", cost: 5, iconUrl: "ashe.png" } },
+      { slug: "elderwood-kayle", name: "Elderwood Kayle", tier: "C" },
+    ]);
+  });
 });

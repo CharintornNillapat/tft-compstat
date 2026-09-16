@@ -126,8 +126,19 @@ function OpenerCard({ opener, folded }: { opener: Opener; folded: boolean }) {
                 rose read as the red "Nerfed" badges one panel up. */}
             <Link
               href={`/comps/${pivot.slug}`}
-              className="flex max-w-full items-center gap-1 rounded-full border border-line px-1.5 py-px text-[11px] text-muted hover:border-faint hover:bg-raised hover:text-fg"
+              className="flex max-w-full items-center gap-1.5 rounded-full border border-line py-0.5 pr-2 pl-1 text-[11px] text-muted hover:border-faint hover:bg-raised hover:text-fg"
             >
+              {pivot.carry ? (
+                <span className="-my-0.5 shrink-0">
+                  <ChampionIcon
+                    name={pivot.carry.name}
+                    cost={pivot.carry.cost}
+                    iconUrl={pivot.carry.iconUrl}
+                    size={16}
+                    alt=""
+                  />
+                </span>
+              ) : null}
               <span className={`font-bold ${TIER_TEXT[pivot.tier]}`}>{pivot.tier}</span>
               <span className="min-w-0 truncate">{pivot.name}</span>
             </Link>

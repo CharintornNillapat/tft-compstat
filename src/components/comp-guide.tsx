@@ -4,7 +4,7 @@ import type { CompAugments } from "@/lib/curated/augment-tiers";
 import type { CompChampion, CompDetail } from "@/lib/curated/queries";
 import { isContested } from "@/lib/curated/comp-badges";
 import { teamCodeHint } from "@/lib/curated/team-code";
-import { AugmentFace } from "./augment-parts";
+import { CompAugmentsList } from "./comp-augments";
 import { ChampionIcon } from "./champion-icon";
 import { CONTESTED_TOOLTIP, ContestedBadge, DifficultyBadge, PlaystyleBadge } from "./comp-badges";
 import { GEM_TOOLTIP, GemBadge } from "./comp-details";
@@ -94,21 +94,7 @@ export function CompGuide({ comp, augments = null }: { comp: CompDetail; augment
 
             {augments && hasAugments ? (
               <Panel title="Best augments">
-                {/* Three across wherever a card still fits a name like "Late Game Specialist":
-                    full width from `sm`, the left column only from `xl`. */}
-                <ul className="grid grid-cols-1 gap-1.5 min-[420px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3">
-                  {augments.augments.map((augment) => (
-                    // A native title rather than the shared tooltip: six descriptions do
-                    // not earn a client island.
-                    <li
-                      key={augment.apiName}
-                      title={augment.description ?? undefined}
-                      className="flex min-w-0 items-center gap-2 rounded-md border border-line bg-raised/40 p-1.5"
-                    >
-                      <AugmentFace augment={augment} />
-                    </li>
-                  ))}
-                </ul>
+                <CompAugmentsList augments={augments.augments} />
                 <p className="mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[11px] text-faint">
                   <span>
                     {augments.source ? <>Graded for this comp by the MetaTFT guide “{augments.source}”</> : "Graded for this comp by MetaTFT"}

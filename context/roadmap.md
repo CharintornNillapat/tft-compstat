@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–21 deployed and verified (2026-09-14). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–21 deployed and verified (2026-09-14) and Task 22 implemented and verified locally (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–21 deployed (2026-09-14) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–21 deployed, Task 22 verified locally (2026-09-16) |
 
 ---
 
@@ -688,6 +688,16 @@ Approved task by task rather than as a whole phase.
 - **Deployed (2026-09-14, commits `5374e80` and `a1e7eef`)**: pushed to `main` and live on https://tft-compstat.vercel.app. First CI workflow run caught that `MeHeader` synchronously constructs the Supabase admin client during build and required `SUPABASE_SERVICE_ROLE_KEY` in `ci.yml` (fixed in `a1e7eef` and recorded in architecture §8).
 - **GitHub Actions secrets:** `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` configured alongside the existing repository secrets for CI and daily meta sync.
 - **Not done:** no live rehearsal of an actual day-long `AuthError` cooldown (would need a real dead key against production) or of a Supabase Gateway Timeout actually retrying (the retry path is covered by injected-failure tests in `retry.test.ts`, not a real flaky endpoint).
+
+- [x] **Task 22 — Overview & Comp Guide Polish** (approved 2026-09-16)
+  - **Top comps key active traits:** `TopComps` (`src/app/top-comps.tsx`) displays the comp's top 3 active traits (`comp.traits.slice(0, 3)`) using `TraitHex` and count separated by a subtle divider next to `CompStatsRow`.
+  - **Opener pivot carry visual cues:** `OpenerPivot` (`src/lib/curated/openers.ts`) optionally includes `carry?: OpenerCarry` (`{ name, cost, iconUrl }`), populated in `getOpeners()` from the target comp's main carry (`comp.units.find(u => u.isCarry)`). `OverviewOpeners` (`src/app/overview-openers.tsx`) displays a 16px cost-bordered `ChampionIcon` inside the pivot pill.
+  - **Rich augment tooltips in comp guides:** Created client island `CompAugmentsList` (`src/components/comp-augments.tsx`) using the shared `useHoverTip` and `AugmentDetails`, replacing the static `title` attribute in `CompGuide` (`src/components/comp-guide.tsx`) to provide full tier, rarity, and description text on touch and desktop.
+
+**Verified — Task 22 (2026-09-16):**
+- **Checks:** `pnpm check` (524 tests, up from 523: new test in `openers.test.ts` asserting carry propagation to pivots) and `pnpm build` (Next.js 16.3 Turbopack) are green; `pnpm dlx knip` reports zero unused files, exports, or dependencies.
+- **Route lifetime & static analysis:** `/` and `/comps/[slug]` retain their exact Partial Prerender behavior. Comp guide augment list adds minimal JS payload since `useHoverTip` and `AugmentDetails` are already shared in the chunk.
+- **Not committed/pushed:** Held in working directory awaiting user review before committing and deploying.
 
 - [ ] Further tasks — not yet specified.
 

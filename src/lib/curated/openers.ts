@@ -18,8 +18,9 @@ import { formatIssue, parseYaml, suggestApiNames, type SeedIssue } from "./valid
 
 export type OpenerUnit = { apiName: string; name: string; cost: number; iconUrl: string | null };
 export type OpenerItem = { apiName: string; name: string; iconUrl: string | null };
+export type OpenerCarry = { name: string; cost: number; iconUrl: string | null };
 /** A comp this opener pivots into. `name` is the comp's, so the pill isn't a slug. */
-export type OpenerPivot = { slug: string; name: string; tier: TierRank };
+export type OpenerPivot = { slug: string; name: string; tier: TierRank; carry?: OpenerCarry };
 
 export type Opener = {
   name: string;
@@ -35,7 +36,7 @@ export type Openers = { patch: string; title: string; openers: Opener[] };
 /** What the file's api names and slugs are checked against. */
 export type OpenerReferences = {
   names: NameBook;
-  comps: ReadonlyMap<string, { name: string; tier: TierRank }>;
+  comps: ReadonlyMap<string, { name: string; tier: TierRank; carry?: OpenerCarry }>;
 };
 
 const costList = OPENER_COSTS.map((cost) => `${cost}-cost`).join(" and ");
@@ -141,7 +142,9 @@ export function validateOpeners(input: {
         warnings.push(yaml.issue(at("transition_to", i), `no published comp has the slug "${slug}"; hiding that pivot`));
         return [];
       }
-      return [{ slug, name: comp.name, tier: comp.tier }];
+      const pivot: OpenerPivot = { slug, name: comp.name, tier: comp.tier };
+      if (comp.carry) pivot.carry = comp.carry;
+      return [pivot];
     });
 
     return { name: opener.name, tier: opener.tier, units, items, pivots, notes: opener.notes };
@@ -186,10 +189,19 @@ export async function getOpeners(): Promise<Openers | null> {
 
   const [{ names }, { comps }] = await Promise.all([getStaticNames(), getComps()]);
   const { file, text } = found;
+  const compRefs = new Map<string, { name: string; tier: TierRank; carry?: OpenerCarry }>();
+  for (const comp of comps) {
+    const mainCarry = comp.units.find((u) => u.isCarry) ?? comp.units[0];
+    const carry = mainCarry
+      ? { name: mainCarry.name, cost: mainCarry.cost, iconUrl: mainCarry.iconUrl }
+      : undefined;
+    compRefs.set(comp.slug, { name: comp.name, tier: comp.tier, carry });
+  }
+
   const { openers, issues, warnings } = validateOpeners({
     file,
     text,
-    refs: { names, comps: new Map(comps.map((comp) => [comp.slug, { name: comp.name, tier: comp.tier }])) },
+    refs: { names, comps: compRefs },
   });
   if (!openers) {
     throw new Error(`Invalid ${file}:\n${issues.map((issue) => `  ${formatIssue(issue)}`).join("\n")}`);
