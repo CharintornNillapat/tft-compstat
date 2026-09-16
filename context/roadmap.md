@@ -1,6 +1,6 @@
 # TFT CompStat — Roadmap
 
-> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–28 deployed and verified and Task 29 in the working tree awaiting review (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
+> **Status:** Phases 1–5 complete and deployed (2026-09-12); Phase 6 is open-ended, approved task by task, with Tasks 1–29 deployed and verified (2026-09-16). Live at https://tft-compstat.vercel.app, with Set 18 static data, synced tier lists, comps, BIS and augments, the match cache syncing daily, the personal dashboard and the team planner.
 > **Companion doc:** [`architecture.md`](./architecture.md), where the § references below point.
 
 ## Working agreement
@@ -20,7 +20,7 @@
 | 3 | Meta comps showcase | ✅ Done (2026-09-12) |
 | 4 | Riot API service & match cache | ✅ Done (2026-09-12) |
 | 5 | Personal dashboard & polish | ✅ Done (2026-09-12) |
-| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–28 deployed, Task 29 awaiting review (2026-09-16) |
+| 6 | Overview enhancements and follow-up tasks | 🔄 Open — task by task; Tasks 1–29 deployed and verified (2026-09-16) |
 
 ---
 
@@ -786,7 +786,9 @@ Approved task by task rather than as a whole phase.
 - **Gates:** `pnpm check` green — 49 test files, **577 tests** (up from 568: 6 in `meta-freshness.test.ts`, 3 in `patch-consistency.test.ts`), 0 lint errors, 0 type errors, `knip` 0 findings. `pnpm build` green with the fetch cache cleared: 42/42 routes, every route keeping its shape (`/` and `/comps/[slug]` Partial Prerender; `/bis`, `/augments`, `/comps`, `/planner` and both tier lists Static).
 - **Route lifetimes:** `/augments` builds at 1d / 1w, not the 30d / 1y architecture §8 claimed. Measured to be a **Task 27 regression, not this one**: `HeaderMetaPill` sits in the root layout and its `cacheLife("days")` floors every route, confirmed by rebuilding with the pill removed (`/augments` returned to 30d / 1y). Kept, and §8 corrected — the pill is tag-revalidated and a daily floor on a freshness badge is the right way round.
 - **Not done:** the workflow changes are unexercised — no scheduled run has fired with `sync:static` in it, and the rollover guard's throw path has no live rehearsal (it needs real game data naming a new set). Neither has a unit test; both are script-level branches the existing suite doesn't reach. No `if: failure()` notification step was added to `sync-meta.yml`, so a failed daily run is still only visible in the Actions tab. `is_shop_unit` is still dead (architecture §4.8) and `CONTEXT.md` / `docs/adr/` that `CLAUDE.md` names still do not exist.
-- **Deployed:** no — left uncommitted in the working tree for review.
+- **Deployed (2026-09-16, commit `8114787`, trailer `AGY-Task: 29`)**: pushed to `main` and live. CI green in 53s; Vercel production deploy READY; the live prerendered header ships the grey "freshness unknown" dot rather than a green pulse, with the real age filled in on hydration.
+- **Cloud rehearsal of the workflow:** a manual `sync-meta.yml` run (35103651723) was green in 1m10s. The new `sync:static` step wrote set 18 with the exact §4.8 counts (36 traits, 74 champions, 771 items, abilities 65 of 74) and only the nine known Lux-form warnings; the rollover guard took its no-op path. The run built and pushed `73ec1fa` (28 files under `data/curated/`), and `patch-consistency.test.ts` is 3/3 green against that freshly synced output.
+- **Found during that run, pre-existing:** `SITE_URL` and `REVALIDATE_SECRET` are empty in the workflow environment, so the daily sync never revalidates the live cache — it only refreshes via the auto-commit's redeploy and `cacheLife("days")`. Architecture §10 lists both as required repository secrets. Unrelated to this task; the two secrets want setting.
 
 - [ ] Further tasks — not yet specified.
 
