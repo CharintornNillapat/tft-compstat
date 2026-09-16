@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster hunter-sivir, DIAMOND+.
-# Sample: 25,947 boards, avg 4.33, patch 18.2, set 18.
+# Sample: 26,948 boards, avg 4.34, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,9 +15,9 @@ style: fast9
 difficulty: 3
 patch: "18.2"
 order: 7
-summary: "Ends at level 9 with Sivir carrying. MetaTFT DIAMOND+: 25,947 boards, avg 4.33, picked 2.9% of boards."
-avg_place: 4.33
-pick_rate: 2.88
+summary: "Ends at level 9 with Sivir carrying. MetaTFT DIAMOND+: 26,948 boards, avg 4.34, picked 3.0% of boards."
+avg_place: 4.34
+pick_rate: 2.97
 level_recommended: 9
 early_units: [ DA_18_Akali_AD, DA_18_Ornn, DA_18_Shen, DA_18_Varus ]
 flex_units: [ DA_18_Ivern, DA_Taric18, DA_Lux18_Base, DA_18_Rakan ]
@@ -43,4 +43,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 25,947 boards, avg 4.33. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 26,948 boards, avg 4.34. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

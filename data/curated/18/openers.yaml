@@ -31,7 +31,7 @@ openers:
     slammable_items:
       - DA_SpearOfShojin
       - DA_RedBuff
-      - DA_StrikersFlail
+      - DA_GargoyleStoneplate
     transition_to:
       - invoker-ahri
       - juggernaut-sivir

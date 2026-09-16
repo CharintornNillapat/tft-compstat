@@ -3,15 +3,15 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 166,552 games on patch 18.2, set 18. Feed updated 2026-09-16T08:08:50.842Z.
+# Sample: 251,824 games on patch 18.2, set 18. Feed updated 2026-09-16T13:42:56.392Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 10 to 4.17, A 19 to 4.54, B 23 to 4.76, C 13 to 5.46.
+# Where they fell, as size and worst average placement: S 10 to 4.18, A 19 to 4.53, B 23 to 4.76, C 13 to 5.46.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: champions-18.2
 kind: champion
 patch: "18.2"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 166,552 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.2: 251,824 games over the last 3 days."
 tiers:
   S:
     - DA_Lux18_Base
@@ -29,56 +29,56 @@ tiers:
     - DA_Sentinel18
     - DA_KogMaw18_AD
     - DA_Nidalee18_AP
-    - DA_18_Ahri
     - DA_18_Soraka
-    - DA_18_Sivir
+    - DA_18_Ahri
     - DA_18_Ezreal
     - DA_18_Sentry
-    - DA_18_Sett
+    - DA_18_Sivir
     - DA_18_Aphelios
+    - DA_18_Sett
     - DA_18_Morgana
     - DA_18_Varus
     - DA_18_Kayle
-    - DA_18_Alistar
     - DA_18_RekSai
-    - DA_Krug18
     - DA_18_KhaZix
-    - DA_18_Zyra
-  B:
+    - DA_18_Alistar
+    - DA_Krug18
     - DA_18_Diana
+  B:
+    - DA_18_Zyra
     - DA_Fiddlesticks18
     - DA_Vi18
-    - DA_Brambleback18
-    - DA_18_Malphite
     - DA_18_Veigar
+    - DA_18_Malphite
+    - DA_Brambleback18
     - DA_18_Azir
     - DA_18_LeBlanc
     - DA_Cinderling18
     - DA_18_Ornn
     - DA_18_Lillia
-    - DA_18_Sejuani
-    - DA_18_Yorick
     - DA_18_Rengar
+    - DA_18_Yorick
     - DA_18_Cassiopeia
     - DA_Karma18
+    - DA_18_Sejuani
     - DA_18_Leona
-    - DA_18_Akali_AD
     - DA_18_MasterYi_AD
     - DA_Murkwolf18
-    - DA_CrimsonRaptor18
-    - DA_18_Teemo
     - DA_18_Rammus
-  C:
-    - DA_18_Kobuko
-    - DA_Scuttlecrab18
     - DA_Gromp18_AP
+    - DA_18_Akali_AD
+    - DA_Scuttlecrab18
+  C:
+    - DA_18_Teemo
+    - DA_18_Kobuko
+    - DA_CrimsonRaptor18
     - DA_18_Hecarim
     - DA_18_Tristana
     - DA_18_Xayah
     - DA_18_Rakan
     - DA_18_Yunara
-    - DA_18_Camille
     - DA_18_Shen
+    - DA_18_Camille
     - DA_18_Caitlyn
     - DA_18_Warwick
     - DA_18_Elise
