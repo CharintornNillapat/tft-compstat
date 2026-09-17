@@ -34,27 +34,11 @@ openers:
       - DA_GargoyleStoneplate
     transition_to:
       - invoker-ahri
+      - riftbeast-malphite
       - juggernaut-sivir
-      - blossom-sett-sivir
     notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Ashe.
-  - name: Inferno Defenders
-    tier: S
-    core_units:
-      - DA_18_Akali_AD
-      - DA_18_Ornn
-      - DA_18_Shen
-      - DA_18_Varus
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_InfinityEdge
-      - DA_StrikersFlail
-    transition_to:
-      - hunter-sivir
-      - elderwood-aphelios-ezreal
-      - elderwood-ezreal-draven
-    notes: Varus holds items while Shen anchors the frontline. Pivot toward Hunter Sivir.
   - name: Blossom Swarm
-    tier: A
+    tier: S
     core_units:
       - DA_Karma18
       - DA_18_Yorick
@@ -67,22 +51,22 @@ openers:
       - vanguard-khazix
       - ashe-fast-9
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
-  - name: Ravager Defenders
+  - name: Inferno Defenders
     tier: A
     core_units:
       - DA_18_Akali_AD
-      - DA_18_Camille
-      - DA_18_Leona
       - DA_18_Ornn
+      - DA_18_Shen
+      - DA_18_Varus
     slammable_items:
+      - DA_SpearOfShojin
+      - DA_RedBuff
       - DA_InfinityEdge
-      - DA_Quicksilver
-      - DA_SteraksGage
     transition_to:
-      - inferno-akali
-      - elderwood-kayle
       - hunter-sivir
-    notes: Akali holds items while Leona anchors the frontline. Pivot toward Inferno Akali.
+      - elderwood-aphelios-ezreal
+      - elderwood-ezreal-draven
+    notes: Varus holds items while Shen anchors the frontline. Pivot toward Hunter Sivir.
   - name: Blackthorn Swarm
     tier: A
     core_units:
@@ -99,16 +83,16 @@ openers:
       - sprykin-veigar
     notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
   - name: Sprykin Brawlers
-    tier: B
+    tier: A
     core_units:
       - DA_18_Kobuko
       - DA_18_RekSai
       - DA_18_Teemo
       - DA_18_Veigar
     slammable_items:
+      - DA_Crownguard
       - DA_GargoyleStoneplate
       - DA_WarmogsArmor
-      - DA_Crownguard
     transition_to:
       - executioner-malphite
       - sprykin-veigar
@@ -127,3 +111,19 @@ openers:
       - defender-cassiopeia
       - invoker-morgana-taric
     notes: Caitlyn holds items while Elise anchors the frontline. Pivot toward Defender Cassiopeia.
+  - name: Ravager Defenders
+    tier: B
+    core_units:
+      - DA_18_Akali_AD
+      - DA_18_Camille
+      - DA_18_Leona
+      - DA_18_Ornn
+    slammable_items:
+      - DA_EdgeOfNight
+      - DA_HandOfJustice
+      - DA_JeweledGauntlet
+    transition_to:
+      - inferno-akali
+      - elderwood-kayle
+      - hunter-sivir
+    notes: Akali holds items while Leona anchors the frontline. Pivot toward Inferno Akali.
