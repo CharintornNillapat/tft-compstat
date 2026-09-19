@@ -5,6 +5,22 @@
 patch: "18.2"
 title: Early openers & item slams
 openers:
+  - name: Blossom Juggernauts
+    tier: S
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Yorick
+      - DA_18_Yunara
+      - DA_Karma18
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
+      - DA_LastWhisper
+    transition_to:
+      - invoker-ahri
+      - riftbeast-malphite
+      - juggernaut-zyra
+    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Sivir.
   - name: Elderwood Rapidfires
     tier: S
     core_units:
@@ -18,41 +34,10 @@ openers:
       - DA_InfinityEdge
     transition_to:
       - elderwood-ezreal-draven
-      - lunar-aphelios-nidalee
       - elderwood-aphelios-ezreal
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios Ezreal.
-  - name: Blossom Juggernauts
-    tier: S
-    core_units:
-      - DA_18_Rakan
-      - DA_18_Yorick
-      - DA_18_Yunara
-      - DA_Karma18
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_StrikersFlail
-      - DA_GargoyleStoneplate
-    transition_to:
-      - invoker-ahri
-      - riftbeast-malphite
-      - juggernaut-sivir
-    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Sivir.
-  - name: Blossom Swarm
-    tier: S
-    core_units:
-      - DA_Karma18
-      - DA_18_Yorick
-      - DA_18_Yunara
-    slammable_items:
-      - DA_EdgeOfNight
-      - DA_HandOfJustice
-      - DA_RabadonsDeathcap
-    transition_to:
-      - vanguard-khazix
-      - ashe-fast-9
-    notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
   - name: Inferno Defenders
-    tier: A
+    tier: S
     core_units:
       - DA_18_Akali_AD
       - DA_18_Ornn
@@ -60,13 +45,42 @@ openers:
       - DA_18_Varus
     slammable_items:
       - DA_SpearOfShojin
-      - DA_RedBuff
       - DA_InfinityEdge
+      - DA_RedBuff
     transition_to:
+      - lunar-aphelios-nidalee
       - hunter-sivir
+    notes: Varus holds items while Shen anchors the frontline. Pivot toward Hunter Sivir.
+  - name: Elderwood Swarm
+    tier: A
+    core_units:
+      - DA_18_Alistar
+      - DA_18_LeBlanc
+      - DA_18_Ornn
+    slammable_items:
+      - DA_EdgeOfNight
+      - DA_HandOfJustice
+      - DA_RabadonsDeathcap
+    transition_to:
+      - vanguard-khazix
       - elderwood-aphelios-ezreal
       - elderwood-ezreal-draven
-    notes: Varus holds items while Shen anchors the frontline. Pivot toward Hunter Sivir.
+    notes: Alistar holds items while Ornn anchors the frontline. Pivot toward Vanguard Kha'Zix.
+  - name: Blossom Swarm
+    tier: A
+    core_units:
+      - DA_Karma18
+      - DA_18_Yorick
+      - DA_18_Yunara
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_RedBuff
+      - DA_LastWhisper
+    transition_to:
+      - ashe-fast-9
+      - adaptor-master-yi
+      - blossom-leblanc
+    notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
   - name: Elderwood Spellweavers
     tier: A
     core_units:
@@ -76,8 +90,8 @@ openers:
       - DA_18_Veigar
     slammable_items:
       - DA_GargoyleStoneplate
-      - DA_WarmogsArmor
-      - DA_Crownguard
+      - DA_BlueBuff
+      - DA_HextechGunblade
     transition_to:
       - sprykin-teemo
       - elderwood-aphelios-ezreal
@@ -106,24 +120,11 @@ openers:
       - DA_18_Teemo
       - DA_18_Veigar
     slammable_items:
+      - DA_SpearOfShojin
       - DA_Crownguard
       - DA_GargoyleStoneplate
-      - DA_WarmogsArmor
     transition_to:
       - executioner-malphite
+      - flora-malphite
       - sprykin-veigar
-    notes: Veigar holds items while Kobuko anchors the frontline. Pivot toward Executioner Malphite.
-  - name: Coven Swarm
-    tier: B
-    core_units:
-      - DA_18_Camille
-      - DA_18_Elise
-      - DA_18_Caitlyn
-    slammable_items:
-      - DA_InfinityEdge
-      - DA_HextechGunblade
-      - DA_RabadonsDeathcap
-    transition_to:
-      - defender-cassiopeia
-      - invoker-morgana-taric
-    notes: Caitlyn holds items while Elise anchors the frontline. Pivot toward Defender Cassiopeia.
+    notes: Teemo holds items while Kobuko anchors the frontline. Pivot toward Executioner Malphite.

@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-18T07:46:59.073Z. Names, icons, rarity and text: CommunityDragon 16.18.
+# (per comp), updated 2026-09-19T07:41:21.020Z. Names, icons, rarity and text: CommunityDragon 16.18.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.2"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-18. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-19. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -1595,9 +1595,6 @@ comps:
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_BoxingLessons, DA_FrontlineFoundation, DA_SpreadingRoots, DA_LivingForge, DA_TheTraitTree ]
-  elderwood-aphelios-ezreal:
-    source: APHELIOS > Elderwood OR Vanguard> Lvl 8 push
-    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   elderwood-ezreal-draven:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_GildedSteel, DA_LevelUp, DA_BirthdayPresent ]
@@ -1626,17 +1623,17 @@ comps:
     source: ZYRA > Juggernaut > Lvl 8 push
     augments: [ DA_GroupHugI, DA_BoxingLessons, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
   lunar-aphelios-nidalee:
-    source: APHELIOS > Elderwood OR Vanguard> Lvl 8 push
+    source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   primal-sivir:
-    source: SIVIR & NIDALEE > Hunter > Lvl 8 push
+    source: NIDALEE & SIVIR > Hunter > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   rapidfire-aphelios:
-    source: APHELIOS > Elderwood OR Vanguard> Lvl 8 push
+    source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   riftbeast-malphite:
-    source: SIVIR & NIDALEE > Hunter > Lvl 8 push
+    source: NIDALEE & SIVIR > Hunter > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   vanguard-aphelios:
-    source: APHELIOS > Elderwood OR Vanguard> Lvl 8 push
+    source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
