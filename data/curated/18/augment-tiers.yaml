@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-19T07:41:21.020Z. Names, icons, rarity and text: CommunityDragon 16.18.
+# (per comp), updated 2026-09-22T08:04:02.260Z. Names, icons, rarity and text: CommunityDragon 16.18.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.2"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-19. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-22. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -118,12 +118,6 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: The first 4 times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain a Veigar and a Rek'Sai.
-  - api_name: DA_LateGameSpecialist
-    name: Late Game Specialist
-    rarity: Silver
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/late-game-specialist-i.png
-    description: When you reach Level 9, gain 27 gold.
   - api_name: DA_BirthdayReunion
     name: Birthday Reunion
     rarity: Gold
@@ -244,12 +238,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/kickstart_i.png
     description: Gain a random 2-star 2-cost champion and 1 gold.
-  - api_name: DA_MakeshiftArmorI
-    name: Makeshift Armor I
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/makeshift1.png
-    description: Champions without items equipped gain 30 Armor and Magic Resist.
   - api_name: DA_MissedConnections
     name: Missed Connections
     rarity: Silver
@@ -277,12 +265,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/smallgrabbag_i.png
     description: Gain 2 random item components.
-  - api_name: DA_TwinGuardians
-    name: Twin Guardians
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/twinguardians_i.png
-    description: If you have exactly 2 allies in your first row, grant them 100 Health, 35 Armor, and 35 Magic Resist.
   - api_name: DA_18_BigGrabBag
     name: Big Grab Bag
     rarity: Gold
@@ -719,12 +701,39 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_iii.png
     description: Your team gains 2.5% Damage Amp and 4 Armor and Magic Resist for each Bronze-tier trait.
+  - api_name: DA_LoadedDice
+    name: Loaded Dice
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: |-
+      Your dice and coins are luckier.
+
+      Roll a die and gain gold equal to the number rolled. Then flip a coin and gain 1 gold if you flip heads.
+  - api_name: DA_CarveAPath
+    name: Carve a Path
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/carveapath_i.png
+    description: Gain a B.F. Sword. After your champions deal 65000 physical damage, gain 2 more.
+  - api_name: DA_LateGameSpecialist
+    name: Late Game Specialist
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/late-game-specialist-i.png
+    description: When you reach Level 9, gain 27 gold.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/celestialblessing1.png
     description: Your team gains 12% Omnivamp. Excess healing is converted to a shield up to 200 Health.
+  - api_name: DA_TwinGuardians
+    name: Twin Guardians
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/twinguardians_i.png
+    description: If you have exactly 2 allies in your first row, grant them 100 Health, 35 Armor, and 35 Magic Resist.
   - api_name: DA_CognitiveTax
     name: Cognitive Tax
     rarity: Silver
@@ -794,6 +803,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/findyourcenter_i.png
     description: Your champion that starts combat in the center of the front row gains 15% Damage Amp and 25% max Health.
+  - api_name: DA_MakeshiftArmorI
+    name: Makeshift Armor I
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/makeshift1.png
+    description: Champions without items equipped gain 30 Armor and Magic Resist.
   - api_name: DA_Recombobulator
     name: Recombobulator
     rarity: Silver
@@ -860,12 +875,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/thetower_i.png
     description: Gain a giant Training Dummy. Every 4 seconds, it zaps the 3 nearest enemies dealing 5% max Health true damage.
-  - api_name: DA_BackupBows
-    name: Backup Bows
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/recurvewrecker_i.png
-    description: Gain a Recurve Bow. After your champions attack 1000 times, get 2 more.
   - api_name: DA_AdvancedLoan
     name: Advanced Loan
     rarity: Gold
@@ -1303,12 +1312,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: The first time you 3-star a champion, gain a copy of them each round for the rest of the game. 3-starring the same champion again grants additional copies. Gain a Lesser Champion Duplicator and a Tiny Champion Duplicator.
-  - api_name: DA_CarveAPath
-    name: Carve a Path
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/carveapath_i.png
-    description: Gain a B.F. Sword. After your champions deal 65000 physical damage, gain 2 more.
   - api_name: DA_PromisedProtection
     name: Promised Protection
     rarity: Gold
@@ -1369,15 +1372,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
     description: After a champion dies in combat, spawn a copy of them one star level lower with 60% health. Gain 3 free rerolls.
-  - api_name: DA_LoadedDice
-    name: Loaded Dice
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: |-
-      Your dice and coins are luckier.
-
-      Roll a die and gain gold equal to the number rolled. Then flip a coin and gain 1 gold if you flip heads.
   - api_name: DA_18_ResidualMagic
     name: Residual Magic
     rarity: Silver
@@ -1465,6 +1459,12 @@ augments:
       Gain 3 gold now. On Stage 3-7, gain an Infinity Force. Infinity Force gives allies in the same row a 12% Health shield.
 
       Monsters Attack Championship, 2023
+  - api_name: DA_BackupBows
+    name: Backup Bows
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/recurvewrecker_i.png
+    description: Gain a Recurve Bow. After your champions attack 1000 times, get 2 more.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1589,51 +1589,48 @@ augments:
     icon_url: https://raw.communitydragon.org/16.18/game/assets/maps/tft/icons/augments/hexcore/electrocharge-ii.png
     description: Every 4 attacks an ally takes, they deal 50-140 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
 comps:
-  adaptor-master-yi:
-    source: MASTER YI > Adaptor > Lvl 7 reroll
-    augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_BoxingLessons, DA_FrontlineFoundation, DA_SpreadingRoots, DA_LivingForge, DA_TheTraitTree ]
-  elderwood-ezreal-draven:
+  elderwood-aphelios:
+    source: APHELIOS > Lvl 8 push
+    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
+  elderwood-ezreal-amumu:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_GildedSteel, DA_LevelUp, DA_BirthdayPresent ]
-  elderwood-kayle:
-    source: XAYAH & KAYLE > Solar > Lvl 5 & 6 reroll
-    augments: [ DA_MissedConnections, DA_RollingForDays, DA_HeroicGrabBag, DA_TradeSector, DA_ShimmerscaleEssence, DA_InvestmentStrategy ]
   executioner-malphite:
     source: SORAKA & ZYRA > Executioner > Lvl 8 push
     augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
   executioner-sett:
     source: EZREAL > Executioner > Lvl 8
     augments: [ DA_TwinGuardians, DA_GlassCannon_Silver, DA_BlackthornTraitAugment, DA_Staffsmith, DA_TheTraitTree, DA_UrfsGrabBag ]
-  hunter-sivir:
+  inferno-sivir:
     source: ASHE > Inferno > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_GildedSteel, DA_LevelUp, DA_BirthdayPresent ]
   invoker-ahri:
     source: AHRI & Morgana > Blossom > Lvl 8 push
     augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
-  invoker-morgana-taric:
-    source: ELDER DRAGON > Legendaries > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_GildedSteel, DA_LevelUp, DA_BirthdayPresent ]
-  juggernaut-sivir:
-    source: ELDER DRAGON > Legendaries > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_GildedSteel, DA_LevelUp, DA_BirthdayPresent ]
-  juggernaut-zyra:
+  juggernaut-zyra-sivir:
     source: ZYRA > Juggernaut > Lvl 8 push
     augments: [ DA_GroupHugI, DA_BoxingLessons, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
-  lunar-aphelios-nidalee:
+  juggernaut-zyra-summoner:
+    source: ZYRA > Juggernaut > Lvl 8 push
+    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
+  lunar-aphelios:
     source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
-  primal-sivir:
-    source: NIDALEE & SIVIR > Hunter > Lvl 8 push
+  primal-nidalee-krug:
+    source: SIVIR > Hunter > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   rapidfire-aphelios:
     source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   riftbeast-malphite:
-    source: NIDALEE & SIVIR > Hunter > Lvl 8 push
+    source: SIVIR > Hunter > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
-  vanguard-aphelios:
+  riftbeast-sentinel:
+    source: ELDER DRAGON > Legendaries > Lvl 9
+    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_GildedSteel, DA_LevelUp, DA_BirthdayPresent ]
+  vanguard-aphelios-brambleback:
     source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]

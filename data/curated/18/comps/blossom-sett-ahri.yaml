@@ -2,39 +2,39 @@
 # To keep a comp of your own, delete the marker line above: a file without it is
 # treated as hand-written, and is never overwritten or pruned.
 #
-# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster blossom-sett-sivir, DIAMOND+.
-# Sample: 18,325 boards, avg 4.55, patch 18.2, set 18.
+# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster blossom-sett-ahri, DIAMOND+.
+# Sample: 12,007 boards, avg 4.56, patch 18.2, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
 # no top4_rate to write.
-slug: blossom-sett-sivir
-name: Blossom Sett Sivir
+slug: blossom-sett-ahri
+name: Blossom Sett Ahri
 tier: B
 style: fast9
 difficulty: 3
 patch: "18.2"
-order: 13
-summary: "Ends at level 9 with Ashe carrying. MetaTFT DIAMOND+: 18,325 boards, avg 4.55, picked 1.8% of boards."
-avg_place: 4.55
-pick_rate: 1.82
+order: 19
+summary: "Ends at level 9 with Ashe carrying. MetaTFT DIAMOND+: 12,007 boards, avg 4.56, picked 1.3% of boards."
+avg_place: 4.56
+pick_rate: 1.26
 level_recommended: 9
 early_units: [ DA_18_Rakan, DA_18_Yorick, DA_18_Yunara, DA_Karma18 ]
-flex_units: [ DA_Lux18_Base, DA_18_Maokai, DA_Amumu18, DA_18_Ivern ]
+flex_units: [ DA_Lux18_Base, DA_18_Maokai, DA_18_MasterYi_AD, DA_18_Yunara ]
 board:
   - { unit: DA_18_Sett, row: 0, col: 3, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_GargoyleStoneplate, DA_WarmogsArmor ] }
-  - { unit: DA_18_Sivir, row: 3, col: 0, items: [ DA_18_EmblemBlossom ] }
   - { unit: DA_18_Ahri, row: 3, col: 6, carry: true, priority: 2, items: [ DA_JeweledGauntlet, DA_SpearOfShojin, DA_StrikersFlail ] }
+  - { unit: DA_18_Sivir, row: 3, col: 0, items: [ DA_18_EmblemBlossom ] }
   - { unit: DA_18_Yorick, row: 0, col: 2, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Ashe, row: 3, col: 5, star: 1, carry: true, priority: 1, items: [ DA_LastWhisper, DA_RedBuff, DA_SpearOfShojin ] }
   - { unit: DA_Vi18, row: 0, col: 4, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_Karma18, row: 3, col: 2, items: [ DA_TacticiansCape ] }
+  - { unit: DA_18_Ashe, row: 3, col: 5, star: 1, carry: true, priority: 1, items: [ DA_LastWhisper, DA_RedBuff, DA_SpearOfShojin ] }
+  - { unit: DA_Karma18, row: 3, col: 1, items: [ DA_VoidStaff ] }
   - { unit: DA_18_GnarSmall, row: 1, col: 3, star: 1, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Zyra, row: 3, col: 4, items: [ DA_VoidStaff ] }
+  - { unit: DA_18_Zyra, row: 3, col: 2, items: [ DA_VoidStaff ] }
 guide: |-
   **Early:** the most-played opener is Rakan, Yorick, Yunara, Karma.
 
-  **Levelling:** level 7 by 3-5, level 8 by 4-2, level 9 by 5-2.
+  **Levelling:** level 7 by 3-6, level 8 by 4-2, level 9 by 5-3.
 
   **Items**, in the order to build them:
   - **Ashe**: Last Whisper, Red Buff, Spear of Shojin
@@ -43,4 +43,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 18,325 boards, avg 4.55. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.2: 12,007 boards, avg 4.56. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
