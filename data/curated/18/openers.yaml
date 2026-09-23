@@ -13,12 +13,13 @@ openers:
       - DA_18_Shen
       - DA_18_Varus
     slammable_items:
-      - DA_SpearOfShojin
       - DA_InfinityEdge
-      - DA_RedBuff
+      - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
     transition_to:
       - lunar-aphelios
       - inferno-sivir
+      - rapidfire-aphelios
     notes: Varus holds items while Shen anchors the frontline. Pivot toward Inferno Sivir.
   - name: Coven Swarm
     tier: S
@@ -48,24 +49,8 @@ openers:
       - DA_VoidStaff
     transition_to:
       - spellweaver-veigar
-      - elderwood-khazix
       - flora-malphite
     notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
-  - name: Elderwood Swarm
-    tier: A
-    core_units:
-      - DA_18_Alistar
-      - DA_18_LeBlanc
-      - DA_18_Ornn
-    slammable_items:
-      - DA_EdgeOfNight
-      - DA_HandOfJustice
-      - DA_RabadonsDeathcap
-    transition_to:
-      - elderwood-khazix
-      - elderwood-aphelios
-      - elderwood-ezreal-amumu
-    notes: Alistar holds items while Ornn anchors the frontline. Pivot toward Elderwood Kha'Zix.
   - name: Blossom Swarm
     tier: A
     core_units:
@@ -73,13 +58,13 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_SpearOfShojin
-      - DA_RedBuff
-      - DA_LastWhisper
+      - DA_JeweledGauntlet
+      - DA_GargoyleStoneplate
+      - DA_EdgeOfNight
     transition_to:
+      - elderwood-khazix
       - ashe-fast-9
-      - blossom-sett-ahri
-      - blossom-yunara
+      - executioner-azir
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
   - name: Blossom Juggernauts
     tier: A
@@ -94,8 +79,8 @@ openers:
       - DA_WarmogsArmor
     transition_to:
       - riftbeast-sentinel
-      - riftbeast-malphite
       - juggernaut-sivir
+      - riftbeast-malphite
     notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Ahri.
   - name: Elderwood Rapidfires
     tier: A
@@ -126,3 +111,18 @@ openers:
       - flora-malphite
       - spellweaver-veigar
     notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
+  - name: Riftbeast Juggernauts
+    tier: B
+    core_units:
+      - DA_18_Sentry
+      - DA_18_Yorick
+      - DA_Cinderling18
+      - DA_Scuttlecrab18
+    slammable_items:
+      - DA_BlueBuff
+      - DA_GargoyleStoneplate
+      - DA_JeweledGauntlet
+    transition_to:
+      - riftbeast-pebbles
+      - draven-fast-9
+    notes: Pebbles holds items while Scuttlecrab anchors the frontline. Pivot toward Riftbeast Pebbles.
