@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-23T08:08:31.501Z. Names, icons, rarity and text: CommunityDragon 16.19.
+# (per comp), updated 2026-09-24T07:57:51.292Z. Names, icons, rarity and text: CommunityDragon 16.19.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.3"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-23. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-24. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -25,12 +25,6 @@ augments:
       When you reach Level 8, gain 20 Shop rerolls.
 
       Runeterra Reforged Championship, 2023
-  - api_name: DA_MagicRoll
-    name: Magic Roll
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/a-magical-roll-ii.png
-    description: Roll 3 dice. Gain rewards based on their total.
   - api_name: DA_PortableForge
     name: Portable Forge
     rarity: Gold
@@ -106,12 +100,6 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/rolling-for-days-i.png
     description: Gain 10 free Shop rerolls.
-  - api_name: DA_BlackthornTraitAugment
-    name: Item Extraction
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: The first 3 times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain an Azir, Veigar, and a Rek'Sai.
   - api_name: DA_BirthdayReunion
     name: Birthday Reunion
     rarity: Gold
@@ -157,6 +145,18 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Primal grants an additional Blessing. Gain a Vi and a Sivir.
+  - api_name: DA_18_CovenTraitAugment_LootToAP
+    name: Dark Ritual
+    rarity: Gold
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
+  - api_name: DA_MagicRoll
+    name: Magic Roll
+    rarity: Gold
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/a-magical-roll-ii.png
+    description: Roll 3 dice. Gain rewards based on their total.
   - api_name: DA_BandOfThieves
     name: Band of Thieves
     rarity: Silver
@@ -569,12 +569,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/expedition_i.png
     description: At the start of every round, lose the champion in the rightmost bench slot. After losing 33 gold of champions in this way, gain a powerful reward. Gain a 3-cost champion now.
-  - api_name: DA_18_CovenTraitAugment_LootToAP
-    name: Dark Ritual
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
   - api_name: DA_PandorasItemsII
     name: Pandora's Items II
     rarity: Gold
@@ -620,12 +614,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: Store gold equal to the interest you earn. On 3-3, gain gold equal to 100% of the stored gold. Gain 1 gold now.
-  - api_name: DA_18_CovenTraitAugment
-    name: Coven Acolyte
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: When you choose to continue gathering Coven essence, heal 2 Tactician health. Gain a Camille, an Elise, and a Caitlyn.
   - api_name: DA_BacklineBlueprint
     name: Backline Blueprint
     rarity: Gold
@@ -716,6 +704,18 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Whenever you open a loot orb, you have a 25% chance to gain a gray loot orb. Gain 1 gray loot orbs.
+  - api_name: DA_BlackthornTraitAugment
+    name: Item Extraction
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: The first 3 times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain an Azir, Veigar, and a Rek'Sai.
+  - api_name: DA_FrontlineFoundation
+    name: Frontline Foundation
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/frontlinefoundation_ii.png
+    description: Gain a 2-star 1-cost Tank champion and an Emblem that matches their class.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -911,6 +911,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: You can field Rengar and Kha'Zix together with no penalties, and they gain bonuses when the other casts. Gain a Rengar and a Kha'Zix.
+  - api_name: DA_18_CovenTraitAugment
+    name: Coven Acolyte
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: When you choose to continue gathering Coven essence, heal 2 Tactician health. Gain a Camille, an Elise, and a Caitlyn.
   - api_name: DA_Ascension
     name: Ascension
     rarity: Gold
@@ -985,12 +991,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/epoch_ii.png
     description: Now, and at the start of every stage, gain 8 XP and 2 free rerolls.
-  - api_name: DA_FrontlineFoundation
-    name: Frontline Foundation
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/frontlinefoundation_ii.png
-    description: Gain a 2-star 1-cost Tank champion and an Emblem that matches their class.
   - api_name: DA_GainGold
     name: Gain 21 Gold
     rarity: Gold
@@ -1435,6 +1435,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: You can now choose a second Alpha Riftbeast. Gain a Scuttlecrab, a Cinderling, and a Pebbles.
+  - api_name: DA_ShimmerscaleEssence
+    name: Shimmerscale Essence
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/shimmerscaleessence_iii.png
+    description: Gain a Gambler's Blade. After 6 player combats, gain a Mogul's Mail.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1576,12 +1582,6 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
     description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
-  - api_name: DA_ShimmerscaleEssence
-    name: Shimmerscale Essence
-    rarity: Prismatic
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/shimmerscaleessence_iii.png
-    description: Gain a Gambler's Blade. After 6 player combats, gain a Mogul's Mail.
 comps:
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll

@@ -5,6 +5,22 @@
 patch: "18.2"
 title: Early openers & item slams
 openers:
+  - name: Blossom Juggernauts
+    tier: S
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Yorick
+      - DA_18_Yunara
+      - DA_Karma18
+    slammable_items:
+      - DA_GargoyleStoneplate
+      - DA_SpearOfShojin
+      - DA_WarmogsArmor
+    transition_to:
+      - juggernaut-zyra-sivir
+      - riftbeast-sentinel
+      - juggernaut-sivir
+    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Ahri.
   - name: Inferno Defenders
     tier: S
     core_units:
@@ -21,21 +37,6 @@ openers:
       - inferno-sivir
       - rapidfire-aphelios
     notes: Varus holds items while Shen anchors the frontline. Pivot toward Inferno Sivir.
-  - name: Coven Swarm
-    tier: S
-    core_units:
-      - DA_18_Caitlyn
-      - DA_18_Camille
-      - DA_18_Elise
-    slammable_items:
-      - DA_HextechGunblade
-      - DA_SpearOfShojin
-      - DA_RabadonsDeathcap
-    transition_to:
-      - invoker-ahri
-      - defender-cassiopeia
-      - coven-elise
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Spellweavers
     tier: S
     core_units:
@@ -58,30 +59,28 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_JeweledGauntlet
-      - DA_GargoyleStoneplate
       - DA_EdgeOfNight
+      - DA_HandOfJustice
+      - DA_RabadonsDeathcap
     transition_to:
       - elderwood-khazix
       - ashe-fast-9
-      - executioner-azir
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
-  - name: Blossom Juggernauts
+  - name: Coven Swarm
     tier: A
     core_units:
-      - DA_18_Rakan
-      - DA_18_Yorick
-      - DA_18_Yunara
-      - DA_Karma18
+      - DA_18_Caitlyn
+      - DA_18_Camille
+      - DA_18_Elise
     slammable_items:
-      - DA_SpearOfShojin
+      - DA_RabadonsDeathcap
+      - DA_HextechGunblade
       - DA_GargoyleStoneplate
-      - DA_WarmogsArmor
     transition_to:
-      - riftbeast-sentinel
-      - juggernaut-sivir
-      - riftbeast-malphite
-    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Ahri.
+      - invoker-ahri
+      - defender-cassiopeia
+      - coven-elise
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: A
     core_units:
@@ -90,9 +89,9 @@ openers:
       - DA_18_Varus
       - DA_18_Xayah
     slammable_items:
+      - DA_InfinityEdge
       - DA_GuinsoosRageblade
       - DA_KrakensFury
-      - DA_InfinityEdge
     transition_to:
       - elderwood-ezreal-amumu
       - elderwood-aphelios
@@ -119,8 +118,8 @@ openers:
       - DA_Cinderling18
       - DA_Scuttlecrab18
     slammable_items:
-      - DA_BlueBuff
       - DA_GargoyleStoneplate
+      - DA_BlueBuff
       - DA_JeweledGauntlet
     transition_to:
       - riftbeast-pebbles

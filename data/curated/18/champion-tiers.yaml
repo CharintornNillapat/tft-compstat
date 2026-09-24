@@ -3,23 +3,23 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 94,136 games on patch 18.3, set 18. Feed updated 2026-09-23T08:09:27.083Z.
+# Sample: 515,624 games on patch 18.3, set 18. Feed updated 2026-09-24T08:00:26.627Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 10 to 4.17, A 19 to 4.47, B 23 to 4.75, C 13 to 5.29.
+# Where they fell, as size and worst average placement: S 10 to 4.17, A 19 to 4.47, B 23 to 4.75, C 13 to 5.34.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: champions-18.3
 kind: champion
 patch: "18.3"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.3: 94,136 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.3: 515,624 games over the last 3 days."
 tiers:
   S:
     - DA_Lux18_Base
     - DA_18_Alune
     - DA_18_Ivern
-    - DA_Taric18
     - DA_18_GnarSmall
     - DA_18_Kennen
+    - DA_Taric18
     - DA_18_Ashe
     - DA_18_ElderDragon
     - DA_18_Maokai
@@ -27,61 +27,61 @@ tiers:
   A:
     - DA_18_Soraka
     - DA_Amumu18
-    - DA_18_Ahri
     - DA_18_Veigar
-    - DA_Sentinel18
-    - DA_18_Ezreal
     - DA_18_Aphelios
+    - DA_18_Ezreal
+    - DA_Sentinel18
+    - DA_18_Ahri
     - DA_18_Zyra
-    - DA_18_Cassiopeia
+    - DA_Fiddlesticks18
     - DA_18_KhaZix
     - DA_Nidalee18_AP
-    - DA_Fiddlesticks18
     - DA_KogMaw18_AD
-    - DA_18_LeBlanc
-    - DA_18_Sett
-    - DA_18_Ornn
     - DA_18_Alistar
+    - DA_18_Cassiopeia
+    - DA_18_Ornn
+    - DA_18_LeBlanc
     - DA_18_RekSai
-    - DA_18_Sivir
-  B:
-    - DA_18_Morgana
+    - DA_18_Sett
     - DA_18_Diana
-    - DA_18_Rengar
-    - DA_18_Sentry
-    - DA_Vi18
-    - DA_18_Azir
-    - DA_18_Malphite
-    - DA_18_Rammus
-    - DA_18_Varus
+  B:
+    - DA_18_Sivir
+    - DA_18_Morgana
     - DA_Brambleback18
+    - DA_Vi18
+    - DA_18_Sentry
+    - DA_18_Azir
+    - DA_18_Varus
+    - DA_18_Malphite
     - DA_Krug18
-    - DA_18_MasterYi_AD
+    - DA_18_Rengar
     - DA_18_Lillia
     - DA_18_Yorick
     - DA_18_Hecarim
+    - DA_18_Rammus
+    - DA_18_MasterYi_AD
     - DA_18_Kayle
-    - DA_18_Kobuko
     - DA_18_Yunara
-    - DA_18_Teemo
-    - DA_Cinderling18
+    - DA_18_Kobuko
     - DA_Karma18
     - DA_Scuttlecrab18
-    - DA_18_Leona
-  C:
-    - DA_18_Sejuani
-    - DA_Murkwolf18
     - DA_CrimsonRaptor18
-    - DA_18_Rakan
+    - DA_Cinderling18
+    - DA_18_Sejuani
+  C:
+    - DA_Murkwolf18
     - DA_18_Warwick
+    - DA_18_Rakan
+    - DA_18_Teemo
+    - DA_18_Leona
     - DA_18_Xayah
-    - DA_Gromp18_AP
-    - DA_18_Tristana
     - DA_18_Shen
+    - DA_18_Tristana
+    - DA_Gromp18_AP
     - DA_18_Akali_AD
     - DA_18_Elise
-    - DA_18_Camille
     - DA_18_Caitlyn
+    - DA_18_Camille
 notes:
   DA_18_Ashe: "Sample note: units with a dot have a note like this one."
   DA_18_KhaZix: "Sample note: shares the Rival trait with Rengar."
