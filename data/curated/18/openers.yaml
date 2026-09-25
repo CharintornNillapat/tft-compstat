@@ -13,13 +13,13 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_GargoyleStoneplate
       - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
       - DA_WarmogsArmor
     transition_to:
       - juggernaut-zyra-sivir
       - riftbeast-sentinel
-      - juggernaut-sivir
+      - executioner-malphite
     notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Sett Ahri.
   - name: Inferno Defenders
     tier: S
@@ -34,8 +34,8 @@ openers:
       - DA_GargoyleStoneplate
     transition_to:
       - lunar-aphelios
-      - inferno-sivir
       - rapidfire-aphelios
+      - inferno-sivir
     notes: Varus holds items while Shen anchors the frontline. Pivot toward Inferno Sivir.
   - name: Elderwood Spellweavers
     tier: S
@@ -73,13 +73,13 @@ openers:
       - DA_18_Camille
       - DA_18_Elise
     slammable_items:
-      - DA_RabadonsDeathcap
       - DA_HextechGunblade
-      - DA_GargoyleStoneplate
+      - DA_SpearOfShojin
+      - DA_RabadonsDeathcap
     transition_to:
       - invoker-ahri
+      - invoker-morgana
       - defender-cassiopeia
-      - coven-elise
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: A
@@ -118,9 +118,9 @@ openers:
       - DA_Cinderling18
       - DA_Scuttlecrab18
     slammable_items:
-      - DA_GargoyleStoneplate
       - DA_BlueBuff
       - DA_JeweledGauntlet
+      - DA_RabadonsDeathcap
     transition_to:
       - riftbeast-pebbles
       - draven-fast-9
