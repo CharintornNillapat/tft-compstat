@@ -2,38 +2,38 @@
 # To keep a comp of your own, delete the marker line above: a file without it is
 # treated as hand-written, and is never overwritten or pruned.
 #
-# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster coven-elise, DIAMOND+.
-# Sample: 31,731 boards, avg 4.80, patch 18.3, set 18.
+# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster coven-morgana, DIAMOND+.
+# Sample: 30,713 boards, avg 4.76, patch 18.3, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
 # no top4_rate to write.
-slug: coven-elise
-name: Coven Elise
+slug: coven-morgana
+name: Coven Morgana
 tier: C
 style: reroll_2
 difficulty: 2
 patch: "18.3"
 order: 12
-summary: "Ends at level 8 with Elise carrying. MetaTFT DIAMOND+: 31,731 boards, avg 4.80, picked 2.6% of boards."
-avg_place: 4.8
-pick_rate: 2.62
+summary: "Ends at level 8 with Elise carrying. MetaTFT DIAMOND+: 30,713 boards, avg 4.76, picked 2.6% of boards."
+avg_place: 4.76
+pick_rate: 2.65
 level_recommended: 8
 early_units: [ DA_18_Caitlyn, DA_18_Camille, DA_18_Cassiopeia, DA_18_Elise ]
-flex_units: [ DA_18_Camille, DA_18_Caitlyn, DA_Lux18_Base, DA_18_Rakan ]
+flex_units: [ DA_18_Camille, DA_Lux18_Base, DA_18_Caitlyn, DA_18_ElderDragon ]
 board:
   - { unit: DA_18_Elise, row: 0, col: 3, star: 3, carry: true, priority: 1, items: [ DA_GargoyleStoneplate, DA_GuinsoosRageblade, DA_TitansResolve ] }
-  - { unit: DA_18_Cassiopeia, row: 3, col: 0, carry: true, priority: 2, items: [ DA_ArchangelsStaff, DA_HextechGunblade, DA_SpearOfShojin ] }
   - { unit: DA_18_Morgana, row: 1, col: 2, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_18_Cassiopeia, row: 3, col: 0, carry: true, priority: 2, items: [ DA_ArchangelsStaff, DA_HextechGunblade, DA_SpearOfShojin ] }
   - { unit: DA_18_Diana, row: 1, col: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_Sentinel18, row: 0, col: 4, star: 1, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Hecarim, row: 0, col: 2, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Alune, row: 3, col: 1, star: 1, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_Taric18, row: 1, col: 4, star: 1, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_Taric18, row: 0, col: 5, star: 1, items: [ DA_ThiefsGloves ] }
 guide: |-
   **Early:** the most-played opener is Caitlyn, Camille, Cassiopeia, Elise.
 
-  **Levelling:** level 7 by 4-1, level 8 by 5-1.
+  **Levelling:** level 7 by 4-1, level 8 by 4-6.
 
   **Items**, in the order to build them:
   - **Elise**: Gargoyle Stoneplate, Guinsoo's Rageblade, Titan's Resolve
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 31,731 boards, avg 4.80. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 30,713 boards, avg 4.76. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

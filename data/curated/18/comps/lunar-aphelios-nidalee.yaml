@@ -2,35 +2,35 @@
 # To keep a comp of your own, delete the marker line above: a file without it is
 # treated as hand-written, and is never overwritten or pruned.
 #
-# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster lunar-aphelios, DIAMOND+.
-# Sample: 103,033 boards, avg 4.33, patch 18.3, set 18.
+# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster lunar-aphelios-nidalee, DIAMOND+.
+# Sample: 99,411 boards, avg 4.34, patch 18.3, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
 # no top4_rate to write.
-slug: lunar-aphelios
-name: Lunar Aphelios
+slug: lunar-aphelios-nidalee
+name: Lunar Aphelios Nidalee
 tier: S
 style: fast8
 difficulty: 2
 patch: "18.3"
 order: 2
-summary: "Ends at level 8 with Nidalee carrying. MetaTFT DIAMOND+: 103,033 boards, avg 4.33, picked 8.5% of boards."
-avg_place: 4.33
-pick_rate: 8.52
+summary: "Ends at level 8 with Nidalee carrying. MetaTFT DIAMOND+: 99,411 boards, avg 4.34, picked 8.6% of boards."
+avg_place: 4.34
+pick_rate: 8.57
 level_recommended: 8
-early_units: [ DA_18_Akali_AD, DA_18_Ornn, DA_18_Shen, DA_18_Varus ]
+early_units: [ DA_18_Rakan, DA_18_Yorick, DA_18_Yunara, DA_Karma18 ]
 board:
-  - { unit: DA_Nidalee18_AP, row: 2, col: 0, carry: true, priority: 1, items: [ DA_InfinityEdge, DA_SpearOfShojin, DA_SteraksGage ] }
   - { unit: DA_18_Aphelios, row: 3, col: 0, carry: true, priority: 2, items: [ DA_GuinsoosRageblade, DA_InfinityEdge, DA_KrakensFury ] }
-  - { unit: DA_Vi18, row: 1, col: 2, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_Nidalee18_AP, row: 2, col: 0, carry: true, priority: 1, items: [ DA_InfinityEdge, DA_SpearOfShojin, DA_SteraksGage ] }
   - { unit: DA_18_Diana, row: 1, col: 3, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_Vi18, row: 1, col: 2, items: [ DA_ThiefsGloves ] }
   - { unit: DA_Sentinel18, row: 0, col: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_KogMaw18_AD, row: 3, col: 1, items: [ DA_ThiefsGloves ] }
   - { unit: DA_Amumu18, row: 0, col: 4, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
-  - { unit: DA_18_Varus, row: 3, col: 6, items: [ DA_TacticiansCape ] }
+  - { unit: DA_18_Varus, row: 3, col: 6, items: [ DA_LastWhisper ] }
 guide: |-
-  **Early:** the most-played opener is Akali, Ornn, Shen, Varus.
+  **Early:** the most-played opener is Rakan, Yorick, Yunara, Karma.
 
   **Levelling:** level 7 by 3-5, level 8 by 4-2.
 
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 103,033 boards, avg 4.33. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 99,411 boards, avg 4.34. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

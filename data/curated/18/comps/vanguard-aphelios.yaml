@@ -2,33 +2,33 @@
 # To keep a comp of your own, delete the marker line above: a file without it is
 # treated as hand-written, and is never overwritten or pruned.
 #
-# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster vanguard-aphelios-brambleback, DIAMOND+.
-# Sample: 15,660 boards, avg 4.76, patch 18.3, set 18.
+# Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster vanguard-aphelios, DIAMOND+.
+# Sample: 14,145 boards, avg 4.83, patch 18.3, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
 # no top4_rate to write.
-slug: vanguard-aphelios-brambleback
-name: Vanguard Aphelios Brambleback
+slug: vanguard-aphelios
+name: Vanguard Aphelios
 tier: C
 style: fast8
 difficulty: 2
 patch: "18.3"
-order: 19
-summary: "Ends at level 8 with Aphelios carrying. MetaTFT DIAMOND+: 15,660 boards, avg 4.76, picked 1.3% of boards."
-avg_place: 4.76
-pick_rate: 1.29
+order: 22
+summary: "Ends at level 8 with Aphelios carrying. MetaTFT DIAMOND+: 14,145 boards, avg 4.83, picked 1.2% of boards."
+avg_place: 4.83
+pick_rate: 1.22
 level_recommended: 8
 early_units: [ DA_18_Rakan, DA_18_Yorick, DA_18_Yunara, DA_Karma18 ]
 flex_units: [ DA_18_Alune, DA_18_Rakan, DA_18_Elise, DA_18_Morgana ]
 board:
   - { unit: DA_18_Aphelios, row: 3, col: 0, carry: true, priority: 1, items: [ DA_GuinsoosRageblade, DA_InfinityEdge, DA_KrakensFury ] }
-  - { unit: DA_18_Diana, row: 1, col: 3, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_18_Diana, row: 1, col: 2, items: [ DA_ThiefsGloves ] }
   - { unit: DA_Sentinel18, row: 0, col: 3, carry: true, priority: 2, items: [ DA_GargoyleStoneplate, DA_ProtectorsVow, DA_WarmogsArmor ] }
   - { unit: DA_CrimsonRaptor18, row: 3, col: 1, items: [ DA_LastWhisper ] }
   - { unit: DA_Brambleback18, row: 2, col: 6, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Hecarim, row: 0, col: 4, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_Taric18, row: 1, col: 2, star: 1, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_18_Hecarim, row: 0, col: 2, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_Taric18, row: 1, col: 3, star: 1, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Zyra, row: 3, col: 6, items: [ DA_ThiefsGloves ] }
 guide: |-
   **Early:** the most-played opener is Rakan, Yorick, Yunara, Karma.
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 15,660 boards, avg 4.76. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 14,145 boards, avg 4.83. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
