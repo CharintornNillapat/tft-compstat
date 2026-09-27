@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-26T08:08:28.904Z. Names, icons, rarity and text: CommunityDragon 16.19.
+# (per comp), updated 2026-09-27T08:46:57.041Z. Names, icons, rarity and text: CommunityDragon 16.19.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.3"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-26. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-27. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -166,6 +166,18 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/seraphimsstaff_ii.png
     description: Gain an Archangel's Staff. Archangel's Staff grants 2 additional Mana Regen if its holder has 90% or more Ability Power.
+  - api_name: DA_TraitLadder
+    name: Trait Ladder
+    rarity: Prismatic
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
+    description: Gain a random emblem. After fielding 2 non-unique traits in a player combat, gain a reward. Then increase the number of traits needed and the size of the reward.
+  - api_name: DA_BoosterPack
+    name: Booster Pack
+    rarity: Gold
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/boosterpack1_ii.png
+    description: Gain 12 gold of random champions. (At least one 3-cost guaranteed!)
   - api_name: DA_BandOfThieves
     name: Band of Thieves
     rarity: Silver
@@ -289,15 +301,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/goldendestiny_ii.png
     description: Gain a random Gold Augment and 3 gold.
-  - api_name: DA_CaretakersFavor
-    name: Caretaker's Favor
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/caretaker_s-chosen-ii.png
-    description: |-
-      Gain a component anvil when you reach level 5, 6, 7, and 8.
-
-      Component anvils offer 4 choices.
   - api_name: DA_ClutteredMind
     name: Cluttered Mind
     rarity: Gold
@@ -332,12 +335,6 @@ augments:
 
       Mogul's Mail gives gold as well as combat power.
       Dragonlands Championship, 2022
-  - api_name: DA_BoosterPack
-    name: Booster Pack
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/boosterpack1_ii.png
-    description: Gain 12 gold of random champions. (At least one 3-cost guaranteed!)
   - api_name: DA_EarlyLearnings
     name: Early Learnings
     rarity: Gold
@@ -497,12 +494,6 @@ augments:
       Gain 1 random Artifact. When you drop below 35 Health, gain 1 more random Artifact, 1 random completed item, and 2 random components.
 
       Remix Rumble Championship, 2023
-  - api_name: DA_TraitLadder
-    name: Trait Ladder
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
-    description: Gain a random emblem. After fielding 2 non-unique traits in a player combat, gain a reward. Then increase the number of traits needed and the size of the reward.
   - api_name: DA_GoldenGamblePlusPlus
     name: Golden Gamble++
     rarity: Prismatic
@@ -521,15 +512,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
     description: Gain an Artifact Anvil. After you open it, gain a Component Anvil. After you open that, gain 8 gold.
-  - api_name: DA_ItsMeBaby
-    name: It's Me, Baby
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: |-
-      Gain a championship hex in the bottom right corner. The champion in it gains 15% Damage Amp and 15% Attack Speed, and drops 1 gold every 5 takedowns.
-
-      Lore & Legends Tactician's Crown, 2026
   - api_name: DA_PrismaticDestiny
     name: Prismatic Destiny
     rarity: Prismatic
@@ -716,6 +698,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/worththewait_iii.png
     description: Gain 2 copies of a random 2-cost champion. Gain another copy of them at the start of each round for the rest of the game.
+  - api_name: DA_URF
+    name: U.R.F
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/ultrarapidfire_ii.png
+    description: Gain a Spatula. Champions holding Spatula or Frying Pan items gain 20% Attack Speed and 3 Mana Regen.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -890,12 +878,6 @@ augments:
       After 8 seconds of combat, stun the enemy team for 1.5 seconds. Repeat this after 18 seconds of combat.
 
       TFT Macao Open, 2024
-  - api_name: DA_URF
-    name: U.R.F
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/ultrarapidfire_ii.png
-    description: Gain a Spatula. Champions holding Spatula or Frying Pan items gain 20% Attack Speed and 3 Mana Regen.
   - api_name: DA_18_RivalsAugment
     name: Unrivaled
     rarity: Gold
@@ -1024,6 +1006,15 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/noscoutnopivot_ii.png
     description: Champions that fight in player combat cannot be benched or sold. Your team gains 1% Health, and 1% Attack Damage and Ability Power after player combat.
+  - api_name: DA_CaretakersFavor
+    name: Caretaker's Favor
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/caretaker_s-chosen-ii.png
+    description: |-
+      Gain a component anvil when you reach level 5, 6, 7, and 8.
+
+      Component anvils offer 4 choices.
   - api_name: DA_SpiritOfRedemption
     name: Spirit Of Redemption
     rarity: Gold
@@ -1450,6 +1441,15 @@ augments:
       Gain a random Emblem and a completed item anvil. Allies that share a trait with that Emblem gain 30% Attack Speed. 0 0
 
       Into The Arcane Tactician's Crown, 2025
+  - api_name: DA_ItsMeBaby
+    name: It's Me, Baby
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: |-
+      Gain a championship hex in the bottom right corner. The champion in it gains 15% Damage Amp and 15% Attack Speed, and drops 1 gold every 5 takedowns.
+
+      Lore & Legends Tactician's Crown, 2026
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1591,7 +1591,7 @@ comps:
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   elderwood-ezreal-amumu:
     source: DRAVEN > Legendaries > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_BirthdayPresent, DA_InvestedPlusPlus ]
+    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_TraitLadder, DA_BirthdayPresent ]
   executioner-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
@@ -1603,10 +1603,13 @@ comps:
     augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
   inferno-lillia:
     source: ASHE > Inferno-Emblem > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_BirthdayPresent, DA_InvestedPlusPlus ]
+    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_TraitLadder, DA_BirthdayPresent ]
   invoker-ahri:
     source: AHRI & Morgana > Blossom > Lvl 8 push
     augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
+  juggernaut-nidalee-zyra:
+    source: ZYRA > Juggernaut > Lvl 8 push
+    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
   juggernaut-zyra-sivir:
     source: ZYRA > Juggernaut > Lvl 8 push
     augments: [ DA_GroupHugI, DA_BoxingLessons, DA_BlackthornTraitAugment, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
@@ -1624,7 +1627,7 @@ comps:
     augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   riftbeast-sentinel:
     source: DRAVEN > Legendaries > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_BirthdayPresent, DA_InvestedPlusPlus ]
+    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_TraitLadder, DA_BirthdayPresent ]
   sprykin-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
