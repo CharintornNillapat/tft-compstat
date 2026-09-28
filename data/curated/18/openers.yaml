@@ -29,8 +29,8 @@ openers:
       - DA_18_Elise
     slammable_items:
       - DA_RabadonsDeathcap
-      - DA_HextechGunblade
-      - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
+      - DA_GuinsoosRageblade
     transition_to:
       - invoker-ahri
       - defender-cassiopeia
@@ -59,9 +59,9 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_EdgeOfNight
-      - DA_HandOfJustice
-      - DA_RabadonsDeathcap
+      - DA_GargoyleStoneplate
+      - DA_SpiritVisage
+      - DA_WarmogsArmor
     transition_to:
       - elderwood-khazix
       - ashe-fast-9
@@ -74,13 +74,30 @@ openers:
       - DA_18_Varus
       - DA_18_Xayah
     slammable_items:
+      - DA_SpearOfShojin
+      - DA_LastWhisper
       - DA_GuinsoosRageblade
-      - DA_KrakensFury
-      - DA_InfinityEdge
     transition_to:
       - elderwood-ezreal-amumu
       - elderwood-aphelios
+      - elderwood-ezreal-alistar
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
+  - name: Sprykin Brawlers
+    tier: A
+    core_units:
+      - DA_18_Kobuko
+      - DA_18_RekSai
+      - DA_18_Teemo
+      - DA_18_Veigar
+    slammable_items:
+      - DA_GuinsoosRageblade
+      - DA_HextechGunblade
+      - DA_RabadonsDeathcap
+    transition_to:
+      - sprykin-azir
+      - flora-malphite
+      - ravager-warwick
+    notes: Teemo holds items while Kobuko anchors the frontline. Pivot toward Sprykin Azir.
   - name: Inferno Defenders
     tier: A
     core_units:
@@ -90,13 +107,12 @@ openers:
       - DA_18_Varus
     slammable_items:
       - DA_SpearOfShojin
-      - DA_RedBuff
+      - DA_InfinityEdge
       - DA_GargoyleStoneplate
     transition_to:
       - rapidfire-aphelios
       - inferno-lillia
-      - inferno-amumu
-    notes: Varus holds items while Shen anchors the frontline. Pivot toward Inferno Amumu.
+    notes: Varus holds items while Shen anchors the frontline. Pivot toward Inferno Lillia.
   - name: Blackthorn Swarm
     tier: A
     core_units:
@@ -112,19 +128,3 @@ openers:
       - ravager-warwick
       - spellweaver-veigar
     notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
-  - name: Sprykin Brawlers
-    tier: B
-    core_units:
-      - DA_18_Kobuko
-      - DA_18_RekSai
-      - DA_18_Teemo
-      - DA_18_Veigar
-    slammable_items:
-      - DA_GargoyleStoneplate
-      - DA_Crownguard
-      - DA_ArchangelsStaff
-    transition_to:
-      - sprykin-azir
-      - flora-malphite
-      - ravager-warwick
-    notes: Teemo holds items while Kobuko anchors the frontline. Pivot toward Sprykin Azir.
