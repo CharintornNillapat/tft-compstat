@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-09-28T09:11:45.136Z. Names, icons, rarity and text: CommunityDragon 16.19.
+# (per comp), updated 2026-09-29T09:19:58.544Z. Names, icons, rarity and text: CommunityDragon 16.19.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.3"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-09-28. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-09-29. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -674,6 +674,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Whenever you open a loot orb, you have a 25% chance to gain a gray loot orb. Gain 1 gray loot orbs.
+  - api_name: DA_SoloPlate
+    name: Solo Plate
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/soloplate_ii.png
+    description: Gain a Gargoyle Stoneplate. Allies holding Gargoyle Stoneplate gain 17% max Health if they start combat alone in their row.
   - api_name: DA_BirthdayReunion
     name: Birthday Reunion
     rarity: Gold
@@ -1060,12 +1066,6 @@ augments:
       Gain a Guinsoo's Rageblade. When 2 players are eliminated, gain 40 gold.
 
       Fates Championship, 2021
-  - api_name: DA_SoloPlate
-    name: Solo Plate
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/soloplate_ii.png
-    description: Gain a Gargoyle Stoneplate. Allies holding Gargoyle Stoneplate gain 17% max Health if they start combat alone in their row.
   - api_name: DA_TradeSector
     name: Trade Sector
     rarity: Gold
