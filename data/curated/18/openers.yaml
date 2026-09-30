@@ -43,9 +43,9 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_EdgeOfNight
-      - DA_HandOfJustice
-      - DA_RabadonsDeathcap
+      - DA_GargoyleStoneplate
+      - DA_SpiritVisage
+      - DA_WarmogsArmor
     transition_to:
       - elderwood-khazix
       - ashe-fast-9
@@ -58,14 +58,14 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_ArchangelsStaff
       - DA_SpearOfShojin
+      - DA_ArchangelsStaff
       - DA_GargoyleStoneplate
     transition_to:
       - riftbeast-sentinel
       - juggernaut-sivir
       - juggernaut-zyra-sivir
-    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Executioner Sett.
+    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Ahri Sivir.
   - name: Elderwood Rapidfires
     tier: A
     core_units:
@@ -96,23 +96,23 @@ openers:
     transition_to:
       - sprykin-azir
       - flora-malphite
-      - ravager-warwick
+      - spellweaver-veigar
     notes: Teemo holds items while Kobuko anchors the frontline. Pivot toward Sprykin Azir.
-  - name: Inferno Defenders
+  - name: Fae Juggernauts
     tier: A
     core_units:
-      - DA_18_Akali_AD
-      - DA_18_Ornn
-      - DA_18_Shen
-      - DA_18_Varus
+      - DA_18_Rakan
+      - DA_18_Xayah
+      - DA_18_Yorick
     slammable_items:
-      - DA_SpearOfShojin
+      - DA_EdgeOfNight
+      - DA_Quicksilver
       - DA_InfinityEdge
-      - DA_GargoyleStoneplate
     transition_to:
       - rapidfire-aphelios
-      - inferno-lillia
-    notes: Varus holds items while Shen anchors the frontline. Pivot toward Inferno Lillia.
+      - blossom-ahri-sivir
+      - executioner-sett
+    notes: Xayah holds items while Rakan anchors the frontline. Pivot toward Rapidfire Aphelios.
   - name: Blackthorn Swarm
     tier: A
     core_units:
@@ -125,6 +125,6 @@ openers:
       - DA_AdaptiveHelm
     transition_to:
       - flora-malphite
-      - ravager-warwick
       - spellweaver-veigar
+      - sprykin-azir
     notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.

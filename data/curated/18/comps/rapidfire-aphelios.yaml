@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster rapidfire-aphelios, DIAMOND+.
-# Sample: 18,983 boards, avg 4.40, patch 18.3, set 18.
+# Sample: 18,662 boards, avg 4.40, patch 18.3, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -14,32 +14,32 @@ tier: A
 style: fast8
 difficulty: 2
 patch: "18.3"
-order: 18
-summary: "Ends at level 8 with Brambleback carrying. MetaTFT DIAMOND+: 18,983 boards, avg 4.40, picked 1.4% of boards."
+order: 17
+summary: "Ends at level 8 with Brambleback carrying. MetaTFT DIAMOND+: 18,662 boards, avg 4.40, picked 1.3% of boards."
 avg_place: 4.4
-pick_rate: 1.37
+pick_rate: 1.35
 level_recommended: 8
-early_units: [ DA_18_Akali_AD, DA_18_Ornn, DA_18_Shen, DA_18_Varus ]
+early_units: [ DA_18_Rakan, DA_18_Xayah, DA_18_Yorick, DA_CrimsonRaptor18 ]
 flex_units: [ DA_18_Rakan, DA_Taric18, DA_18_Maokai ]
 board:
-  - { unit: DA_18_Aphelios, row: 3, col: 0, carry: true, priority: 2, items: [ DA_InfinityEdge, DA_KrakensFury, DA_StrikersFlail ] }
+  - { unit: DA_18_Aphelios, row: 3, col: 0, carry: true, priority: 3, items: [ DA_InfinityEdge, DA_KrakensFury, DA_StrikersFlail ] }
   - { unit: DA_Brambleback18, row: 2, col: 0, carry: true, priority: 1, items: [ DA_18_EmblemRapidfire, DA_EdgeOfNight, DA_Quicksilver ] }
   - { unit: DA_CrimsonRaptor18, row: 3, col: 1, items: [ DA_LastWhisper ] }
   - { unit: DA_Sentinel18, row: 0, col: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Varus, row: 3, col: 6, items: [ DA_TacticiansCape ] }
-  - { unit: DA_Amumu18, row: 0, col: 4, carry: true, priority: 3, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
+  - { unit: DA_Amumu18, row: 0, col: 4, carry: true, priority: 2, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
   - { unit: DA_18_Diana, row: 1, col: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Xayah, row: 3, col: 2, items: [ DA_ThiefsGloves ] }
 guide: |-
-  **Early:** the most-played opener is Akali, Ornn, Shen, Varus.
+  **Early:** the most-played opener is Rakan, Xayah, Yorick, Mama Beak.
 
   **Levelling:** level 7 by 3-6, level 8 by 4-2.
 
   **Items**, in the order to build them:
   - **Brambleback**: Rapidfire Emblem, Edge of Night, Quicksilver
-  - **Aphelios**: Infinity Edge, Kraken's Fury, Striker's Flail
   - **Amumu**: Gargoyle Stoneplate, Spirit Visage, Warmogs Armor
+  - **Aphelios**: Infinity Edge, Kraken's Fury, Striker's Flail
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 18,983 boards, avg 4.40. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.3: 18,662 boards, avg 4.40. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

@@ -3,15 +3,15 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 1,558,168 games on patch 18.3, set 18. Feed updated 2026-09-29T09:20:32.386Z.
+# Sample: 1,562,640 games on patch 18.3, set 18. Feed updated 2026-09-30T09:11:05.785Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 10 to 4.23, A 19 to 4.46, B 23 to 4.75, C 13 to 5.44.
+# Where they fell, as size and worst average placement: S 10 to 4.24, A 19 to 4.47, B 23 to 4.75, C 13 to 5.49.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: champions-18.3
 kind: champion
 patch: "18.3"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.3: 1,558,168 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.3: 1,562,640 games over the last 3 days."
 tiers:
   S:
     - DA_Lux18_Base
@@ -33,30 +33,30 @@ tiers:
     - DA_18_Veigar
     - DA_Nidalee18_AP
     - DA_KogMaw18_AD
-    - DA_Brambleback18
     - DA_18_Zyra
+    - DA_Brambleback18
     - DA_18_Cassiopeia
     - DA_18_Ezreal
     - DA_Fiddlesticks18
     - DA_18_LeBlanc
     - DA_18_Varus
-    - DA_18_Sett
     - DA_18_RekSai
-    - DA_18_Alistar
+    - DA_18_Sett
+    - DA_18_Diana
     - DA_18_Morgana
   B:
-    - DA_18_Diana
+    - DA_18_Alistar
     - DA_18_Ornn
     - DA_18_Sentry
     - DA_18_KhaZix
-    - DA_18_Sivir
-    - DA_Krug18
     - DA_18_Rammus
+    - DA_18_Teemo
+    - DA_18_Sivir
     - DA_18_Azir
+    - DA_Krug18
     - DA_Vi18
     - DA_CrimsonRaptor18
     - DA_18_Malphite
-    - DA_18_Teemo
     - DA_18_Lillia
     - DA_18_Rengar
     - DA_18_Yorick
@@ -67,13 +67,13 @@ tiers:
     - DA_Scuttlecrab18
     - DA_18_Hecarim
     - DA_18_Kobuko
-    - DA_18_Yunara
-  C:
     - DA_18_Kayle
-    - DA_Cinderling18
+  C:
+    - DA_18_Yunara
     - DA_18_Sejuani
-    - DA_18_Xayah
+    - DA_Cinderling18
     - DA_18_Rakan
+    - DA_18_Xayah
     - DA_18_Leona
     - DA_18_Shen
     - DA_Gromp18_AP
