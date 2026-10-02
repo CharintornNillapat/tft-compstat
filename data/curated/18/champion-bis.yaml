@@ -19,14 +19,14 @@ champions:
       - DA_InfinityEdge
     secondary_bis:
       - DA_StrikersFlail
+      - DA_GiantSlayer
       - DA_Quicksilver
-      - DA_JeweledGauntlet
     special_bis:
       - DA_Artifact_RapidFireCannon
       - DA_Artifact_Dawncore
-      - DA_Artifact_Mittens
-    avg_place: 4.42
-    games: 647
+      - DA_Artifact_LudensTempest
+    avg_place: 4.49
+    games: 610
   - api_name: DA_18_Camille
     role: AD Carry
     primary_bis:
@@ -34,15 +34,15 @@ champions:
       - DA_HandOfJustice
       - DA_InfinityEdge
     secondary_bis:
-      - DA_Deathblade
-      - DA_SteraksGage
+      - DA_GiantSlayer
       - DA_Quicksilver
+      - DA_SteraksGage
     special_bis:
-      - DA_Artifact_SilvermereDawn
-      - DA_Artifact_HellfireHatchet
+      - DA_Artifact_RapidFireCannon
       - DA_Artifact_Mittens
-    avg_place: 4.37
-    games: 233
+      - DA_Artifact_SilvermereDawn
+    avg_place: 4.47
+    games: 212
   - api_name: DA_Cinderling18
     role: AD Carry
     primary_bis:
@@ -50,26 +50,26 @@ champions:
       - DA_InfinityEdge
       - DA_SpearOfShojin
     secondary_bis:
-      - DA_HextechGunblade
       - DA_ThiefsGloves
+      - DA_HextechGunblade
       - DA_BlueBuff
     special_bis:
       - DA_Artifact_Dawncore
       - DA_Artifact_Fishbones
-    avg_place: 4.35
-    games: 212
+    avg_place: 4.34
+    games: 221
   - api_name: DA_Karma18
     role: AP Carry
     primary_bis:
       - DA_JeweledGauntlet
+      - DA_RabadonsDeathcap
       - DA_SpearOfShojin
-      - DA_VoidStaff
     secondary_bis:
       - DA_TacticiansCrown
       - DA_GiantSlayer
       - DA_AdaptiveHelm
-    avg_place: 4.77
-    games: 267
+    avg_place: 4.11
+    games: 209
   - api_name: DA_18_Leona
     role: Main Tank
     primary_bis:
@@ -84,8 +84,8 @@ champions:
       - DA_Artifact_LightshieldCrest
       - DA_Artifact_VoidGauntlet
       - DA_Artifact_TheIndomitable
-    avg_place: 5.12
-    games: 395
+    avg_place: 5.25
+    games: 414
   - api_name: DA_18_Ornn
     role: Main Tank
     primary_bis:
@@ -99,41 +99,41 @@ champions:
     special_bis:
       - DA_Artifact_LightshieldCrest
       - DA_Artifact_ForbiddenIdol
-      - DA_Artifact_AegisOfDusk
-    avg_place: 3.69
-    games: 216
+      - DA_Artifact_AegisOfDawn
+    avg_place: 3.72
+    games: 222
   - api_name: DA_18_Sentry
     role: AP Carry
     primary_bis:
+      - DA_ArchangelsStaff
       - DA_BlueBuff
-      - DA_RabadonsDeathcap
       - DA_RabadonsDeathcap
     secondary_bis:
       - DA_TacticiansCrown
       - DA_TacticiansCape
-      - DA_ArchangelsStaff
+      - DA_ThiefsGloves
     special_bis:
-      - DA_BlueBuffRadiant
       - DA_RabadonsDeathcap_Radiant
+      - DA_BlueBuffRadiant
       - DA_Artifact_EternalPact
-    avg_place: 3.94
-    games: 216
+    avg_place: 4.11
+    games: 314
   - api_name: DA_18_RekSai
     role: Main Tank
     primary_bis:
       - DA_IonicSpark
+      - DA_SpiritVisage
       - DA_SunfireCape
-      - DA_WarmogsArmor
     secondary_bis:
-      - DA_AdaptiveHelm
       - DA_ProtectorsVow
+      - DA_AdaptiveHelm
       - DA_BrambleVest
     special_bis:
-      - DA_Artifact_HorizonFocus
       - DA_Artifact_LightshieldCrest
-      - DA_Artifact_VoidGauntlet
-    avg_place: 3.46
-    games: 230
+      - DA_Artifact_HorizonFocus
+      - DA_Artifact_InfinityForce
+    avg_place: 3.29
+    games: 209
   - api_name: DA_18_Varus
     role: AD Carry
     primary_bis:
@@ -143,11 +143,11 @@ champions:
     secondary_bis:
       - DA_TacticiansCrown
       - DA_HandOfJustice
-      - DA_TacticiansCape
+      - DA_StrikersFlail
     special_bis:
       - DA_Artifact_Manazane
     avg_place: 4.6
-    games: 329
+    games: 341
   - api_name: DA_18_Veigar
     role: AP Carry
     primary_bis:
@@ -157,19 +157,19 @@ champions:
     secondary_bis:
       - DA_TacticiansCrown
       - DA_ThiefsGloves
-      - DA_HandOfJustice
+      - DA_JeweledGauntlet
     special_bis:
       - DA_Artifact_Dawncore
       - DA_AdaptiveHelm_Radiant
       - DA_Artifact_LudensTempest
-    avg_place: 4.55
-    games: 221
+    avg_place: 4.41
+    games: 205
   - api_name: DA_18_Xayah
     role: AD Carry
     primary_bis:
-      - DA_GiantSlayer
+      - DA_Deathblade
       - DA_GuinsoosRageblade
-      - DA_InfinityEdge
+      - DA_KrakensFury
     secondary_bis:
       - DA_TacticiansCrown
       - DA_TacticiansCape
@@ -178,20 +178,8 @@ champions:
       - DA_Artifact_TitanicHydra
       - DA_Artifact_GoldCollector
       - DA_Artifact_Fishbones
-    avg_place: 4.69
-    games: 278
-  - api_name: DA_18_Yorick
-    role: Main Tank
-    primary_bis:
-      - DA_GargoyleStoneplate
-      - DA_GargoyleStoneplate
-      - DA_WarmogsArmor
-    secondary_bis:
-      - DA_IonicSpark
-      - DA_AdaptiveHelm
-      - DA_SteraksGage
-    avg_place: 5.74
-    games: 226
+    avg_place: 4.73
+    games: 348
   - api_name: DA_18_Alistar
     role: Main Tank
     primary_bis:
@@ -205,9 +193,9 @@ champions:
     special_bis:
       - DA_Artifact_VoidGauntlet
       - DA_Artifact_LightshieldCrest
-      - DA_Artifact_InfinityForce
-    avg_place: 3.24
-    games: 339
+      - DA_Artifact_AegisOfDusk
+    avg_place: 3.23
+    games: 352
   - api_name: DA_18_Caitlyn
     role: AD Carry
     primary_bis:
@@ -216,14 +204,14 @@ champions:
       - DA_KrakensFury
     secondary_bis:
       - DA_HextechGunblade
-      - DA_Deathblade
       - DA_GiantSlayer
+      - DA_Deathblade
     special_bis:
       - DA_GiantSlayer_Radiant
       - DA_InfinityEdgeRadiant
       - DA_HextechGunbladeRadiant
-    avg_place: 4.44
-    games: 598
+    avg_place: 4.34
+    games: 566
   - api_name: DA_18_Elise
     role: Utility / Bruiser
     primary_bis:
@@ -233,13 +221,13 @@ champions:
     secondary_bis:
       - DA_ThiefsGloves
       - DA_IonicSpark
-      - DA_ArchangelsStaff
+      - DA_Evenshroud
     special_bis:
       - DA_GuinsoosRagebladeRadiant
       - DA_TitansResolve_Radiant
       - DA_GargoyleStoneplate_Radiant
-    avg_place: 4.79
-    games: 1149
+    avg_place: 4.78
+    games: 1006
   - api_name: DA_Gromp18_AP
     role: AD Carry
     primary_bis:
@@ -248,10 +236,10 @@ champions:
       - DA_SpearOfShojin
     secondary_bis:
       - DA_VoidStaff
-      - DA_AdaptiveHelm
+      - DA_HextechGunblade
       - DA_Morellonomicon
-    avg_place: 5.23
-    games: 450
+    avg_place: 5.28
+    games: 367
   - api_name: DA_18_Kayle
     role: AP Carry
     primary_bis:
@@ -265,44 +253,45 @@ champions:
     special_bis:
       - DA_Artifact_SeekersArmguard
       - DA_Artifact_NavoriFlickerblade
-      - DA_Item_Artifact_TalismanOfAscension
-    avg_place: 4.82
-    games: 587
+      - DA_Artifact_WitsEnd
+    avg_place: 4.93
+    games: 574
   - api_name: DA_18_LeBlanc
-    role: AP Carry
+    role: Utility / Bruiser
     primary_bis:
       - DA_BlueBuff
-      - DA_RabadonsDeathcap
+      - DA_GiantSlayer
       - DA_VoidStaff
     secondary_bis:
       - DA_HextechGunblade
+      - DA_RabadonsDeathcap
       - DA_AdaptiveHelm
-      - DA_SpearOfShojin
     special_bis:
       - DA_Artifact_EternalPact
-      - DA_Artifact_LichBane
       - DA_Artifact_Dawncore
-    avg_place: 3.35
-    games: 220
+      - DA_Artifact_Manazane
+    avg_place: 3.31
+    games: 229
   - api_name: DA_Murkwolf18
     role: AD Carry
     primary_bis:
-      - DA_Deathblade
-      - DA_HandOfJustice
-      - DA_Quicksilver
-    secondary_bis:
       - DA_EdgeOfNight
+      - DA_HandOfJustice
+      - DA_InfinityEdge
+    secondary_bis:
+      - DA_Quicksilver
+      - DA_Deathblade
       - DA_SteraksGage
-      - DA_StrikersFlail
     special_bis:
-      - DA_Artifact_Mittens
+      - DA_Artifact_InfinityForce
       - DA_Artifact_GoldCollector
-    avg_place: 3.94
-    games: 202
+      - DA_Artifact_Mittens
+    avg_place: 4.02
+    games: 551
   - api_name: DA_Scuttlecrab18
     role: Main Tank
     primary_bis:
-      - DA_BrambleVest
+      - DA_DragonsClaw
       - DA_GargoyleStoneplate
       - DA_SpiritVisage
     secondary_bis:
@@ -311,10 +300,10 @@ champions:
       - DA_Evenshroud
     special_bis:
       - DA_Artifact_LightshieldCrest
-      - DA_GargoyleStoneplate_Radiant
-      - DA_Artifact_MogulsMail
-    avg_place: 4.61
-    games: 265
+      - DA_Artifact_Hullcrusher
+      - DA_Artifact_AegisOfDawn
+    avg_place: 4.66
+    games: 284
   - api_name: DA_18_Sejuani
     role: Main Tank
     primary_bis:
@@ -322,15 +311,15 @@ champions:
       - DA_GargoyleStoneplate
       - DA_WarmogsArmor
     secondary_bis:
+      - DA_Evenshroud
       - DA_SteraksGage
       - DA_BrambleVest
-      - DA_Evenshroud
     special_bis:
-      - DA_Artifact_AegisOfDusk
-      - DA_Artifact_LightshieldCrest
       - DA_Artifact_Hullcrusher
-    avg_place: 4.25
-    games: 1142
+      - DA_Artifact_AegisOfDusk
+      - DA_Artifact_ForbiddenIdol
+    avg_place: 4.29
+    games: 1132
   - api_name: DA_18_Teemo
     role: AP Carry
     primary_bis:
@@ -345,8 +334,8 @@ champions:
       - DA_Artifact_EternalPact
       - DA_Artifact_Manazane
       - DA_Artifact_Dawncore
-    avg_place: 4.76
-    games: 706
+    avg_place: 4.67
+    games: 695
   - api_name: DA_18_Warwick
     role: Utility / Bruiser
     primary_bis:
@@ -354,31 +343,31 @@ champions:
       - DA_SpearOfShojin
       - DA_TitansResolve
     secondary_bis:
-      - DA_SteraksGage
       - DA_EdgeOfNight
+      - DA_SteraksGage
       - DA_GiantSlayer
     special_bis:
       - DA_Artifact_Mittens
-      - DA_Artifact_Dawncore
       - DA_Artifact_InfinityForce
-    avg_place: 4.11
-    games: 323
+      - DA_SteraksGageRadiant
+    avg_place: 4.16
+    games: 309
   - api_name: DA_18_Yunara
     role: AD Carry
     primary_bis:
-      - DA_InfinityEdge
+      - DA_Deathblade
+      - DA_GiantSlayer
       - DA_SpearOfShojin
-      - DA_StrikersFlail
     secondary_bis:
       - DA_HandOfJustice
       - DA_ThiefsGloves
-      - DA_GiantSlayer
+      - DA_StrikersFlail
     special_bis:
-      - DA_StrikersFlailRadiant
       - DA_SpearOfShojinRadiant
+      - DA_StrikersFlailRadiant
       - DA_DeathbladeRadiant
-    avg_place: 4.23
-    games: 286
+    avg_place: 4.15
+    games: 232
   - api_name: DA_18_Azir
     role: AP Carry
     primary_bis:
@@ -391,42 +380,42 @@ champions:
       - DA_Quicksilver
     special_bis:
       - DA_GiantSlayer_Radiant
-      - DA_JeweledGauntletRadiant
       - DA_RabadonsDeathcap_Radiant
-    avg_place: 3.81
-    games: 459
+      - DA_GuinsoosRagebladeRadiant
+    avg_place: 3.7
+    games: 487
   - api_name: DA_18_Cassiopeia
-    role: Utility / Bruiser
+    role: AP Carry
     primary_bis:
       - DA_BlueBuff
-      - DA_RedBuff
+      - DA_Morellonomicon
       - DA_VoidStaff
     secondary_bis:
       - DA_TacticiansCrown
-      - DA_Morellonomicon
+      - DA_RedBuff
       - DA_AdaptiveHelm
     special_bis:
       - DA_Artifact_BlightingJewel
       - DA_Item_Artifact_TalismanOfAscension
       - DA_Artifact_LichBane
-    avg_place: 3.28
-    games: 514
+    avg_place: 3.29
+    games: 836
   - api_name: DA_18_Diana
     role: AP Carry
     primary_bis:
-      - DA_HandOfJustice
+      - DA_Bloodthirster
       - DA_IonicSpark
       - DA_JeweledGauntlet
     secondary_bis:
       - DA_TacticiansCrown
-      - DA_TitansResolve
       - DA_Quicksilver
+      - DA_TitansResolve
     special_bis:
       - DA_ThiefsGlovesRadiant
       - DA_Artifact_InfinityForce
-      - DA_Artifact_WitsEnd
-    avg_place: 3.5
-    games: 1233
+      - DA_Artifact_ZhonyasParadox
+    avg_place: 3.29
+    games: 290
   - api_name: DA_Fiddlesticks18
     role: Main Tank
     primary_bis:
@@ -438,11 +427,11 @@ champions:
       - DA_BlueBuff
       - DA_ProtectorsVow
     special_bis:
-      - DA_Item_Artifact_TalismanOfAscension
-      - DA_Artifact_SilvermereDawn
       - DA_Artifact_LightshieldCrest
-    avg_place: 3.14
-    games: 248
+      - DA_Item_Artifact_TalismanOfAscension
+      - DA_Artifact_Hullcrusher
+    avg_place: 3.2
+    games: 267
   - api_name: DA_18_Hecarim
     role: Main Tank
     primary_bis:
@@ -456,9 +445,9 @@ champions:
     special_bis:
       - DA_Artifact_LightshieldCrest
       - DA_Artifact_HorizonFocus
-      - DA_GargoyleStoneplate_Radiant
-    avg_place: 3.76
-    games: 232
+      - DA_ThiefsGlovesRadiant
+    avg_place: 3.72
+    games: 219
   - api_name: DA_18_KhaZix
     role: AP Carry
     primary_bis:
@@ -470,11 +459,11 @@ champions:
       - DA_RabadonsDeathcap
       - DA_ThiefsGloves
     special_bis:
-      - DA_StrikersFlailRadiant
       - DA_HandOfJusticeRadiant
+      - DA_StrikersFlailRadiant
       - DA_RabadonsDeathcap_Radiant
-    avg_place: 3.48
-    games: 204
+    avg_place: 3.52
+    games: 269
   - api_name: DA_KogMaw18_AD
     role: AD Carry
     primary_bis:
@@ -483,14 +472,14 @@ champions:
       - DA_SpearOfShojin
     secondary_bis:
       - DA_TacticiansCrown
-      - DA_AdaptiveHelm
       - DA_HandOfJustice
+      - DA_Quicksilver
     special_bis:
-      - DA_Artifact_StatikkShiv
       - DA_Artifact_GamblersBlade
       - DA_Artifact_LichBane
-    avg_place: 3.87
-    games: 574
+      - DA_Artifact_StatikkShiv
+    avg_place: 3.91
+    games: 576
   - api_name: DA_Krug18
     role: Main Tank
     primary_bis:
@@ -499,19 +488,19 @@ champions:
       - DA_WarmogsArmor
     secondary_bis:
       - DA_Bloodthirster
+      - DA_ThiefsGloves
       - DA_BrambleVest
-      - DA_SteraksGage
     special_bis:
       - DA_BlastPotion18_Radiant
       - DA_Artifact_LightshieldCrest
       - DA_Artifact_VoidGauntlet
-    avg_place: 4.15
-    games: 590
+    avg_place: 4.23
+    games: 591
   - api_name: DA_CrimsonRaptor18
     role: AD Carry
     primary_bis:
+      - DA_Deathblade
       - DA_GuinsoosRageblade
-      - DA_InfinityEdge
       - DA_KrakensFury
     secondary_bis:
       - DA_LastWhisper
@@ -520,24 +509,24 @@ champions:
     special_bis:
       - DA_Artifact_GamblersBlade
       - DA_Artifact_NavoriFlickerblade
-    avg_place: 5.28
-    games: 411
+    avg_place: 5.12
+    games: 203
   - api_name: DA_18_MasterYi_AD
     role: AD Carry
     primary_bis:
       - DA_EdgeOfNight
       - DA_GuinsoosRageblade
-      - DA_TitansResolve
-    secondary_bis:
       - DA_Quicksilver
+    secondary_bis:
       - DA_GiantSlayer
+      - DA_TitansResolve
       - DA_Bloodthirster
     special_bis:
-      - DA_Artifact_HellfireHatchet
       - DA_GuinsoosRagebladeRadiant
-      - DA_Artifact_NavoriFlickerblade
-    avg_place: 4.46
-    games: 1019
+      - DA_Artifact_HellfireHatchet
+      - DA_Artifact_WitsEnd
+    avg_place: 4.43
+    games: 471
   - api_name: DA_18_Rammus
     role: Main Tank
     primary_bis:
@@ -545,47 +534,47 @@ champions:
       - DA_Crownguard
       - DA_GargoyleStoneplate
     secondary_bis:
-      - DA_SpiritVisage
       - DA_DragonsClaw
-      - DA_ProtectorsVow
+      - DA_SpiritVisage
+      - DA_WarmogsArmor
     special_bis:
       - DA_GargoyleStoneplate_Radiant
       - DA_Artifact_LightshieldCrest
-      - DA_DragonsClawRadiant
-    avg_place: 3.54
-    games: 412
+      - DA_SteadfastHeartRadiant
+    avg_place: 3.6
+    games: 452
   - api_name: DA_18_Rengar
     role: AD Carry
     primary_bis:
+      - DA_EdgeOfNight
       - DA_GuinsoosRageblade
-      - DA_Quicksilver
       - DA_SteraksGage
     secondary_bis:
       - DA_TitansResolve
-      - DA_Bloodthirster
+      - DA_Quicksilver
       - DA_KrakensFury
     special_bis:
+      - DA_SteraksGageRadiant
       - DA_TitansResolve_Radiant
-      - DA_Artifact_InfinityForce
       - DA_Artifact_Mittens
-    avg_place: 4.05
-    games: 221
+    avg_place: 4.19
+    games: 675
   - api_name: DA_18_Tristana
     role: AD Carry
     primary_bis:
-      - DA_Deathblade
       - DA_GiantSlayer
       - DA_GuinsoosRageblade
+      - DA_KrakensFury
     secondary_bis:
       - DA_Quicksilver
       - DA_StrikersFlail
       - DA_HextechGunblade
     special_bis:
-      - DA_GuinsoosRagebladeRadiant
       - DA_Artifact_GoldCollector
-      - DA_Artifact_GamblersBlade
+      - DA_GuinsoosRagebladeRadiant
+      - DA_Artifact_NavoriFlickerblade
     avg_place: 4.18
-    games: 306
+    games: 342
   - api_name: DA_Vi18
     role: Main Tank
     primary_bis:
@@ -593,15 +582,15 @@ champions:
       - DA_SunfireCape
       - DA_WarmogsArmor
     secondary_bis:
+      - DA_Quicksilver
       - DA_ThiefsGloves
       - DA_IonicSpark
-      - DA_TitansResolve
     special_bis:
       - DA_ThiefsGlovesRadiant
       - DA_Artifact_LightshieldCrest
       - DA_Artifact_MogulsMail
-    avg_place: 3.96
-    games: 230
+    avg_place: 3.95
+    games: 220
   - api_name: DA_18_Ahri
     role: AD Carry
     primary_bis:
@@ -616,8 +605,8 @@ champions:
       - DA_AdaptiveHelm_Radiant
       - DA_ThiefsGlovesRadiant
       - DA_BlueBuffRadiant
-    avg_place: 3.47
-    games: 275
+    avg_place: 3.48
+    games: 258
   - api_name: DA_Amumu18
     role: Main Tank
     primary_bis:
@@ -625,47 +614,47 @@ champions:
       - DA_SunfireCape
       - DA_WarmogsArmor
     secondary_bis:
-      - DA_TitansResolve
       - DA_Bloodthirster
+      - DA_TitansResolve
       - DA_Evenshroud
     special_bis:
       - DA_ThiefsGlovesRadiant
       - DA_Artifact_LightshieldCrest
       - DA_SunfireCape_Radiant
-    avg_place: 3.45
-    games: 261
+    avg_place: 3.49
+    games: 281
   - api_name: DA_18_Aphelios
     role: AD Carry
     primary_bis:
-      - DA_Deathblade
-      - DA_InfinityEdge
-      - DA_StrikersFlail
+      - DA_KrakensFury
+      - DA_KrakensFury
+      - DA_RedBuff
     secondary_bis:
       - DA_EdgeOfNight
       - DA_GiantSlayer
-      - DA_KrakensFury
+      - DA_Deathblade
     special_bis:
-      - DA_HextechGunbladeRadiant
       - DA_GiantSlayer_Radiant
       - DA_Artifact_GoldCollector
-    avg_place: 3.69
-    games: 650
+      - DA_DeathbladeRadiant
+    avg_place: 3.75
+    games: 1021
   - api_name: DA_Brambleback18
     role: Utility / Bruiser
     primary_bis:
-      - DA_Bloodthirster
       - DA_EdgeOfNight
+      - DA_HandOfJustice
       - DA_Quicksilver
     secondary_bis:
       - DA_ThiefsGloves
-      - DA_GiantSlayer
       - DA_TitansResolve
+      - DA_Bloodthirster
     special_bis:
-      - DA_ThiefsGlovesRadiant
       - DA_EdgeOfNightRadiant
-      - DA_Artifact_InfinityForce
-    avg_place: 3.74
-    games: 203
+      - DA_ThiefsGlovesRadiant
+      - DA_Artifact_Mittens
+    avg_place: 3.81
+    games: 266
   - api_name: DA_18_Ezreal
     role: AD Carry
     primary_bis:
@@ -674,30 +663,30 @@ champions:
       - DA_RedBuff
     secondary_bis:
       - DA_HandOfJustice
+      - DA_ThiefsGloves
       - DA_Quicksilver
-      - DA_NashorsTooth
     special_bis:
       - DA_ThiefsGlovesRadiant
-      - DA_Item_Artifact_TalismanOfAscension
       - DA_GiantSlayer_Radiant
-    avg_place: 3.5
-    games: 291
+      - DA_Item_Artifact_TalismanOfAscension
+    avg_place: 3.54
+    games: 268
   - api_name: DA_18_Lillia
     role: AP Carry
     primary_bis:
-      - DA_AdaptiveHelm
       - DA_ProtectorsVow
-      - DA_SpiritVisage
+      - DA_ProtectorsVow
+      - DA_ProtectorsVow
     secondary_bis:
       - DA_TitansResolve
-      - DA_ArchangelsStaff
       - DA_Bloodthirster
+      - DA_IonicSpark
     special_bis:
       - DA_ThiefsGlovesRadiant
       - DA_Artifact_HorizonFocus
-      - DA_Artifact_LightshieldCrest
-    avg_place: 3.97
-    games: 246
+      - DA_Artifact_VoidGauntlet
+    avg_place: 3.83
+    games: 211
   - api_name: DA_18_Malphite
     role: Main Tank
     primary_bis:
@@ -709,11 +698,11 @@ champions:
       - DA_WarmogsArmor
       - DA_DragonsClaw
     special_bis:
-      - DA_Artifact_LightshieldCrest
-      - DA_ProtectorsVowRadiant
       - DA_DragonsClawRadiant
-    avg_place: 3.97
-    games: 931
+      - DA_Artifact_LightshieldCrest
+      - DA_BrambleVestRadiant
+    avg_place: 3.93
+    games: 894
   - api_name: DA_18_Morgana
     role: AD Carry
     primary_bis:
@@ -726,26 +715,26 @@ champions:
       - DA_AdaptiveHelm
     special_bis:
       - DA_ThiefsGlovesRadiant
-      - DA_HandOfJusticeRadiant
-      - DA_RabadonsDeathcap_Radiant
-    avg_place: 3.42
-    games: 278
+      - DA_AdaptiveHelm_Radiant
+      - DA_MorellonomiconRadiant
+    avg_place: 3.67
+    games: 261
   - api_name: DA_Nidalee18_AP
-    role: AD Carry
+    role: Utility / Bruiser
     primary_bis:
-      - DA_SpearOfShojin
-      - DA_SteraksGage
-      - DA_SteraksGage
+      - DA_ArchangelsStaff
+      - DA_GiantSlayer
+      - DA_GuinsoosRageblade
     secondary_bis:
       - DA_EdgeOfNight
       - DA_Bloodthirster
-      - DA_HandOfJustice
+      - DA_SteraksGage
     special_bis:
       - DA_Artifact_SilvermereDawn
       - DA_BloodthirsterRadiant
       - DA_HandOfJusticeRadiant
-    avg_place: 3.67
-    games: 412
+    avg_place: 3.64
+    games: 214
   - api_name: DA_Sentinel18
     role: AP Carry
     primary_bis:
@@ -754,14 +743,14 @@ champions:
       - DA_AdaptiveHelm
     secondary_bis:
       - DA_BlueBuff
-      - DA_TitansResolve
       - DA_Bloodthirster
+      - DA_EdgeOfNight
     special_bis:
-      - DA_SunfireCape_Radiant
       - DA_ThiefsGlovesRadiant
-      - DA_WarmogsArmorRadiant
-    avg_place: 3.33
-    games: 294
+      - DA_SunfireCape_Radiant
+      - DA_CrownguardRadiant
+    avg_place: 3.31
+    games: 297
   - api_name: DA_18_Sett
     role: Main Tank
     primary_bis:
@@ -769,47 +758,47 @@ champions:
       - DA_SteraksGage
       - DA_WarmogsArmor
     secondary_bis:
-      - DA_Bloodthirster
       - DA_TitansResolve
+      - DA_Bloodthirster
       - DA_ThiefsGloves
     special_bis:
       - DA_ThiefsGlovesRadiant
-      - DA_SpiritVisage_Radiant
-      - DA_SteadfastHeartRadiant
-    avg_place: 3.47
-    games: 207
+      - DA_WarmogsArmorRadiant
+      - DA_BrambleVestRadiant
+    avg_place: 3.62
+    games: 230
   - api_name: DA_18_Sivir
     role: AD Carry
     primary_bis:
-      - DA_GiantSlayer
+      - DA_Deathblade
       - DA_HextechGunblade
       - DA_InfinityEdge
     secondary_bis:
       - DA_NashorsTooth
-      - DA_ThiefsGloves
       - DA_EdgeOfNight
+      - DA_ThiefsGloves
     special_bis:
       - DA_KrakensFury_Radiant
       - DA_ThiefsGlovesRadiant
       - DA_GiantSlayer_Radiant
-    avg_place: 3.67
-    games: 223
+    avg_place: 3.7
+    games: 206
   - api_name: DA_18_Soraka
     role: AP Carry
     primary_bis:
       - DA_AdaptiveHelm
-      - DA_BlueBuff
-      - DA_RabadonsDeathcap
+      - DA_ArchangelsStaff
+      - DA_NashorsTooth
     secondary_bis:
       - DA_HandOfJustice
       - DA_ThiefsGloves
-      - DA_NashorsTooth
+      - DA_BlueBuff
     special_bis:
       - DA_ThiefsGlovesRadiant
-      - DA_Artifact_Dawncore
       - DA_AdaptiveHelm_Radiant
-    avg_place: 3.51
-    games: 280
+      - DA_Artifact_Dawncore
+    avg_place: 3.56
+    games: 238
   - api_name: DA_18_Zyra
     role: AD Carry
     primary_bis:
@@ -823,9 +812,9 @@ champions:
     special_bis:
       - DA_AdaptiveHelm_Radiant
       - DA_Item_Artifact_TalismanOfAscension
-      - DA_ArchangelsStaffRadiant
-    avg_place: 3.31
-    games: 264
+      - DA_BlueBuffRadiant
+    avg_place: 3.35
+    games: 283
   - api_name: DA_18_Alune
     role: AP Carry
     primary_bis:
@@ -833,31 +822,31 @@ champions:
       - DA_SpearOfShojin
       - DA_VoidStaff
     secondary_bis:
-      - DA_AdaptiveHelm
-      - DA_HandOfJustice
       - DA_EdgeOfNight
+      - DA_AdaptiveHelm
+      - DA_Quicksilver
     special_bis:
+      - DA_Item_Artifact_TalismanOfAscension
       - DA_ThiefsGlovesRadiant
       - DA_Artifact_BlightingJewel
-      - DA_Item_Artifact_TalismanOfAscension
-    avg_place: 2.83
-    games: 375
+    avg_place: 2.86
+    games: 364
   - api_name: DA_18_Ashe
     role: AD Carry
     primary_bis:
-      - DA_LastWhisper
+      - DA_GiantSlayer
       - DA_RedBuff
-      - DA_StrikersFlail
+      - DA_SpearOfShojin
     secondary_bis:
       - DA_AdaptiveHelm
-      - DA_TitansResolve
+      - DA_NashorsTooth
       - DA_HandOfJustice
     special_bis:
       - DA_ThiefsGlovesRadiant
       - DA_RedBuffRadiant
-      - DA_GiantSlayer_Radiant
-    avg_place: 3.12
-    games: 211
+      - DA_StrikersFlailRadiant
+    avg_place: 3.17
+    games: 2289
   - api_name: DA_Draven18
     role: AD Carry
     primary_bis:
@@ -866,62 +855,62 @@ champions:
       - DA_RedBuff
     secondary_bis:
       - DA_TitansResolve
-      - DA_Deathblade
       - DA_GiantSlayer
+      - DA_Deathblade
     special_bis:
       - DA_KrakensFury_Radiant
       - DA_RedBuffRadiant
       - DA_GiantSlayer_Radiant
-    avg_place: 3.24
-    games: 204
+    avg_place: 3.21
+    games: 234
   - api_name: DA_18_ElderDragon
-    role: AD Carry
-    primary_bis:
-      - DA_Deathblade
-      - DA_GiantSlayer
-      - DA_SteraksGage
-    secondary_bis:
-      - DA_Quicksilver
-      - DA_StrikersFlail
-      - DA_HandOfJustice
-    special_bis:
-      - DA_ThiefsGlovesRadiant
-      - DA_TitansResolve_Radiant
-      - DA_EdgeOfNightRadiant
-    avg_place: 3.17
-    games: 397
-  - api_name: DA_18_GnarSmall
     role: Utility / Bruiser
     primary_bis:
-      - DA_Bloodthirster
+      - DA_HandOfJustice
+      - DA_InfinityEdge
       - DA_Quicksilver
-      - DA_SteraksGage
+    secondary_bis:
+      - DA_StrikersFlail
+      - DA_GiantSlayer
+      - DA_Deathblade
+    special_bis:
+      - DA_QuicksilverRadiant
+      - DA_ThiefsGlovesRadiant
+      - DA_TitansResolve_Radiant
+    avg_place: 3.18
+    games: 316
+  - api_name: DA_18_GnarSmall
+    role: AD Carry
+    primary_bis:
+      - DA_Bloodthirster
+      - DA_EdgeOfNight
+      - DA_TitansResolve
     secondary_bis:
       - DA_GiantSlayer
-      - DA_Evenshroud
       - DA_DragonsClaw
+      - DA_SteadfastHeart
     special_bis:
       - DA_Artifact_ZhonyasParadox
-      - DA_Artifact_HorizonFocus
       - DA_ThiefsGlovesRadiant
-    avg_place: 2.74
-    games: 212
+      - DA_Artifact_HorizonFocus
+    avg_place: 2.89
+    games: 205
   - api_name: DA_18_Ivern
     role: AP Carry
     primary_bis:
       - DA_AdaptiveHelm
-      - DA_BlueBuff
+      - DA_ArchangelsStaff
       - DA_SpearOfShojin
     secondary_bis:
       - DA_NashorsTooth
-      - DA_Quicksilver
+      - DA_BlueBuff
       - DA_TacticiansCrown
     special_bis:
       - DA_ThiefsGlovesRadiant
       - DA_AdaptiveHelm_Radiant
       - DA_Artifact_LichBane
-    avg_place: 2.38
-    games: 385
+    avg_place: 2.37
+    games: 347
   - api_name: DA_18_Kennen
     role: Utility / Bruiser
     primary_bis:
@@ -936,8 +925,8 @@ champions:
       - DA_ThiefsGlovesRadiant
       - DA_EdgeOfNightRadiant
       - DA_Artifact_InfinityForce
-    avg_place: 2.54
-    games: 200
+    avg_place: 2.64
+    games: 203
   - api_name: DA_Lux18_Base
     role: AP Carry
     primary_bis:
@@ -946,14 +935,14 @@ champions:
       - DA_VoidStaff
     secondary_bis:
       - DA_AdaptiveHelm
-      - DA_Quicksilver
-      - DA_HandOfJustice
+      - DA_ThiefsGloves
+      - DA_RabadonsDeathcap
     special_bis:
       - DA_Artifact_HorizonFocus
-      - DA_AdaptiveHelm_Radiant
       - DA_ThiefsGlovesRadiant
-    avg_place: 2.71
-    games: 261
+      - DA_BlueBuffRadiant
+    avg_place: 2.82
+    games: 270
   - api_name: DA_18_Maokai
     role: Main Tank
     primary_bis:
@@ -961,15 +950,15 @@ champions:
       - DA_SpiritVisage
       - DA_WarmogsArmor
     secondary_bis:
-      - DA_SteadfastHeart
       - DA_DragonsClaw
+      - DA_SteadfastHeart
       - DA_BrambleVest
     special_bis:
       - DA_Item_Artifact_TalismanOfAscension
-      - DA_WarmogsArmorRadiant
       - DA_SteadfastHeartRadiant
-    avg_place: 3.03
-    games: 206
+      - DA_WarmogsArmorRadiant
+    avg_place: 2.86
+    games: 221
   - api_name: DA_Taric18
     role: Main Tank
     primary_bis:
@@ -985,4 +974,4 @@ champions:
       - DA_ProtectorsVowRadiant
       - DA_SpiritVisage_Radiant
     avg_place: 3.13
-    games: 203
+    games: 204

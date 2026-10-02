@@ -13,8 +13,8 @@ openers:
       - DA_18_Elise
     slammable_items:
       - DA_SpearOfShojin
+      - DA_JeweledGauntlet
       - DA_InfinityEdge
-      - DA_GuinsoosRageblade
     transition_to:
       - lunar-aphelios-nidalee
       - riftbeast-sentinel
@@ -77,10 +77,26 @@ openers:
       - DA_SpearOfShojin
       - DA_GargoyleStoneplate
     transition_to:
-      - juggernaut-sivir
       - juggernaut-zyra-sivir
+      - juggernaut-sivir
       - juggernaut-nidalee-zyra
     notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Ahri Sivir.
+  - name: Fae Juggernauts
+    tier: A
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Varus
+      - DA_18_Xayah
+      - DA_18_Yorick
+    slammable_items:
+      - DA_EdgeOfNight
+      - DA_Quicksilver
+      - DA_InfinityEdge
+    transition_to:
+      - rapidfire-aphelios
+      - blossom-ahri-sivir
+      - elderwood-aphelios
+    notes: Varus holds items while Rakan anchors the frontline. Pivot toward Rapidfire Aphelios.
   - name: Brawler Blackthorns
     tier: A
     core_units:
@@ -112,19 +128,3 @@ openers:
       - ravager-warwick
       - spellweaver-veigar
     notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
-  - name: Elderwood Rapidfires
-    tier: B
-    core_units:
-      - DA_18_Alistar
-      - DA_18_Ornn
-      - DA_18_Varus
-      - DA_18_Xayah
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_LastWhisper
-      - DA_GuinsoosRageblade
-    transition_to:
-      - elderwood-ezreal-amumu
-      - elderwood-aphelios
-      - elderwood-ezreal-alistar
-    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
