@@ -58,9 +58,9 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_GargoyleStoneplate
-      - DA_SpiritVisage
-      - DA_WarmogsArmor
+      - DA_EdgeOfNight
+      - DA_HandOfJustice
+      - DA_RabadonsDeathcap
     transition_to:
       - elderwood-khazix
       - ashe-fast-9
