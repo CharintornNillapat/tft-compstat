@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-03T08:44:29.595Z. Names, icons, rarity and text: CommunityDragon 16.19.
+# (per comp), updated 2026-10-04T09:09:13.169Z. Names, icons, rarity and text: CommunityDragon 16.19.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.3"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-03. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-04. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -1589,6 +1589,9 @@ augments:
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
     description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
 comps:
+  blackthorn-malphite:
+    source: SORAKA > Executioner > Lvl 8 push
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_BoxingLessons, DA_FrontlineFoundation, DA_SpreadingRoots, DA_LivingForge, DA_TheTraitTree ]
@@ -1637,3 +1640,6 @@ comps:
   sprykin-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
+  vanguard-ahri:
+    source: AHRI & Morgana > Blossom > Lvl 8 push
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BronzeForLifeI, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
