@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-04T09:09:13.169Z. Names, icons, rarity and text: CommunityDragon 16.19.
+# (per comp), updated 2026-10-05T09:49:11.069Z. Names, icons, rarity and text: CommunityDragon 16.19.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.3"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-04. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-05. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -443,45 +443,18 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/trade3.png
     description: Gain 16 free Shop rerolls now and 3 every round for the rest of the game.
-  - api_name: DA_Coronation
-    name: Coronation
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/coronation_iii.png
-    description: Gain a Tactician's Crown. Tactician's Crown, Cape, and Shield grant the holder 20% Attack Speed, 25% Attack Damage, and 30% Ability Power.
   - api_name: DA_LevelUp
     name: Level Up!
     rarity: Prismatic
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/levelup3.png
     description: When you buy XP, gain an additional 2. Gain 6 immediately.
-  - api_name: DA_GoldenGamble
-    name: Golden Gamble
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/goldengamble_iii.png
-    description: Gain 2 gold and flip a coin. If heads, gain a Radiant Lucky Item Chest. If tails, gain 2 Completed Item anvils.
   - api_name: DA_GoldenGamblePlus
     name: Golden Gamble+
     rarity: Prismatic
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/goldengamble_iii.png
     description: Gain 3 gold and flip a coin. If heads, gain a Radiant Lucky Item Chest. If tails, gain 2 Completed Item anvils.
-  - api_name: DA_LivingForge
-    name: Living Forge
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/living-forge-iii.png
-    description: Gain an Artifact Anvil now and after every 10 player combats.
-  - api_name: DA_ForgedInStrength
-    name: Forged In Strength
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/forgedinstrength_iii.png
-    description: |-
-      Gain 1 random Artifact. When you drop below 35 Health, gain 1 more random Artifact, 1 random completed item, and 2 random components.
-
-      Remix Rumble Championship, 2023
   - api_name: DA_GoldenGamblePlusPlus
     name: Golden Gamble++
     rarity: Prismatic
@@ -506,12 +479,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/prismaticdestiny_iii.png
     description: Gain a random Prismatic Augment and 4 gold.
-  - api_name: DA_UpwardMobility
-    name: Upward Mobility
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/upwardmobility_iii.png
-    description: Buying XP costs 1 less. Gain 2 Health and 2 Shop rerolls whenever you level up.
   - api_name: DA_SilverDestiny
     name: Silver Destiny
     rarity: Silver
@@ -560,12 +527,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/worththewait_ii.png
     description: Gain a random 1-cost champion. Gain another copy of them at the start of each round for the rest of the game.
-  - api_name: DA_CapitalGainsII
-    name: Capital Gains II
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Store gold equal to the interest you earn. On 3-3, gain gold equal to 125% of the stored gold. Gain 3 gold now.
   - api_name: DA_ShoppingSpree
     name: Shopping Spree
     rarity: Prismatic
@@ -638,12 +599,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/late-game-specialist-i.png
     description: When you reach Level 9, gain 27 gold.
-  - api_name: DA_18_FloraFatalisAugment
-    name: Consuming Flora
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Gain a Flora Fatalis emblem. The champion holding the emblem gains 50% increased benefits from Flora Fatalis. Gain 3 gold.
   - api_name: DA_BonusGift
     name: Bonus Gifts
     rarity: Gold
@@ -722,6 +677,24 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/buried-treasures-iii.png
     description: Gain a random item component now and at the start of the next 6 rounds.
+  - api_name: DA_SwordOverflow
+    name: Sword Overflow
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/bladeoverflow_iii.png
+    description: Gain 4 BF Swords. Your BF Swords grant +4% Attack Speed.
+  - api_name: DA_WandOverflow
+    name: Wand Overflow
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/wandoverflow_iii.png
+    description: Gain 4 Needlessly Large Rods. Your Needlessly Large Rods grant +5% Attack Speed.
+  - api_name: DA_PrismaticDestinyPlus
+    name: Prismatic Destiny+
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/prismaticdestiny_iii.png
+    description: Gain a random Prismatic Augment and 7 gold.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -943,6 +916,12 @@ augments:
       Round start: items on your bench are randomized.
 
       Gain 2 random components.
+  - api_name: DA_CapitalGainsII
+    name: Capital Gains II
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Store gold equal to the interest you earn. On 3-3, gain gold equal to 125% of the stored gold. Gain 3 gold now.
   - api_name: DA_CelestialBlessingII
     name: Celestial Blessing II
     rarity: Gold
@@ -955,6 +934,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/choiceui/precisiongrace_ii.png
     description: At the start of combat, allies gain 25% Attack Speed for 3 seconds. On takedown, allies dash to their next target and gain this bonus again.
+  - api_name: DA_18_FloraFatalisAugment
+    name: Consuming Flora
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Gain a Flora Fatalis emblem. The champion holding the emblem gains 50% increased benefits from Flora Fatalis. Gain 3 gold.
   - api_name: DA_MaliciousMonetization
     name: Malicious Monetization
     rarity: Gold
@@ -1141,12 +1126,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/lucky-gloves-iii.png
     description: Thief's Gloves will always give your champions ideal items. Gain 2 Sparring Gloves and 4 gold.
-  - api_name: DA_PrismaticDestinyPlus
-    name: Prismatic Destiny+
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/prismaticdestiny_iii.png
-    description: Gain a random Prismatic Augment and 7 gold.
   - api_name: DA_LuckyGlovesPlus
     name: Lucky Gloves+
     rarity: Prismatic
@@ -1213,12 +1192,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/sweettreats_iii.png
     description: Gain an Artifact anvil. Your team gains 16 Health for each item equipped on champions.
-  - api_name: DA_SwordOverflow
-    name: Sword Overflow
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/bladeoverflow_iii.png
-    description: Gain 4 BF Swords. Your BF Swords grant +4% Attack Speed.
   - api_name: DA_UrfsGrabBag
     name: Urf's Grab Bag
     rarity: Prismatic
@@ -1231,12 +1204,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/golden-gifts-iii.png
     description: "Gain a 2-star champion and 1 gold each time you level up. The champion's cost tier is your level minus 4 (max: 5-cost)."
-  - api_name: DA_WandOverflow
-    name: Wand Overflow
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/wandoverflow_iii.png
-    description: Gain 4 Needlessly Large Rods. Your Needlessly Large Rods grant +5% Attack Speed.
   - api_name: DA_BandOfThievesIIPlus
     name: Band of Thieves II+
     rarity: Prismatic
@@ -1249,6 +1216,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/deadlierblades_ii.png
     description: Gain a Deathblade. Deathblades permanently gain 1% Attack Damage whenever their holders score a takedown.
+  - api_name: DA_LivingForge
+    name: Living Forge
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/living-forge-iii.png
+    description: Gain an Artifact Anvil now and after every 10 player combats.
   - api_name: DA_VerticalityIII
     name: Verticality III
     rarity: Prismatic
@@ -1315,18 +1288,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/holdtheline_iii.png
     description: Champions in your back 2 rows gain 10% Ability Power and 9% Attack Damage for each champion that starts combat in your front row.
-  - api_name: DA_NestingDollsPlus
-    name: Nesting Dolls
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
-    description: After a champion dies in combat, spawn a copy of them one star level lower with 60% health. Gain 3 free rerolls.
-  - api_name: DA_NestingDollsPlusPlus
-    name: Nesting Dolls
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
-    description: After a champion dies in combat, spawn a copy of them one star level lower with 60% health. Gain 3 free rerolls.
   - api_name: DA_18_ResidualMagic
     name: Residual Magic
     rarity: Silver
@@ -1354,6 +1315,15 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/richgetricher3.png
     description: Gain 22 gold. Your max interest is increased to 10.
+  - api_name: DA_ForgedInStrength
+    name: Forged In Strength
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/forgedinstrength_iii.png
+    description: |-
+      Gain 1 random Artifact. When you drop below 35 Health, gain 1 more random Artifact, 1 random completed item, and 2 random components.
+
+      Remix Rumble Championship, 2023
   - api_name: DA_ComebackStory
     name: Comeback Story
     rarity: Prismatic
@@ -1456,12 +1426,36 @@ augments:
       Gain a championship hex in the bottom right corner. The champion in it gains 15% Damage Amp and 15% Attack Speed, and drops 1 gold every 5 takedowns.
 
       Lore & Legends Tactician's Crown, 2026
+  - api_name: DA_UpwardMobility
+    name: Upward Mobility
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/upwardmobility_iii.png
+    description: Buying XP costs 1 less. Gain 2 Health and 2 Shop rerolls whenever you level up.
   - api_name: DA_BandOfThievesIIPlusPlus
     name: Band of Thieves II++
     rarity: Prismatic
     tier: B
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/bandthieves3.png
     description: Gain 2 Thief's Gloves. After 3 player combats, gain another.
+  - api_name: DA_GoldenGamble
+    name: Golden Gamble
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/goldengamble_iii.png
+    description: Gain 2 gold and flip a coin. If heads, gain a Radiant Lucky Item Chest. If tails, gain 2 Completed Item anvils.
+  - api_name: DA_Coronation
+    name: Coronation
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/coronation_iii.png
+    description: Gain a Tactician's Crown. Tactician's Crown, Cape, and Shield grant the holder 20% Attack Speed, 25% Attack Damage, and 30% Ability Power.
+  - api_name: DA_MakeshiftArmorII
+    name: Makeshift Armor II
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/makeshift2.png
+    description: Champions without items equipped gain 50 Armor and Magic Resist.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1516,18 +1510,18 @@ augments:
       You no longer gain interest. Gain 10 gold now. Gain 4 XP after every player combat.
 
       Interest is extra gold you gain per 10g saved.
-  - api_name: DA_HardCommit
-    name: Hard Commit
-    rarity: Prismatic
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/hardcommit_iii.png
-    description: Gain a random emblem. Now and at the start of each stage, gain a 1-star champion of that trait with a cost equal to the Stage (max 5) and 3 gold.
   - api_name: DA_Min_Max
     name: Min-Max
     rarity: Prismatic
     tier: C
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/minmax_iii.png
     description: Gain a Golden Item Remover and 4 random components.
+  - api_name: DA_HardCommit
+    name: Hard Commit
+    rarity: Prismatic
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/hardcommit_iii.png
+    description: Gain a random emblem. Now and at the start of each stage, gain a 1-star champion of that trait with a cost equal to the Stage (max 5) and 3 gold.
   - api_name: DA_GoldenEgg
     name: The Golden Egg
     rarity: Prismatic
@@ -1570,12 +1564,6 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/electrocharge-ii.png
     description: Every 4 attacks an ally takes, they deal 50-140 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
-  - api_name: DA_MakeshiftArmorII
-    name: Makeshift Armor II
-    rarity: Gold
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/makeshift2.png
-    description: Champions without items equipped gain 50 Armor and Magic Resist.
   - api_name: DA_18_SprykinAugment
     name: Small Furry Friend
     rarity: Gold
@@ -1588,6 +1576,18 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
     description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
+  - api_name: DA_NestingDollsPlus
+    name: Nesting Dolls
+    rarity: Prismatic
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
+    description: After a champion dies in combat, spawn a copy of them one star level lower with 60% health. Gain 3 free rerolls.
+  - api_name: DA_NestingDollsPlusPlus
+    name: Nesting Dolls
+    rarity: Prismatic
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
+    description: After a champion dies in combat, spawn a copy of them one star level lower with 60% health. Gain 3 free rerolls.
 comps:
   blackthorn-malphite:
     source: SORAKA > Executioner > Lvl 8 push

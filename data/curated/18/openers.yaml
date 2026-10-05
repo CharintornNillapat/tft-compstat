@@ -80,7 +80,23 @@ openers:
       - riftbeast-sentinel
       - invoker-ahri
       - defender-cassiopeia
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Morgana.
+    notes: Caitlyn holds items while Elise anchors the frontline. Pivot toward Coven Morgana.
+  - name: Elderwood Rapidfires
+    tier: A
+    core_units:
+      - DA_18_Alistar
+      - DA_18_Ornn
+      - DA_18_Varus
+      - DA_18_Xayah
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_LastWhisper
+      - DA_InfinityEdge
+    transition_to:
+      - elderwood-ezreal-amumu
+      - elderwood-aphelios
+      - elderwood-ezreal-alistar
+    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Fae Juggernauts
     tier: A
     core_units:
@@ -112,19 +128,3 @@ openers:
       - spellweaver-veigar
       - sprykin-azir
     notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
-  - name: Elderwood Rapidfires
-    tier: B
-    core_units:
-      - DA_18_Alistar
-      - DA_18_Ornn
-      - DA_18_Varus
-      - DA_18_Xayah
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_GuinsoosRageblade
-      - DA_KrakensFury
-    transition_to:
-      - elderwood-ezreal-amumu
-      - elderwood-aphelios
-      - elderwood-ezreal-alistar
-    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
