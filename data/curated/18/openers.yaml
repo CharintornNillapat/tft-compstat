@@ -13,9 +13,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_GargoyleStoneplate
       - DA_SpearOfShojin
       - DA_ArchangelsStaff
+      - DA_GargoyleStoneplate
     transition_to:
       - lunar-aphelios-nidalee
       - juggernaut-zyra-sivir
@@ -75,7 +75,7 @@ openers:
     slammable_items:
       - DA_SpearOfShojin
       - DA_JeweledGauntlet
-      - DA_RabadonsDeathcap
+      - DA_GargoyleStoneplate
     transition_to:
       - riftbeast-sentinel
       - invoker-ahri
@@ -90,8 +90,8 @@ openers:
       - DA_18_Xayah
     slammable_items:
       - DA_SpearOfShojin
-      - DA_LastWhisper
-      - DA_InfinityEdge
+      - DA_GuinsoosRageblade
+      - DA_KrakensFury
     transition_to:
       - elderwood-ezreal-amumu
       - elderwood-aphelios
