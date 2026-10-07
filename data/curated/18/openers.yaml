@@ -13,8 +13,8 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_SpearOfShojin
       - DA_ArchangelsStaff
+      - DA_SpearOfShojin
       - DA_GargoyleStoneplate
     transition_to:
       - lunar-aphelios-nidalee
@@ -73,14 +73,14 @@ openers:
       - DA_18_Camille
       - DA_18_Elise
     slammable_items:
-      - DA_SpearOfShojin
-      - DA_JeweledGauntlet
       - DA_GargoyleStoneplate
+      - DA_SpearOfShojin
+      - DA_WarmogsArmor
     transition_to:
-      - riftbeast-sentinel
       - invoker-ahri
-      - defender-cassiopeia
-    notes: Caitlyn holds items while Elise anchors the frontline. Pivot toward Coven Morgana.
+      - invoker-morgana
+      - riftbeast-sentinel
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Morgana.
   - name: Elderwood Rapidfires
     tier: A
     core_units:
@@ -89,9 +89,9 @@ openers:
       - DA_18_Varus
       - DA_18_Xayah
     slammable_items:
+      - DA_LastWhisper
       - DA_SpearOfShojin
       - DA_GuinsoosRageblade
-      - DA_KrakensFury
     transition_to:
       - elderwood-ezreal-amumu
       - elderwood-aphelios

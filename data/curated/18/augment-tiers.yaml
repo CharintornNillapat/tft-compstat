@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-05T09:49:11.069Z. Names, icons, rarity and text: CommunityDragon 16.19.
+# (per comp), updated 2026-10-07T09:35:39.476Z. Names, icons, rarity and text: CommunityDragon 16.19.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
-patch: "18.3"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-05. Expert grades rather than placement stats: set 18 match data carries no augments."
+patch: "18.4"
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-07. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -172,12 +172,6 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_iii.png
     description: Your team gains 2.5% Damage Amp and 4 Armor and Magic Resist for each Bronze-tier trait.
-  - api_name: DA_PrismaticTicket
-    name: Prismatic Ticket
-    rarity: Prismatic
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/goldenticket3.png
-    description: Each time your shop is rerolled you have a 45% chance to gain a free reroll.
   - api_name: DA_BandOfThieves
     name: Band of Thieves
     rarity: Silver
@@ -527,6 +521,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/worththewait_ii.png
     description: Gain a random 1-cost champion. Gain another copy of them at the start of each round for the rest of the game.
+  - api_name: DA_PrismaticTicket
+    name: Prismatic Ticket
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.19/game/assets/maps/tft/icons/augments/hexcore/goldenticket3.png
+    description: Each time your shop is rerolled you have a 45% chance to gain a free reroll.
   - api_name: DA_ShoppingSpree
     name: Shopping Spree
     rarity: Prismatic
@@ -1607,9 +1607,6 @@ comps:
   executioner-soraka:
     source: SORAKA > Executioner > Lvl 8 push
     augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
-  inferno-lillia:
-    source: ASHE > Inferno-Emblem > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_TraitLadder, DA_InvestedPlusPlus ]
   invoker-ahri:
     source: AHRI & Morgana > Blossom > Lvl 8 push
     augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BronzeForLifeI, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
