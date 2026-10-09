@@ -5,22 +5,6 @@
 patch: "18.2"
 title: Early openers & item slams
 openers:
-  - name: Blossom Juggernauts
-    tier: S
-    core_units:
-      - DA_18_Rakan
-      - DA_18_Yorick
-      - DA_18_Yunara
-      - DA_Karma18
-    slammable_items:
-      - DA_ArchangelsStaff
-      - DA_SpearOfShojin
-      - DA_GargoyleStoneplate
-    transition_to:
-      - lunar-aphelios-nidalee
-      - juggernaut-zyra-sivir
-      - juggernaut-sivir
-    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blackthorn Malphite.
   - name: Elderwood Spellweavers
     tier: S
     core_units:
@@ -52,6 +36,21 @@ openers:
       - flora-malphite
       - spellweaver-veigar
     notes: Kobuko holds items while Rek'Sai anchors the frontline. Pivot toward Sprykin Azir.
+  - name: Riftbeast Juggernauts
+    tier: S
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Sentry
+      - DA_Cinderling18
+      - DA_Scuttlecrab18
+    slammable_items:
+      - DA_BlueBuff
+      - DA_JeweledGauntlet
+      - DA_RabadonsDeathcap
+    transition_to:
+      - riftbeast-pebbles
+      - draven-fast-9
+    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Blossom Swarm
     tier: A
     core_units:
@@ -59,13 +58,29 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
+      - DA_SpearOfShojin
+      - DA_RedBuff
       - DA_EdgeOfNight
-      - DA_HandOfJustice
-      - DA_RabadonsDeathcap
     transition_to:
       - elderwood-khazix
       - ashe-fast-9
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
+  - name: Blossom Juggernauts
+    tier: A
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Yorick
+      - DA_18_Yunara
+      - DA_Karma18
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_ArchangelsStaff
+      - DA_GargoyleStoneplate
+    transition_to:
+      - lunar-aphelios-nidalee
+      - executioner-soraka
+      - juggernaut-zyra-sivir
+    notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Blossom Ahri Sivir.
   - name: Coven Swarm
     tier: A
     core_units:
@@ -73,9 +88,9 @@ openers:
       - DA_18_Camille
       - DA_18_Elise
     slammable_items:
-      - DA_GargoyleStoneplate
       - DA_SpearOfShojin
-      - DA_WarmogsArmor
+      - DA_GargoyleStoneplate
+      - DA_HextechGunblade
     transition_to:
       - invoker-ahri
       - invoker-morgana
@@ -91,7 +106,7 @@ openers:
     slammable_items:
       - DA_LastWhisper
       - DA_SpearOfShojin
-      - DA_GuinsoosRageblade
+      - DA_Deathblade
     transition_to:
       - elderwood-ezreal-amumu
       - elderwood-aphelios
@@ -110,21 +125,6 @@ openers:
       - DA_InfinityEdge
     transition_to:
       - rapidfire-aphelios
-      - blackthorn-malphite
       - blossom-ahri-sivir
+      - elderwood-aphelios
     notes: Varus holds items while Rakan anchors the frontline. Pivot toward Rapidfire Aphelios.
-  - name: Blackthorn Swarm
-    tier: A
-    core_units:
-      - DA_18_RekSai
-      - DA_18_Veigar
-      - DA_18_Warwick
-    slammable_items:
-      - DA_RabadonsDeathcap
-      - DA_NashorsTooth
-      - DA_AdaptiveHelm
-    transition_to:
-      - flora-malphite
-      - spellweaver-veigar
-      - sprykin-azir
-    notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
