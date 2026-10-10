@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster elderwood-kayle, DIAMOND+.
-# Sample: 27,343 boards, avg 4.91, patch 18.4, set 18.
+# Sample: 31,353 boards, avg 4.85, patch 18.4, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -11,23 +11,23 @@
 slug: elderwood-kayle
 name: Elderwood Kayle
 tier: C
-style: reroll_1
+style: reroll_2
 difficulty: 2
 patch: "18.4"
-order: 14
-summary: "Ends at level 7 with Ornn carrying. MetaTFT DIAMOND+: 27,343 boards, avg 4.91, picked 2.0% of boards."
-avg_place: 4.91
-pick_rate: 1.99
+order: 13
+summary: "Ends at level 7 with Ornn carrying. MetaTFT DIAMOND+: 31,353 boards, avg 4.85, picked 2.3% of boards."
+avg_place: 4.85
+pick_rate: 2.26
 level_recommended: 7
 early_units: [ DA_18_Kayle, DA_18_Leona, DA_18_Ornn, DA_18_Xayah ]
 flex_units: [ DA_18_LeBlanc, DA_18_Aphelios ]
 board:
-  - { unit: DA_18_Xayah, row: 3, col: 0, star: 3, carry: true, priority: 3, items: [ DA_GuinsoosRageblade, DA_InfinityEdge, DA_KrakensFury ] }
   - { unit: DA_18_Leona, row: 0, col: 3, star: 3, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Kayle, row: 3, col: 6, star: 3, carry: true, priority: 2, items: [ DA_GuinsoosRageblade, DA_HextechGunblade, DA_JeweledGauntlet ] }
-  - { unit: DA_18_Ornn, row: 0, col: 4, star: 3, carry: true, priority: 1, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
-  - { unit: DA_18_Sejuani, row: 2, col: 3, star: 3, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Rakan, row: 0, col: 2, star: 3, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_18_Kayle, row: 3, col: 0, star: 3, carry: true, priority: 2, items: [ DA_GuinsoosRageblade, DA_HextechGunblade, DA_JeweledGauntlet ] }
+  - { unit: DA_18_Xayah, row: 3, col: 1, star: 3, carry: true, priority: 3, items: [ DA_GuinsoosRageblade, DA_InfinityEdge, DA_KrakensFury ] }
+  - { unit: DA_18_Sejuani, row: 0, col: 4, star: 3, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_18_Ornn, row: 0, col: 2, star: 3, carry: true, priority: 1, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
+  - { unit: DA_18_Rakan, row: 2, col: 3, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Hecarim, row: 2, col: 4, items: [ DA_ThiefsGloves ] }
 guide: |-
   **Early:** the most-played opener is Kayle, Leona, Ornn, Xayah.
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.4: 27,343 boards, avg 4.91. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.4: 31,353 boards, avg 4.85. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

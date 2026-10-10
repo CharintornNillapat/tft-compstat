@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-09T09:49:46.734Z. Names, icons, rarity and text: CommunityDragon 16.20.
+# (per comp), updated 2026-10-10T09:15:34.097Z. Names, icons, rarity and text: CommunityDragon 16.20.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.4"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-09. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-10. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -31,12 +31,6 @@ augments:
       When you reach Level 8, gain 20 Shop rerolls.
 
       Runeterra Reforged Championship, 2023
-  - api_name: DA_PortableForge
-    name: Portable Forge
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/portableforge2.png
-    description: Choose 1 of 4 Artifacts. Artifacts are more powerful items with a unique effect.
   - api_name: DA_SpreadingRoots
     name: Spreading Roots
     rarity: Gold
@@ -106,18 +100,6 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/explosivegrowth_ii.png
     description: Now and at the start of the next 3 rounds, gain 7 XP.
-  - api_name: DA_18_PrimalAugment_Nidalee
-    name: Beast Within
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Primal grants an additional Blessing. Gain a Vi now and a Nidalee after 3 rounds.
-  - api_name: DA_18_PrimalAugmentPlus_Nidalee
-    name: Beast Within+
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Primal grants an additional Blessing. Gain a Vi and a Nidalee.
   - api_name: DA_MagicRoll
     name: Magic Roll
     rarity: Gold
@@ -172,6 +154,12 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/ultrarapidfire_ii.png
     description: Gain a Spatula. Champions holding Spatula or Frying Pan items gain 20% Attack Speed and 3 Mana Regen.
+  - api_name: DA_18_CovenTraitAugment_LootToAP
+    name: Dark Ritual
+    rarity: Gold
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
   - api_name: DA_BandOfThieves
     name: Band of Thieves
     rarity: Silver
@@ -425,6 +413,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/slammin_ii.png
     description: Gain 4 gold and 10 XP now. After each player combat, if there are no items on your bench (other than consumables), gain 2 XP.
+  - api_name: DA_18_PrimalAugment_Nidalee
+    name: Beast Within
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Primal grants an additional Blessing. Gain a Vi now and a Nidalee after 3 rounds.
   - api_name: DA_Staffsmith
     name: Staffsmith
     rarity: Gold
@@ -695,12 +689,18 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: You can now choose a second Alpha Riftbeast. Alpha Riftbeasts gain 15% max Health and 12% Attack Speed. Gain a Scuttlecrab, a Cinderling, and a Pebbles.
-  - api_name: DA_18_CovenTraitAugment_LootToAP
-    name: Dark Ritual
+  - api_name: DA_18_PrimalAugmentPlus_Nidalee
+    name: Beast Within+
     rarity: Gold
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
+    description: Primal grants an additional Blessing. Gain a Vi and a Nidalee.
+  - api_name: DA_PortableForge
+    name: Portable Forge
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/portableforge2.png
+    description: Choose 1 of 4 Artifacts. Artifacts are more powerful items with a unique effect.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -1592,48 +1592,42 @@ comps:
   defender-cassiopeia:
     source: CASSIOPEIA > Defender > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_BoxingLessons, DA_FrontlineFoundation, DA_SpreadingRoots, DA_LivingForge, DA_TheTraitTree ]
-  elderwood-aphelios:
-    source: APHELIOS > Lvl 8 push
-    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
-  elderwood-ezreal-amumu:
+  elderwood-ezreal-draven:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
   elderwood-kayle:
     source: XAYAH & KAYLE > Solar > Lvl 5 & 6 reroll
     augments: [ DA_MissedConnections, DA_RollingForDays, DA_HeroicGrabBag, DA_MoneyHungry_NotBroken, DA_ShimmerscaleEssence, DA_InvestmentStrategy ]
+  executioner-malphite:
+    source: SORAKA > Executioner > Lvl 8 push
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_OneBuffTwoBuff, DA_TheTraitTree ]
   executioner-sett:
     source: EZREAL > Executioner > Lvl 8
-    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_TheTraitTree, DA_UrfsGrabBag ]
-  executioner-soraka:
-    source: SORAKA > Executioner > Lvl 8 push
-    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
+    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+  hunter-malphite:
+    source: SIVIR > Hunter > Lvl 8 push
+    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
   invoker-ahri:
     source: AHRI & Morgana > Blossom > Lvl 8 push
-    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BronzeForLifeI, DA_SeraphimsStaff, DA_TheTraitTree, DA_UrfsGrabBag ]
-  juggernaut-nidalee-zyra:
-    source: ZYRA > Juggernaut > Lvl 8 push
-    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BronzeForLifeI, DA_SeraphimsStaff, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+  juggernaut-amumu:
+    source: DRAVEN > Legendaries > Lvl 9
+    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
   juggernaut-sivir:
     source: ASHE > Juggernaut > Lvl 9 push
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
-  juggernaut-zyra-sivir:
+  juggernaut-zyra-nidalee:
     source: ZYRA > Juggernaut > Lvl 8 push
-    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
-  juggernaut-zyra-summoner:
+    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+  juggernaut-zyra-sejuani:
     source: ZYRA > Juggernaut > Lvl 8 push
-    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
+    augments: [ DA_GroupHugI, DA_BoxingLessons, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_OneBuffTwoBuff, DA_TheTraitTree ]
   lunar-aphelios-nidalee:
     source: APHELIOS > Lvl 8 push
-    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
-  rapidfire-aphelios:
-    source: APHELIOS > Lvl 8 push
-    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
-  riftbeast-malphite:
-    source: SIVIR > Hunter > Lvl 8 push
-    augments: [ DA_FutureFocused, DA_StandUnited, DA_18_PrimalAugment_Nidalee, DA_CyberneticImplants_Gold, DA_BronzeForLifeII, DA_SwordOverflow ]
-  riftbeast-sentinel:
-    source: DRAVEN > Legendaries > Lvl 9
-    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
+    augments: [ DA_FutureFocused, DA_StandUnited, DA_CyberneticImplants_Gold, DA_18_PrimalAugment_Nidalee, DA_BronzeForLifeII, DA_SwordOverflow ]
   sprykin-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
+  vanguard-aphelios:
+    source: APHELIOS > Lvl 8 push
+    augments: [ DA_FutureFocused, DA_StandUnited, DA_CyberneticImplants_Gold, DA_18_PrimalAugment_Nidalee, DA_BronzeForLifeII, DA_SwordOverflow ]

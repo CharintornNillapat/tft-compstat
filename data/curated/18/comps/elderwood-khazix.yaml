@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster elderwood-khazix, DIAMOND+.
-# Sample: 41,642 boards, avg 4.19, patch 18.4, set 18.
+# Sample: 46,993 boards, avg 4.22, patch 18.4, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -14,10 +14,10 @@ tier: S
 style: reroll_3
 difficulty: 2
 patch: "18.4"
-order: 11
-summary: "Ends at level 7 with Kha'Zix carrying. MetaTFT DIAMOND+: 41,642 boards, avg 4.19, picked 3.0% of boards."
-avg_place: 4.19
-pick_rate: 3.03
+order: 9
+summary: "Ends at level 7 with Kha'Zix carrying. MetaTFT DIAMOND+: 46,993 boards, avg 4.22, picked 3.4% of boards."
+avg_place: 4.22
+pick_rate: 3.38
 level_recommended: 7
 early_units: [ DA_18_KhaZix, DA_18_Yorick, DA_18_Yunara, DA_Karma18 ]
 flex_units: [ DA_18_Aphelios, DA_18_Alune, DA_18_Kennen, DA_18_Azir ]
@@ -28,7 +28,7 @@ board:
   - { unit: DA_Fiddlesticks18, row: 2, col: 2, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Ezreal, row: 3, col: 0, carry: true, priority: 3, items: [ DA_Deathblade, DA_RedBuff, DA_SpearOfShojin ] }
   - { unit: DA_18_Ornn, row: 3, col: 6, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Soraka, row: 3, col: 1, items: [ DA_ThiefsGloves ] }
+  - { unit: DA_18_Soraka, row: 3, col: 1, star: 1, items: [ DA_ThiefsGloves ] }
 guide: |-
   **Early:** the most-played opener is Kha'Zix, Yorick, Yunara, Karma.
 
@@ -41,4 +41,4 @@ guide: |-
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.4: 41,642 boards, avg 4.19. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.4: 46,993 boards, avg 4.22. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
