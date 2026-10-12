@@ -78,9 +78,24 @@ openers:
       - DA_WarmogsArmor
     transition_to:
       - lunar-aphelios-nidalee
-      - invoker-ahri
       - juggernaut-amumu
+      - executioner-malphite
     notes: Yunara holds items while Rakan anchors the frontline. Pivot toward Executioner Malphite.
+  - name: Coven Swarm
+    tier: A
+    core_units:
+      - DA_18_Caitlyn
+      - DA_18_Camille
+      - DA_18_Elise
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
+      - DA_JeweledGauntlet
+    transition_to:
+      - invoker-ahri
+      - vanguard-morgana
+      - vanguard-ahri
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: A
     core_units:
@@ -90,28 +105,13 @@ openers:
       - DA_18_Xayah
     slammable_items:
       - DA_SpearOfShojin
-      - DA_GuinsoosRageblade
-      - DA_KrakensFury
+      - DA_Deathblade
+      - DA_LastWhisper
     transition_to:
       - elderwood-ezreal-draven
       - elderwood-aphelios
       - elderwood-ezreal-alistar
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
-  - name: Coven Swarm
-    tier: A
-    core_units:
-      - DA_18_Caitlyn
-      - DA_18_Camille
-      - DA_18_Elise
-    slammable_items:
-      - DA_GargoyleStoneplate
-      - DA_HextechGunblade
-      - DA_SpearOfShojin
-    transition_to:
-      - vanguard-morgana
-      - vanguard-ahri
-      - defender-cassiopeia
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Solar Rapidfires
     tier: A
     core_units:
