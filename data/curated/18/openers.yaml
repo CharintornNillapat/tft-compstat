@@ -73,8 +73,8 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_SpearOfShojin
       - DA_GargoyleStoneplate
+      - DA_SpearOfShojin
       - DA_WarmogsArmor
     transition_to:
       - lunar-aphelios-nidalee
