@@ -5,6 +5,22 @@
 patch: "18.2"
 title: Early openers & item slams
 openers:
+  - name: Elderwood Rapidfires
+    tier: S
+    core_units:
+      - DA_18_Alistar
+      - DA_18_Ornn
+      - DA_18_Varus
+      - DA_18_Xayah
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_Deathblade
+      - DA_LastWhisper
+    transition_to:
+      - elderwood-aphelios
+      - elderwood-ezreal-draven
+      - elderwood-ezreal-alistar
+    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Riftbeast Juggernauts
     tier: S
     core_units:
@@ -35,22 +51,6 @@ openers:
       - flora-malphite
       - spellweaver-veigar
     notes: Kobuko holds items while Rek'Sai anchors the frontline. Pivot toward Sprykin Azir.
-  - name: Elderwood Spellweavers
-    tier: S
-    core_units:
-      - DA_18_LeBlanc
-      - DA_18_Ornn
-      - DA_18_RekSai
-      - DA_18_Veigar
-    slammable_items:
-      - DA_Morellonomicon
-      - DA_SpearOfShojin
-      - DA_VoidStaff
-    transition_to:
-      - spellweaver-veigar
-      - flora-malphite
-      - sprykin-azir
-    notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
   - name: Blossom Swarm
     tier: A
     core_units:
@@ -73,9 +73,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_GargoyleStoneplate
       - DA_SpearOfShojin
-      - DA_WarmogsArmor
+      - DA_GargoyleStoneplate
+      - DA_ArchangelsStaff
     transition_to:
       - lunar-aphelios-nidalee
       - juggernaut-amumu
@@ -89,29 +89,29 @@ openers:
       - DA_18_Elise
     slammable_items:
       - DA_HextechGunblade
-      - DA_SpearOfShojin
-      - DA_JeweledGauntlet
+      - DA_Morellonomicon
+      - DA_VoidStaff
     transition_to:
       - invoker-ahri
       - vanguard-morgana
       - vanguard-ahri
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
-  - name: Elderwood Rapidfires
+  - name: Elderwood Spellweavers
     tier: A
     core_units:
-      - DA_18_Alistar
+      - DA_18_LeBlanc
       - DA_18_Ornn
-      - DA_18_Varus
-      - DA_18_Xayah
+      - DA_18_RekSai
+      - DA_18_Veigar
     slammable_items:
+      - DA_Morellonomicon
       - DA_SpearOfShojin
-      - DA_Deathblade
-      - DA_LastWhisper
+      - DA_VoidStaff
     transition_to:
-      - elderwood-ezreal-draven
-      - elderwood-aphelios
-      - elderwood-ezreal-alistar
-    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
+      - spellweaver-veigar
+      - flora-malphite
+      - sprykin-azir
+    notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
   - name: Solar Rapidfires
     tier: A
     core_units:
