@@ -74,8 +74,8 @@ openers:
       - DA_Karma18
     slammable_items:
       - DA_SpearOfShojin
-      - DA_GargoyleStoneplate
       - DA_ArchangelsStaff
+      - DA_GargoyleStoneplate
     transition_to:
       - lunar-aphelios-nidalee
       - juggernaut-amumu
@@ -89,8 +89,8 @@ openers:
       - DA_18_Elise
     slammable_items:
       - DA_HextechGunblade
-      - DA_Morellonomicon
-      - DA_VoidStaff
+      - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
     transition_to:
       - invoker-ahri
       - vanguard-morgana

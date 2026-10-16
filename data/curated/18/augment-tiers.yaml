@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-15T07:50:20.314Z. Names, icons, rarity and text: CommunityDragon 16.20.
+# (per comp), updated 2026-10-16T07:42:24.088Z. Names, icons, rarity and text: CommunityDragon 16.20.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.4"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-15. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-16. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -124,12 +124,6 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/boosterpack1_ii.png
     description: Gain 26 gold of random champions. (At least one 5-cost guaranteed!)
-  - api_name: DA_FrontlineFoundation
-    name: Frontline Foundation
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/frontlinefoundation_ii.png
-    description: Gain a 2-star 1-cost Tank champion and an Emblem that matches their class.
   - api_name: DA_BoosterPack
     name: Booster Pack
     rarity: Gold
@@ -710,6 +704,12 @@ augments:
       You no longer gain interest but gain 3 gold at the start of every player combat round. Gain 3 gold now.
 
       Interest is extra gold you gain per 10g saved.
+  - api_name: DA_FrontlineFoundation
+    name: Frontline Foundation
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/frontlinefoundation_ii.png
+    description: Gain a 2-star 1-cost Tank champion and an Emblem that matches their class.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
