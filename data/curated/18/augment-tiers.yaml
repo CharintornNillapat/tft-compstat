@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-16T07:42:24.088Z. Names, icons, rarity and text: CommunityDragon 16.20.
+# (per comp), updated 2026-10-17T07:20:21.790Z. Names, icons, rarity and text: CommunityDragon 16.20.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.4"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-16. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-17. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -148,6 +148,12 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
+  - api_name: DA_18_RiftbeastTraitAugment
+    name: Omega Riftbeast
+    rarity: Gold
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: You can now choose a second Alpha Riftbeast. Alpha Riftbeasts gain 15% max Health and 12% Attack Speed. Gain a Scuttlecrab, a Cinderling, and a Pebbles.
   - api_name: DA_BandOfThieves
     name: Band of Thieves
     rarity: Silver
@@ -667,12 +673,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/prismaticdestiny_iii.png
     description: Gain a random Prismatic Augment and 7 gold.
-  - api_name: DA_18_RiftbeastTraitAugment
-    name: Omega Riftbeast
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: You can now choose a second Alpha Riftbeast. Alpha Riftbeasts gain 15% max Health and 12% Attack Speed. Gain a Scuttlecrab, a Cinderling, and a Pebbles.
   - api_name: DA_18_PrimalAugmentPlus_Nidalee
     name: Beast Within+
     rarity: Gold
@@ -710,6 +710,18 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/frontlinefoundation_ii.png
     description: Gain a 2-star 1-cost Tank champion and an Emblem that matches their class.
+  - api_name: DA_InvestmentStrategy
+    name: Investment Strategy II
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_iii.png
+    description: Your champions gain 10 permanent max health per interest you earn. Your max interest is increased by 2. Gain 8 gold now.
+  - api_name: DA_InvestmentStrategyI
+    name: Investment Strategy I
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
+    description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -1126,12 +1138,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/invested-iii.png
     description: Gain 26 gold. At the start of each round, gain 1 Shop reroll for every 10 gold above 50 (max 80 gold).
-  - api_name: DA_InvestmentStrategy
-    name: Investment Strategy II
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_iii.png
-    description: Your champions gain 10 permanent max health per interest you earn. Your max interest is increased by 2. Gain 8 gold now.
   - api_name: DA_JeweledLotus_II
     name: Jeweled Lotus II
     rarity: Prismatic
@@ -1477,12 +1483,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/makeshift2.png
     description: Champions without items equipped gain 50 Armor and Magic Resist.
-  - api_name: DA_InvestmentStrategyI
-    name: Investment Strategy I
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
-    description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1634,6 +1634,3 @@ comps:
   sprykin-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
-  vanguard-aphelios:
-    source: APHELIOS > Lvl 8 push
-    augments: [ DA_FutureFocused, DA_StandUnited, DA_CyberneticImplants_Gold, DA_18_PrimalAugment_Nidalee, DA_BronzeForLifeII, DA_SwordOverflow ]

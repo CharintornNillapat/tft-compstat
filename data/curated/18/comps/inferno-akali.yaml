@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster inferno-akali, DIAMOND+.
-# Sample: 22,802 boards, avg 4.56, patch 18.4, set 18.
+# Sample: 23,630 boards, avg 4.58, patch 18.4, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -14,32 +14,32 @@ tier: B
 style: reroll_1
 difficulty: 2
 patch: "18.4"
-order: 21
-summary: "Ends at level 7 with Akali carrying. MetaTFT DIAMOND+: 22,802 boards, avg 4.56, picked 1.4% of boards."
-avg_place: 4.56
-pick_rate: 1.43
+order: 19
+summary: "Ends at level 7 with Ornn carrying. MetaTFT DIAMOND+: 23,630 boards, avg 4.58, picked 1.5% of boards."
+avg_place: 4.58
+pick_rate: 1.48
 level_recommended: 7
 early_units: [ DA_18_Akali_AD, DA_18_Camille, DA_18_Leona, DA_18_Ornn ]
 flex_units: [ DA_Amumu18 ]
 board:
-  - { unit: DA_18_Akali_AD, row: 2, col: 0, star: 3, carry: true, priority: 1, items: [ DA_EdgeOfNight, DA_HandOfJustice, DA_JeweledGauntlet ] }
+  - { unit: DA_18_Akali_AD, row: 2, col: 0, star: 3, carry: true, priority: 2, items: [ DA_EdgeOfNight, DA_HandOfJustice, DA_JeweledGauntlet ] }
   - { unit: DA_18_Leona, row: 2, col: 3, star: 3, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Varus, row: 3, col: 0, star: 3, carry: true, items: [ DA_InfinityEdge, DA_LastWhisper, DA_SpearOfShojin ] }
   - { unit: DA_18_Camille, row: 2, col: 1, star: 3, carry: true, priority: 3, items: [ DA_InfinityEdge, DA_Quicksilver, DA_SteraksGage ] }
+  - { unit: DA_18_Varus, row: 3, col: 0, star: 3, carry: true, items: [ DA_InfinityEdge, DA_LastWhisper, DA_SpearOfShojin ] }
   - { unit: DA_18_Kayle, row: 3, col: 6, items: [ DA_GuinsoosRageblade ] }
   - { unit: DA_18_Sejuani, row: 2, col: 6, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 2, items: [ DA_Crownguard, DA_GargoyleStoneplate, DA_WarmogsArmor ] }
+  - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 1, items: [ DA_Crownguard, DA_GargoyleStoneplate, DA_WarmogsArmor ] }
 guide: |-
   **Early:** the most-played opener is Akali, Camille, Leona, Ornn.
 
   **Levelling:** level 7 by 5-1.
 
   **Items**, in the order to build them:
-  - **Akali**: Edge of Night, Hand Of Justice, Jeweled Gauntlet
   - **Ornn**: Crownguard, Gargoyle Stoneplate, Warmog's Armor
+  - **Akali**: Edge of Night, Hand Of Justice, Jeweled Gauntlet
   - **Camille**: Infinity Edge, Quicksilver, Sterak's Gage
   - **Varus**: Infinity Edge, Last Whisper, Spear of Shojin
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.4: 22,802 boards, avg 4.56. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.4: 23,630 boards, avg 4.58. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
