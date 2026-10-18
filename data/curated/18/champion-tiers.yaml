@@ -3,15 +3,15 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 1,746,552 games on patch 18.4, set 18. Feed updated 2026-10-17T07:22:53.352Z.
+# Sample: 1,790,176 games on patch 18.4, set 18. Feed updated 2026-10-18T07:36:59.539Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 10 to 4.23, A 19 to 4.44, B 23 to 4.67, C 13 to 5.87.
+# Where they fell, as size and worst average placement: S 10 to 4.23, A 19 to 4.43, B 23 to 4.66, C 13 to 5.89.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
 slug: champions-18.4
 kind: champion
 patch: "18.4"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.4: 1,746,552 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.4: 1,790,176 games over the last 3 days."
 tiers:
   S:
     - DA_Lux18_Base
@@ -22,8 +22,8 @@ tiers:
     - DA_18_ElderDragon
     - DA_18_Kennen
     - DA_Brambleback18
-    - DA_18_Ashe
     - DA_Draven18
+    - DA_18_Ashe
   A:
     - DA_18_Maokai
     - DA_18_Soraka
@@ -33,35 +33,35 @@ tiers:
     - DA_18_Sentry
     - DA_18_Ezreal
     - DA_18_Veigar
+    - DA_Gromp18_AP
     - DA_Murkwolf18
     - DA_KogMaw18_AD
-    - DA_Gromp18_AP
     - DA_18_Zyra
-    - DA_Krug18
-    - DA_18_Kayle
-    - DA_18_KhaZix
     - DA_18_Azir
+    - DA_18_KhaZix
+    - DA_18_Kayle
+    - DA_Krug18
     - DA_Amumu18
     - DA_Nidalee18_AP
-    - DA_18_Ahri
+    - DA_Fiddlesticks18
   B:
     - DA_18_Rammus
-    - DA_Fiddlesticks18
+    - DA_18_Ahri
+    - DA_18_Ornn
     - DA_18_Varus
     - DA_18_Diana
-    - DA_18_Ornn
     - DA_Cinderling18
     - DA_18_Alistar
+    - DA_18_LeBlanc
     - DA_18_Morgana
     - DA_18_Sett
-    - DA_18_LeBlanc
     - DA_18_RekSai
     - DA_18_Leona
     - DA_CrimsonRaptor18
     - DA_18_Lillia
     - DA_18_Rengar
-    - DA_18_Cassiopeia
     - DA_Scuttlecrab18
+    - DA_18_Cassiopeia
     - DA_18_Hecarim
     - DA_18_Sejuani
     - DA_18_MasterYi_AD
@@ -69,8 +69,8 @@ tiers:
     - DA_Vi18
     - DA_18_Warwick
   C:
-    - DA_18_Xayah
     - DA_18_Yunara
+    - DA_18_Xayah
     - DA_Karma18
     - DA_18_Yorick
     - DA_18_Shen
