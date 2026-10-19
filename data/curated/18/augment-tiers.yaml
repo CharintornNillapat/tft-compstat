@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-18T07:34:27.605Z. Names, icons, rarity and text: CommunityDragon 16.20.
+# (per comp), updated 2026-10-19T08:17:05.816Z. Names, icons, rarity and text: CommunityDragon 16.20.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.4"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-18. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-19. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -163,6 +163,12 @@ augments:
       You no longer gain interest but gain 3 gold at the start of every player combat round. Gain 3 gold now.
 
       Interest is extra gold you gain per 10g saved.
+  - api_name: DA_BronzeForLifeII
+    name: Bronze For Life II
+    rarity: Prismatic
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_iii.png
+    description: Your team gains 2.5% Damage Amp and 4 Armor and Magic Resist for each Bronze-tier trait.
   - api_name: DA_BandOfThieves
     name: Band of Thieves
     rarity: Silver
@@ -448,30 +454,24 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/invested-iii.png
     description: Gain 45 gold. At the start of each round, gain 1 Shop reroll for every 10 gold above 50 (max 80 gold).
+  - api_name: DA_VerticalityIII
+    name: Verticality III
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
+    description: Champions gain 3.5% Attack Damage, 3.5% Ability Power, 3.5 Armor, and 3.5 Magic Resist for each ally that shares a trait with them.
   - api_name: DA_NestingAnvilsPlus
     name: Nesting Anvils+
     rarity: Prismatic
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
     description: Gain an Artifact Anvil. After you open it, gain a Component Anvil. After you open that, gain 8 gold.
-  - api_name: DA_PrismaticDestiny
-    name: Prismatic Destiny
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/prismaticdestiny_iii.png
-    description: Gain a random Prismatic Augment and 4 gold.
   - api_name: DA_SilverDestiny
     name: Silver Destiny
     rarity: Silver
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/silverdestiny_i.png
     description: Gain a random Silver Augment and 2 gold.
-  - api_name: DA_BronzeForLifeII
-    name: Bronze For Life II
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_iii.png
-    description: Your team gains 2.5% Damage Amp and 4 Armor and Magic Resist for each Bronze-tier trait.
   - api_name: DA_NestingAnvils
     name: Nesting Anvils
     rarity: Prismatic
@@ -484,12 +484,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/slightlymagicroll_i.png
     description: Roll a die. Gain rewards based on the number rolled.
-  - api_name: DA_18_WispRebatePlusPlus
-    name: Wisp Rebate+
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Each time you purchase a Wisp, gain 2 gold. Gain 8 gold now.
   - api_name: DA_Expedition
     name: Expedition
     rarity: Silver
@@ -514,12 +508,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/worththewait_ii.png
     description: Gain a random 1-cost champion. Gain another copy of them at the start of each round for the rest of the game.
-  - api_name: DA_ShoppingSpree
-    name: Shopping Spree
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/silver-ticket-iii.png
-    description: When you level up, gain a number of Shop refreshes equal to your level +1. Gain 6 gold.
   - api_name: DA_CapitalGainsI
     name: Capital Gains I
     rarity: Silver
@@ -598,6 +586,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Whenever you open a loot orb, you have a 25% chance to gain a gray loot orb. Gain 1 gray loot orbs.
+  - api_name: DA_InvestmentStrategyI
+    name: Investment Strategy I
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
+    description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
   - api_name: DA_SoloPlate
     name: Solo Plate
     rarity: Gold
@@ -694,34 +688,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/portableforge2.png
     description: Choose 1 of 4 Artifacts. Artifacts are more powerful items with a unique effect.
-  - api_name: DA_TheGoldenDragon
-    name: The Golden Dragon
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/thegoldendragon_ii.png
-    description: |-
-      Gain a Mogul's Mail. Champions holding Mogul's Mail take up +1 team slot but gain 600 Health and 15% Durability.
-
-      Mogul's Mail gives gold as well as combat power.
-      Dragonlands Championship, 2022
   - api_name: DA_FrontlineFoundation
     name: Frontline Foundation
     rarity: Gold
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/frontlinefoundation_ii.png
     description: Gain a 2-star 1-cost Tank champion and an Emblem that matches their class.
-  - api_name: DA_InvestmentStrategy
-    name: Investment Strategy II
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_iii.png
-    description: Your champions gain 10 permanent max health per interest you earn. Your max interest is increased by 2. Gain 8 gold now.
-  - api_name: DA_InvestmentStrategyI
-    name: Investment Strategy I
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_ii.png
-    description: Your champions gain 8 permanent max health per interest you earn. Gain 4 gold now.
   - api_name: DA_18_LuxAugmentII
     name: Master of All Origins
     rarity: Prismatic
@@ -731,6 +703,24 @@ augments:
       Open an armory and choose one of 3 traits. Gain a Lux with that trait and a Spear of Shojin.
 
       Traits on your board are more likely to appear in the armory. Lux provides +2 to her chosen trait
+  - api_name: DA_PromisedProtection
+    name: Promised Protection
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/promisedprotection_ii.png
+    description: Gain a Protector's Vow. Protector's Vow grants its holder 20% additional Mana from all sources and 200 max Health.
+  - api_name: DA_VerticalityII
+    name: Verticality II
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Champions gain 2% Attack Damage, 2% Ability Power, 2 Armor, and 2 Magic Resist for each ally that shares a trait with them.
+  - api_name: DA_InvestmentStrategy
+    name: Investment Strategy II
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/investmentstrategy_iii.png
+    description: Your champions gain 10 permanent max health per interest you earn. Your max interest is increased by 2. Gain 8 gold now.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -755,6 +745,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/cognitivetax_i.png
     description: Gain 12 gold and 3 XP.
+  - api_name: DA_18_WispRebatePlusPlus
+    name: Wisp Rebate+
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Each time you purchase a Wisp, gain 2 gold. Gain 8 gold now.
   - api_name: DA_Corrosion
     name: Corrosion
     rarity: Silver
@@ -917,6 +913,16 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/trade2.png
     description: Gain a Shop reroll every round. Gain 8 gold.
+  - api_name: DA_TheGoldenDragon
+    name: The Golden Dragon
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/thegoldendragon_ii.png
+    description: |-
+      Gain a Mogul's Mail. Champions holding Mogul's Mail take up +1 team slot but gain 600 Health and 15% Durability.
+
+      Mogul's Mail gives gold as well as combat power.
+      Dragonlands Championship, 2022
   - api_name: DA_18_CovenTraitAugment
     name: Coven Acolyte
     rarity: Gold
@@ -1102,6 +1108,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/sololeveling_ii.png
     description: For the next 5 combats, your team size is 1, but the champion you field has massively increased stats. Gain 1 XP for every kill they get. Afterwards, gain 2 item components.
+  - api_name: DA_Pilfer
+    name: Pilfer
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/pilfer_ii.png
+    description: Each round, gain a 1-star copy of the first champion you killed last combat. The first time you gain 21 gold worth of champions in this way, gain a Thief's Gloves.
   - api_name: DA_SpeedyDoubleKill
     name: Speedy Double Kill
     rarity: Gold
@@ -1111,12 +1123,6 @@ augments:
       Gain a Guinsoo's Rageblade. When 2 players are eliminated, gain 40 gold.
 
       Fates Championship, 2021
-  - api_name: DA_VerticalityII
-    name: Verticality II
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Champions gain 2% Attack Damage, 2% Ability Power, 2 Armor, and 2 Magic Resist for each ally that shares a trait with them.
   - api_name: DA_BeltOverflow
     name: Belt Overflow
     rarity: Prismatic
@@ -1129,12 +1135,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/calltochaos_iii.png
     description: Gain a powerful and random reward.
-  - api_name: DA_CelestialBlessingIII
-    name: Celestial Blessing III
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/celestialblessing3.png
-    description: Your team gains 25% Omnivamp. Excess healing is converted to a shield up to 1000 Health.
   - api_name: DA_GiantAndMighty
     name: Giant and Mighty
     rarity: Prismatic
@@ -1174,6 +1174,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/moneymonsoon_iii.png
     description: Gain 7 gold now and every round for the rest of the game.
+  - api_name: DA_PrismaticDestiny
+    name: Prismatic Destiny
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/prismaticdestiny_iii.png
+    description: Gain a random Prismatic Augment and 4 gold.
   - api_name: DA_OneBuffTwoBuff
     name: One Buff Two Buff
     rarity: Prismatic
@@ -1189,12 +1195,6 @@ augments:
       Round start: items on your bench are randomized.
 
       Gain 1 Radiant item.
-  - api_name: DA_RadiantRascal
-    name: Radiant Rascal
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/roll-the-dice-iii.png
-    description: Gain a Radiant Thief's Gloves item. This equips 2 random Radiant items every round.
   - api_name: DA_Flexible
     name: Flexible
     rarity: Prismatic
@@ -1258,12 +1258,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/living-forge-iii.png
     description: Gain an Artifact Anvil now and after every 10 player combats.
-  - api_name: DA_VerticalityIII
-    name: Verticality III
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
-    description: Champions gain 3.5% Attack Damage, 3.5% Ability Power, 3.5 Armor, and 3.5 Magic Resist for each ally that shares a trait with them.
   - api_name: DA_BonusGiftPlus
     name: Bonus Gifts+
     rarity: Gold
@@ -1282,12 +1276,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: The first time you 3-star a champion, gain a copy of them each round for the rest of the game. 3-starring the same champion again grants additional copies. Gain a Lesser Champion Duplicator.
-  - api_name: DA_PromisedProtection
-    name: Promised Protection
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/promisedprotection_ii.png
-    description: Gain a Protector's Vow. Protector's Vow grants its holder 20% additional Mana from all sources and 200 max Health.
   - api_name: DA_18_FOURcing
     name: FOURcing
     rarity: Gold
@@ -1324,6 +1312,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/tons-of-stats-ii.png
     description: Your team gains 88 Health, 8% Attack Damage, 8% Ability Power, 8 Armor, 8 Magic Resist, 8% Attack Speed, and 8 Mana.
+  - api_name: DA_ShoppingSpree
+    name: Shopping Spree
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/silver-ticket-iii.png
+    description: When you level up, gain a number of Shop refreshes equal to your level +1. Gain 6 gold.
   - api_name: DA_HoldTheLine
     name: Hold the Line
     rarity: Prismatic
@@ -1501,12 +1495,6 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: Gain 2 1-cost champions, 1 2-cost champion, and 1 3-cost champion.
-  - api_name: DA_Pilfer
-    name: Pilfer
-    rarity: Gold
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/pilfer_ii.png
-    description: Each round, gain a 1-star copy of the first champion you killed last combat. The first time you gain 21 gold worth of champions in this way, gain a Thief's Gloves.
   - api_name: DA_BandOfThievesII
     name: Band of Thieves II
     rarity: Prismatic
@@ -1588,6 +1576,18 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: While Sprykin is active, gain a second BFF summon that is 45% as powerful. Gain a Teemo, a Veigar, and a Kobuko.
+  - api_name: DA_RadiantRascal
+    name: Radiant Rascal
+    rarity: Prismatic
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/roll-the-dice-iii.png
+    description: Gain a Radiant Thief's Gloves item. This equips 2 random Radiant items every round.
+  - api_name: DA_CelestialBlessingIII
+    name: Celestial Blessing III
+    rarity: Prismatic
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/celestialblessing3.png
+    description: Your team gains 25% Omnivamp. Excess healing is converted to a shield up to 1000 Health.
 comps:
   blossom-rengar:
     source: MASTER YI > Adaptor > Lvl 7 reroll
