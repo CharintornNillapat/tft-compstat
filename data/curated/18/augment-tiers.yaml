@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-19T08:17:05.816Z. Names, icons, rarity and text: CommunityDragon 16.20.
+# (per comp), updated 2026-10-20T08:02:44.626Z. Names, icons, rarity and text: CommunityDragon 16.20.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.4"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-19. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-20. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -628,12 +628,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/addicted-to-rolling-iii.png
     description: Now and at the start of the next 2 stages, roll 3 dice. Gain various rewards based on their total.
-  - api_name: DA_DeadlierCaps
-    name: Deadlier Caps
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/deadliercaps_ii.png
-    description: Gain a Rabadon's Deathcap. Rabadon's Deathcaps grant 1 Mana Regen and permanently gain 1% Ability Power whenever their holders score a takedown.
   - api_name: DA_18_PrimalAugmentPlus_Sivir
     name: Beast Within+
     rarity: Gold
@@ -646,6 +640,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Primal grants an additional Blessing. Gain a Vi now and a Sivir after 3 rounds.
+  - api_name: DA_BronzeForLifeI
+    name: Bronze For Life I
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_ii.png
+    description: Your team gains 2.5% Damage Amp for each Bronze-tier trait.
   - api_name: DA_ComponentQuest
     name: Component Quest
     rarity: Prismatic
@@ -935,12 +935,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/ascension2.png
     description: After 12 seconds of combat, your units gain 35% Damage Amp.
-  - api_name: DA_BronzeForLifeI
-    name: Bronze For Life I
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_ii.png
-    description: Your team gains 2.5% Damage Amp for each Bronze-tier trait.
   - api_name: DA_HardBargain
     name: Hard Bargain
     rarity: Gold
@@ -1351,6 +1345,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/richgetricher3.png
     description: Gain 22 gold. Your max interest is increased to 10.
+  - api_name: DA_DeadlierCaps
+    name: Deadlier Caps
+    rarity: Prismatic
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.20/game/assets/maps/tft/icons/augments/hexcore/deadliercaps_ii.png
+    description: Gain a Rabadon's Deathcap. Rabadon's Deathcaps grant 1 Mana Regen and permanently gain 1% Ability Power whenever their holders score a takedown.
   - api_name: DA_ForgedInStrength
     name: Forged In Strength
     rarity: Prismatic
@@ -1609,7 +1609,7 @@ comps:
     augments: [ DA_PandorasBench, DA_EarlyLearnings, DA_NoScoutNoPivot, DA_PortableForge ]
   invoker-ahri:
     source: AHRI & Morgana > Blossom > Lvl 8 push
-    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_BronzeForLifeI, DA_SeraphimsStaff, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_BronzeForLifeII, DA_OneBuffTwoBuff ]
   juggernaut-amumu:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]

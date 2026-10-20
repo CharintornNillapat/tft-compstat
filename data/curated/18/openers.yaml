@@ -14,8 +14,8 @@ openers:
       - DA_18_Xayah
     slammable_items:
       - DA_SpearOfShojin
-      - DA_LastWhisper
       - DA_Deathblade
+      - DA_LastWhisper
     transition_to:
       - elderwood-aphelios
       - elderwood-ezreal-draven
@@ -29,13 +29,13 @@ openers:
       - DA_Cinderling18
       - DA_Scuttlecrab18
     slammable_items:
+      - DA_BlueBuff
       - DA_JeweledGauntlet
       - DA_RabadonsDeathcap
-      - DA_BlueBuff
     transition_to:
       - riftbeast-pebbles
-      - riftbeast-gromp
-    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Gromp.
+      - draven-fast-9
+    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Sprykin Brawlers
     tier: S
     core_units:
@@ -68,18 +68,18 @@ openers:
   - name: Coven Swarm
     tier: A
     core_units:
-      - DA_18_Caitlyn
       - DA_18_Camille
       - DA_18_Elise
+      - DA_18_Caitlyn
     slammable_items:
       - DA_HextechGunblade
-      - DA_SpearOfShojin
       - DA_JeweledGauntlet
+      - DA_SpearOfShojin
     transition_to:
       - vanguard-morgana
       - vanguard-ahri
-      - juggernaut-amumu
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
+      - invoker-ahri
+    notes: Caitlyn holds items while Elise anchors the frontline. Pivot toward Defender Cassiopeia.
   - name: Inferno Defenders
     tier: A
     core_units:
