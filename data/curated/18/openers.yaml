@@ -36,23 +36,8 @@ openers:
       - riftbeast-pebbles
       - draven-fast-9
     notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
-  - name: Sprykin Brawlers
-    tier: S
-    core_units:
-      - DA_18_Kobuko
-      - DA_18_RekSai
-      - DA_18_Veigar
-    slammable_items:
-      - DA_GuinsoosRageblade
-      - DA_HextechGunblade
-      - DA_RabadonsDeathcap
-    transition_to:
-      - sprykin-azir
-      - flora-malphite
-      - spellweaver-veigar
-    notes: Kobuko holds items while Rek'Sai anchors the frontline. Pivot toward Sprykin Azir.
   - name: Blossom Swarm
-    tier: A
+    tier: S
     core_units:
       - DA_Karma18
       - DA_18_Yorick
@@ -68,18 +53,18 @@ openers:
   - name: Coven Swarm
     tier: A
     core_units:
+      - DA_18_Caitlyn
       - DA_18_Camille
       - DA_18_Elise
-      - DA_18_Caitlyn
     slammable_items:
-      - DA_HextechGunblade
-      - DA_JeweledGauntlet
       - DA_SpearOfShojin
+      - DA_JeweledGauntlet
+      - DA_HextechGunblade
     transition_to:
       - vanguard-morgana
       - vanguard-ahri
-      - invoker-ahri
-    notes: Caitlyn holds items while Elise anchors the frontline. Pivot toward Defender Cassiopeia.
+      - juggernaut-amumu
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Inferno Defenders
     tier: A
     core_units:
@@ -110,7 +95,6 @@ openers:
     transition_to:
       - spellweaver-veigar
       - flora-malphite
-      - sprykin-azir
     notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
   - name: Solar Rapidfires
     tier: A
@@ -128,3 +112,17 @@ openers:
       - elderwood-kayle
       - lunar-aphelios-nidalee
     notes: Kayle holds items while Shen anchors the frontline. Pivot toward Rapidfire Kayle.
+  - name: Blackthorn Swarm
+    tier: A
+    core_units:
+      - DA_18_RekSai
+      - DA_18_Veigar
+      - DA_18_Warwick
+    slammable_items:
+      - DA_RabadonsDeathcap
+      - DA_NashorsTooth
+      - DA_AdaptiveHelm
+    transition_to:
+      - flora-malphite
+      - spellweaver-veigar
+    notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
