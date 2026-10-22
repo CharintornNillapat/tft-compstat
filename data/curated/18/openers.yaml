@@ -112,17 +112,18 @@ openers:
       - elderwood-kayle
       - lunar-aphelios-nidalee
     notes: Kayle holds items while Shen anchors the frontline. Pivot toward Rapidfire Kayle.
-  - name: Blackthorn Swarm
+  - name: Sprykin Brawlers
     tier: A
     core_units:
-      - DA_18_RekSai
+      - DA_18_Alistar
+      - DA_18_Kobuko
+      - DA_18_Teemo
       - DA_18_Veigar
-      - DA_18_Warwick
     slammable_items:
-      - DA_RabadonsDeathcap
-      - DA_NashorsTooth
-      - DA_AdaptiveHelm
+      - DA_SpearOfShojin
+      - DA_JeweledGauntlet
+      - DA_StrikersFlail
     transition_to:
-      - flora-malphite
-      - spellweaver-veigar
-    notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
+      - sprykin-teemo
+      - sprykin-azir
+    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
