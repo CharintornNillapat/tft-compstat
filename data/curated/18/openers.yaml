@@ -5,22 +5,6 @@
 patch: "18.2"
 title: Early openers & item slams
 openers:
-  - name: Elderwood Rapidfires
-    tier: S
-    core_units:
-      - DA_18_Alistar
-      - DA_18_Ornn
-      - DA_18_Varus
-      - DA_18_Xayah
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_Deathblade
-      - DA_LastWhisper
-    transition_to:
-      - elderwood-aphelios
-      - elderwood-ezreal-draven
-      - elderwood-ezreal-alistar
-    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Riftbeast Juggernauts
     tier: S
     core_units:
@@ -30,12 +14,28 @@ openers:
       - DA_Scuttlecrab18
     slammable_items:
       - DA_BlueBuff
-      - DA_JeweledGauntlet
-      - DA_RabadonsDeathcap
+      - DA_EdgeOfNight
+      - DA_GuinsoosRageblade
     transition_to:
       - riftbeast-pebbles
       - draven-fast-9
     notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
+  - name: Elderwood Rapidfires
+    tier: S
+    core_units:
+      - DA_18_Alistar
+      - DA_18_Ornn
+      - DA_18_Varus
+      - DA_18_Xayah
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_GuinsoosRageblade
+      - DA_KrakensFury
+    transition_to:
+      - elderwood-aphelios
+      - elderwood-ezreal-draven
+      - elderwood-ezreal-alistar
+    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Blossom Swarm
     tier: S
     core_units:
@@ -96,22 +96,6 @@ openers:
       - spellweaver-veigar
       - flora-malphite
     notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
-  - name: Solar Rapidfires
-    tier: A
-    core_units:
-      - DA_18_Kayle
-      - DA_18_Leona
-      - DA_18_Shen
-      - DA_18_Varus
-    slammable_items:
-      - DA_GargoyleStoneplate
-      - DA_SpiritVisage
-      - DA_WarmogsArmor
-    transition_to:
-      - rapidfire-kayle
-      - elderwood-kayle
-      - lunar-aphelios-nidalee
-    notes: Kayle holds items while Shen anchors the frontline. Pivot toward Rapidfire Kayle.
   - name: Sprykin Brawlers
     tier: A
     core_units:
@@ -127,3 +111,17 @@ openers:
       - sprykin-teemo
       - sprykin-azir
     notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
+  - name: Blackthorn Swarm
+    tier: A
+    core_units:
+      - DA_18_RekSai
+      - DA_18_Veigar
+      - DA_18_Warwick
+    slammable_items:
+      - DA_RabadonsDeathcap
+      - DA_NashorsTooth
+      - DA_AdaptiveHelm
+    transition_to:
+      - flora-malphite
+      - spellweaver-veigar
+    notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
