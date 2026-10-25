@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-24T07:44:51.678Z. Names, icons, rarity and text: CommunityDragon 16.21.
+# (per comp), updated 2026-10-25T07:56:03.582Z. Names, icons, rarity and text: CommunityDragon 16.21.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.5"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-24. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-25. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -1587,6 +1587,9 @@ augments:
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/roll-the-dice-iii.png
     description: Gain a Radiant Thief's Gloves item. This equips 2 random Radiant items every round.
 comps:
+  adaptor-master-yi:
+    source: MASTER YI > Adaptor > Lvl 7 reroll
+    augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
   blossom-rengar:
     source: MASTER YI > Adaptor > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
@@ -1620,9 +1623,6 @@ comps:
   lunar-aphelios-nidalee:
     source: APHELIOS > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_CyberneticImplants_Gold, DA_18_PrimalAugment_Nidalee, DA_BronzeForLifeII, DA_SwordOverflow ]
-  rapidfire-kayle:
-    source: VARUS & KAYLE > Solar > Lvl 5 & 6 reroll
-    augments: [ DA_MissedConnections, DA_RollingForDays, DA_HeroicGrabBag, DA_MoneyHungry_NotBroken, DA_ShimmerscaleEssence, DA_InvestmentStrategy ]
   sprykin-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
