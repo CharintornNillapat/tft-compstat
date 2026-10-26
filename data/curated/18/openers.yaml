@@ -44,9 +44,9 @@ openers:
       - DA_18_RekSai
       - DA_18_Veigar
     slammable_items:
-      - DA_BlueBuff
-      - DA_HextechGunblade
-      - DA_JeweledGauntlet
+      - DA_Morellonomicon
+      - DA_SpearOfShojin
+      - DA_VoidStaff
     transition_to:
       - spellweaver-veigar
       - flora-malphite
@@ -62,24 +62,9 @@ openers:
       - DA_SpearOfShojin
       - DA_RedBuff
     transition_to:
-      - ashe-fast-9
       - elderwood-khazix
-    notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
-  - name: Juggernaut Blossoms
-    tier: A
-    core_units:
-      - DA_18_Rakan
-      - DA_18_Yorick
-      - DA_Karma18
-    slammable_items:
-      - DA_EdgeOfNight
-      - DA_GuinsoosRageblade
-      - DA_GargoyleStoneplate
-    transition_to:
-      - adaptor-master-yi
       - ashe-fast-9
-      - blossom-rengar
-    notes: Rakan holds items while Yorick anchors the frontline. Pivot toward Adaptor Master Yi.
+    notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
   - name: Coven Swarm
     tier: A
     core_units:
@@ -103,9 +88,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_GargoyleStoneplate
-      - DA_Deathblade
-      - DA_LastWhisper
+      - DA_BlueBuff
+      - DA_JeweledGauntlet
+      - DA_RabadonsDeathcap
     transition_to:
       - blossom-yunara
       - adaptor-master-yi
@@ -126,3 +111,18 @@ openers:
       - sprykin-teemo
       - sprykin-azir
     notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
+  - name: Juggernaut Blossoms
+    tier: A
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Yorick
+      - DA_Karma18
+    slammable_items:
+      - DA_EdgeOfNight
+      - DA_GuinsoosRageblade
+      - DA_GargoyleStoneplate
+    transition_to:
+      - adaptor-master-yi
+      - ashe-fast-9
+      - blossom-rengar
+    notes: Rakan holds items while Yorick anchors the frontline. Pivot toward Adaptor Master Yi.
