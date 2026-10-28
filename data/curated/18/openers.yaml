@@ -39,9 +39,9 @@ openers:
   - name: Elderwood Spellweavers
     tier: S
     core_units:
+      - DA_18_Alistar
       - DA_18_LeBlanc
       - DA_18_Ornn
-      - DA_18_RekSai
       - DA_18_Veigar
     slammable_items:
       - DA_Morellonomicon
@@ -49,8 +49,9 @@ openers:
       - DA_VoidStaff
     transition_to:
       - spellweaver-veigar
-      - flora-malphite
-    notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
+      - elderwood-aphelios
+      - elderwood-ezreal-alistar
+    notes: LeBlanc holds items while Alistar anchors the frontline. Pivot toward Spellweaver Veigar.
   - name: Blossom Swarm
     tier: A
     core_units:
@@ -78,6 +79,7 @@ openers:
       - DA_StrikersFlail
     transition_to:
       - sprykin-teemo
+      - spellweaver-veigar
       - sprykin-azir
     notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
   - name: Coven Swarm
@@ -103,9 +105,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_BlueBuff
-      - DA_JeweledGauntlet
-      - DA_RabadonsDeathcap
+      - DA_GargoyleStoneplate
+      - DA_Deathblade
+      - DA_LastWhisper
     transition_to:
       - blossom-yunara
       - adaptor-master-yi

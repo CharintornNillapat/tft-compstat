@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-27T08:31:18.733Z. Names, icons, rarity and text: CommunityDragon 16.21.
+# (per comp), updated 2026-10-28T09:09:15.083Z. Names, icons, rarity and text: CommunityDragon 16.21.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.5"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-27. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-28. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -142,39 +142,36 @@ augments:
     tier: S
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/ultrarapidfire_ii.png
     description: Gain a Spatula. Champions holding Spatula or Frying Pan items gain 20% Attack Speed and 3 Mana Regen.
-  - api_name: DA_18_CovenTraitAugment_LootToAP
-    name: Dark Ritual
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
   - api_name: DA_18_RiftbeastTraitAugment
     name: Omega Riftbeast
     rarity: Gold
     tier: S
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: You can now choose a second Alpha Riftbeast. Alpha Riftbeasts gain 15% max Health and 12% Attack Speed. Gain a Scuttlecrab, a Cinderling, and a Pebbles.
-  - api_name: DA_Hustler
-    name: Hustler
-    rarity: Gold
-    tier: S
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/hyperroll2.png
-    description: |-
-      You no longer gain interest but gain 3 gold at the start of every player combat round. Gain 3 gold now.
-
-      Interest is extra gold you gain per 10g saved.
   - api_name: DA_BronzeForLifeII
     name: Bronze For Life II
     rarity: Prismatic
     tier: S
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/bronzeforlife_iii.png
     description: Your team gains 2.5% Damage Amp and 3 Armor and Magic Resist for each Bronze-tier trait.
-  - api_name: DA_BandOfThieves
-    name: Band of Thieves
+  - api_name: DA_VerticalityII
+    name: Verticality II
+    rarity: Gold
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Champions gain 2.5% Attack Damage, 2.5% Ability Power, 2 Armor, and 2 Magic Resist for each ally that shares a trait with them.
+  - api_name: DA_VerticalityIII
+    name: Verticality III
+    rarity: Prismatic
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
+    description: Champions gain 4% Attack Damage, 4% Ability Power, 3.5 Armor, and 3.5 Magic Resist for each ally that shares a trait with them.
+  - api_name: DA_VerticalityI
+    name: Verticality I
     rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/bandthieves1.png
-    description: Gain 1 Thief's Gloves.
+    tier: S
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Champions gain 1.5% Attack Damage, 1.5% Ability Power, 1.5 Armor, and 1.5 Magic Resist for each ally that shares a trait with them.
   - api_name: DA_ChampDeliveryPlusPlus
     name: Champ Delivery++
     rarity: Silver
@@ -208,6 +205,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/the-customer-is-always-right-i.png
     description: Whenever you would get a component, gain a component anvil instead. Gain a random component.The anvil offers 4 choices.
+  - api_name: DA_GroupHugI
+    name: Group Hug I
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/grouphug1_i.png
+    description: "Combat start: Champions grant other adjacent champions 7 Armor and Magic Resist. This effect stacks."
   - api_name: DA_PartialAscension
     name: Partial Ascension
     rarity: Silver
@@ -460,12 +463,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/silverdestiny_i.png
     description: Gain a random Silver Augment and 2 gold.
-  - api_name: DA_VerticalityIII
-    name: Verticality III
-    rarity: Prismatic
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t3.png
-    description: Champions gain 4% Attack Damage, 4% Ability Power, 3.5 Armor, and 3.5 Magic Resist for each ally that shares a trait with them.
   - api_name: DA_NestingAnvils
     name: Nesting Anvils
     rarity: Prismatic
@@ -520,12 +517,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/backlineblueprint_ii.png
     description: Gain a 3-cost non-Tank champion and an Emblem that matches their class.
-  - api_name: DA_QuickStreaks
-    name: Quick Streaks
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: You gain twice as much progress towards win and loss streaks. Gain 2 gold.
   - api_name: DA_LateGameScaling
     name: Late Game Scaling
     rarity: Gold
@@ -547,21 +538,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/silverdestiny_i.png
     description: Gain a random Silver Augment and 7 gold.
-  - api_name: DA_VerticalityI
-    name: Verticality I
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Champions gain 1.5% Attack Damage, 1.5% Ability Power, 1.5 Armor, and 1.5 Magic Resist for each ally that shares a trait with them.
-  - api_name: DA_LoadedDice
-    name: Loaded Dice
-    rarity: Silver
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: |-
-      Your dice and coins are luckier.
-
-      Roll a die and gain gold equal to the number rolled. Then flip a coin and gain 1 gold if you flip heads.
   - api_name: DA_CarveAPath
     name: Carve a Path
     rarity: Silver
@@ -574,6 +550,15 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/late-game-specialist-i.png
     description: When you reach Level 9, gain 27 gold.
+  - api_name: DA_Hustler
+    name: Hustler
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/hyperroll2.png
+    description: |-
+      You no longer gain interest but gain 3 gold at the start of every player combat round. Gain 3 gold now.
+
+      Interest is extra gold you gain per 10g saved.
   - api_name: DA_BonusGift
     name: Bonus Gifts
     rarity: Gold
@@ -709,30 +694,54 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/promisedprotection_ii.png
     description: Gain a Protector's Vow. Protector's Vow grants its holder 20% additional Mana from all sources and 200 max Health.
-  - api_name: DA_VerticalityII
-    name: Verticality II
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Champions gain 2.5% Attack Damage, 2.5% Ability Power, 2 Armor, and 2 Magic Resist for each ally that shares a trait with them.
   - api_name: DA_HoldTheLine
     name: Hold the Line
     rarity: Prismatic
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/holdtheline_iii.png
     description: Champions in your back 2 rows gain 11% Ability Power and 11% Attack Damage for each champion that starts combat in your front row.
+  - api_name: DA_Flexible
+    name: Flexible
+    rarity: Prismatic
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/flexible_ii.png
+    description: Gain 1 random Emblem. At the start of every Stage, gain a random Emblem. Your team gains 30 Health for each Emblem they are holding.
+  - api_name: DA_18_CovenTraitAugment_LootToAP
+    name: Dark Ritual
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
+  - api_name: DA_18_FOURcing
+    name: FOURcing
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Gain a random 4-cost champion. For each item equipped to that champion, your team gains 100 health.
+  - api_name: DA_TwinGuardians
+    name: Twin Guardians
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/twinguardians_i.png
+    description: If you have exactly 2 allies in your first row, grant them 100 Health, 35 Armor, and 35 Magic Resist.
+  - api_name: DA_BandOfThieves
+    name: Band of Thieves
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/bandthieves1.png
+    description: Gain 1 Thief's Gloves.
+  - api_name: DA_FocusedFire
+    name: Focused Fire
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/marksman_i.png
+    description: Your team gains 10% Attack Damage. Every 5 seconds, they gain 5% more.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/celestialblessing1.png
     description: Your team gains 12% Omnivamp. Excess healing is converted to a shield up to 200 Health.
-  - api_name: DA_TwinGuardians
-    name: Twin Guardians
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/twinguardians_i.png
-    description: If you have exactly 2 allies in your first row, grant them 100 Health, 35 Armor, and 35 Magic Resist.
   - api_name: DA_CognitiveTax
     name: Cognitive Tax
     rarity: Silver
@@ -820,12 +829,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/recombobulator-i.png
     description: Champions on your board permanently transform into random champions 1 cost tier higher (max 5). Gain 2 Magnetic Removers and 3 free rerolls.
-  - api_name: DA_FocusedFire
-    name: Focused Fire
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/marksman_i.png
-    description: Your team gains 10% Attack Damage. Every 5 seconds, they gain 5% more.
   - api_name: DA_FutureFocused
     name: Future Focused
     rarity: Silver
@@ -850,18 +853,18 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/griefofthegreatgoddess_i.png
     description: Gain a Tear of the Goddess. After your champions spend 6500 Mana, gain 2 more.
+  - api_name: DA_ElectrochargeI
+    name: Electrocharge I
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/electrocharge-i.png
+    description: Every 4 attacks an ally takes, they deal 25-80 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
   - api_name: DA_GlassCannon_Silver
     name: Glass Cannon I
     rarity: Silver
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/glasscannon_i.png
     description: Allies that start combat in the back row begin combat at 80% Health but gain 16% Damage Amp.
-  - api_name: DA_GroupHugI
-    name: Group Hug I
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/grouphug1_i.png
-    description: "Combat start: Champions grant other adjacent champions 7 Armor and Magic Resist. This effect stacks."
   - api_name: DA_HealingOrbsI
     name: Healing Orbs I
     rarity: Silver
@@ -874,6 +877,15 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/one-two-five-i.png
     description: Gain 1 random component, 2 gold, and 1 random 5-cost champion.
+  - api_name: DA_LoadedDice
+    name: Loaded Dice
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: |-
+      Your dice and coins are luckier.
+
+      Roll a die and gain gold equal to the number rolled. Then flip a coin and gain 1 gold if you flip heads.
   - api_name: DA_TheTower
     name: The Tower
     rarity: Silver
@@ -991,12 +1003,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/glasscannon_ii.png
     description: Allies that start combat in the back row begin combat at 80% Health but gain 25% Damage Amp.
-  - api_name: DA_GroupHugII
-    name: Group Hug II
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/grouphug2_ii.png
-    description: "Combat start: Champions grant other adjacent champions 10 Armor and Magic Resist. This effect stacks."
   - api_name: DA_ConstructACompanion
     name: Construct a Companion
     rarity: Gold
@@ -1063,6 +1069,12 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/spiritofredemption_ii.png
     description: Gain a Spirit Visage. Every 5 seconds, Spirit Visage heals allies within 1 hex for 9% of their missing Health.
+  - api_name: DA_GroupHugII
+    name: Group Hug II
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/grouphug2_ii.png
+    description: "Combat start: Champions grant other adjacent champions 10 Armor and Magic Resist. This effect stacks."
   - api_name: DA_MoneyHungryPlus
     name: Money Hungry+
     rarity: Gold
@@ -1180,12 +1192,6 @@ augments:
       Round start: items on your bench are randomized.
 
       Gain 1 Radiant item.
-  - api_name: DA_Flexible
-    name: Flexible
-    rarity: Prismatic
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/flexible_ii.png
-    description: Gain 1 random Emblem. At the start of every Stage, gain a random Emblem. Your team gains 30 Health for each Emblem they are holding.
   - api_name: DA_RadiantRelic
     name: Radiant Relics
     rarity: Prismatic
@@ -1267,12 +1273,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: The first time you 3-star a champion, gain a copy of them each round for the rest of the game. 3-starring the same champion again grants additional copies. Gain a Lesser Champion Duplicator.
-  - api_name: DA_18_FOURcing
-    name: FOURcing
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Gain a random 4-cost champion. For each item equipped to that champion, your team gains 100 health.
   - api_name: DA_Warpath
     name: Warpath
     rarity: Gold
@@ -1469,24 +1469,36 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/makeshift2.png
     description: Champions without items equipped gain 50 Armor and Magic Resist.
+  - api_name: DA_18_SolarTraitAugment
+    name: Chosen of the Sun
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Gain a Leona, a Kayle, and a Sejuani. Leona gains 70 permanent max Health each round, increased by 10 for each unique 3-star champion fielded.
+  - api_name: DA_ForgeAFriend
+    name: Forge A Friend
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/constructacompanion_iii.png
+    description: The next 1-cost champion you buy is 3-star. Gain 5 gold.
+  - api_name: DA_ExtraBuckles
+    name: Extra Buckles
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/extrabuckles_i.png
+    description: Gain a Giant's Belt. After your champions take 75000 damage, get 2 more.
+  - api_name: DA_QuickStreaks
+    name: Quick Streaks
+    rarity: Silver
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: You gain twice as much progress towards win and loss streaks. Gain 2 gold.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
     tier: C
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/calledshot_i.png
     description: Set your win streak to +4. Gain 4 gold.
-  - api_name: DA_ExtraBuckles
-    name: Extra Buckles
-    rarity: Silver
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/extrabuckles_i.png
-    description: Gain a Giant's Belt. After your champions take 75000 damage, get 2 more.
-  - api_name: DA_ForgeAFriend
-    name: Forge A Friend
-    rarity: Silver
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/constructacompanion_iii.png
-    description: The next 1-cost champion you buy is 3-star. Gain 5 gold.
   - api_name: DA_18_OnesTwosThree
     name: Ones Two Three
     rarity: Silver
@@ -1544,18 +1556,6 @@ augments:
     tier: C
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Your Lunar champions gain 100 Health and 8% Damage Amp for each unique Solar champion fielded. Gain a Leona, a Kayle, and a Diana.
-  - api_name: DA_ElectrochargeI
-    name: Electrocharge I
-    rarity: Silver
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/electrocharge-i.png
-    description: Every 4 attacks an ally takes, they deal 25-80 (based on current Stage) magic damage to nearby enemies (1 second cooldown).
-  - api_name: DA_18_SolarTraitAugment
-    name: Chosen of the Sun
-    rarity: Silver
-    tier: C
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
-    description: Gain a Leona, a Kayle, and a Sejuani. Leona gains 70 permanent max Health each round, increased by 10 for each unique 3-star champion fielded.
   - api_name: DA_18_BlossomTraitAugment
     name: Blossom's Call
     rarity: Gold
@@ -1593,9 +1593,6 @@ comps:
   blossom-rengar:
     source: MASTER YI > Adaptor > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
-  defender-cassiopeia:
-    source: CASSIOPEIA > Defender > Lvl 7 reroll
-    augments: [ DA_18_BranchingOutPlus, DA_BoxingLessons, DA_FrontlineFoundation, DA_ConstructACompanion, DA_LivingForge, DA_TheTraitTree ]
   elderwood-aphelios:
     source: EZREAL > Executioner > Lvl 8
     augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_OneBuffTwoBuff, DA_TheTraitTree ]
