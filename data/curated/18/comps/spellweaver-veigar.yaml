@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster spellweaver-veigar, DIAMOND+.
-# Sample: 64,232 boards, avg 4.32, patch 18.5, set 18.
+# Sample: 63,230 boards, avg 4.32, patch 18.5, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,31 +15,31 @@ style: reroll_2
 difficulty: 2
 patch: "18.5"
 order: 6
-summary: "Ends at level 7 with Ornn carrying. MetaTFT DIAMOND+: 64,232 boards, avg 4.32, picked 4.5% of boards."
+summary: "Ends at level 7 with Veigar carrying. MetaTFT DIAMOND+: 63,230 boards, avg 4.32, picked 4.5% of boards."
 avg_place: 4.32
 pick_rate: 4.55
 level_recommended: 7
-early_units: [ DA_18_Alistar, DA_18_LeBlanc, DA_18_Ornn, DA_18_Veigar ]
+early_units: [ DA_18_LeBlanc, DA_18_Ornn, DA_18_RekSai, DA_18_Veigar ]
 flex_units: [ DA_18_Alune, DA_18_Ahri ]
 board:
-  - { unit: DA_18_LeBlanc, row: 3, col: 1, star: 3, carry: true, priority: 2, items: [ DA_Morellonomicon, DA_SpearOfShojin, DA_VoidStaff ] }
-  - { unit: DA_18_Veigar, row: 3, col: 0, star: 3, carry: true, priority: 3, items: [ DA_BlueBuff, DA_HextechGunblade, DA_JeweledGauntlet ] }
-  - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 1, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
+  - { unit: DA_18_LeBlanc, row: 3, col: 1, star: 3, carry: true, items: [ DA_Morellonomicon, DA_SpearOfShojin, DA_VoidStaff ] }
+  - { unit: DA_18_Veigar, row: 3, col: 0, star: 3, carry: true, priority: 1, items: [ DA_BlueBuff, DA_HextechGunblade, DA_JeweledGauntlet ] }
+  - { unit: DA_18_Ornn, row: 0, col: 3, star: 3, carry: true, priority: 2, items: [ DA_GargoyleStoneplate, DA_SpiritVisage, DA_WarmogsArmor ] }
   - { unit: DA_18_RekSai, row: 2, col: 2, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_18_Alistar, row: 2, col: 4, star: 3, items: [ DA_ThiefsGloves ] }
   - { unit: DA_Fiddlesticks18, row: 2, col: 5, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_18_Cassiopeia, row: 2, col: 3, carry: true, items: [ DA_Morellonomicon, DA_SpearOfShojin, DA_VoidStaff ] }
+  - { unit: DA_18_Cassiopeia, row: 2, col: 3, carry: true, priority: 3, items: [ DA_Morellonomicon, DA_SpearOfShojin, DA_VoidStaff ] }
 guide: |-
-  **Early:** the most-played opener is Alistar, LeBlanc, Ornn, Veigar.
+  **Early:** the most-played opener is LeBlanc, Ornn, Rek'Sai, Veigar.
 
   **Levelling:** level 7 by 4-6.
 
   **Items**, in the order to build them:
-  - **Ornn**: Gargoyle Stoneplate, Spirit Visage, Warmog's Armor
-  - **LeBlanc**: Morellonomicon, Spear of Shojin, Void Staff
   - **Veigar**: Blue Buff, Hextech Gunblade, Jeweled Gauntlet
+  - **Ornn**: Gargoyle Stoneplate, Spirit Visage, Warmog's Armor
   - **Cassiopeia**: Morellonomicon, Spear of Shojin, Void Staff
+  - **LeBlanc**: Morellonomicon, Spear of Shojin, Void Staff
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.5: 64,232 boards, avg 4.32. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.5: 63,230 boards, avg 4.32. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._

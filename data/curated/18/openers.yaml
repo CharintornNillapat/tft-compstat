@@ -5,6 +5,21 @@
 patch: "18.5"
 title: Early openers & item slams
 openers:
+  - name: Coven Swarm
+    tier: S
+    core_units:
+      - DA_18_Caitlyn
+      - DA_18_Camille
+      - DA_18_Elise
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_JeweledGauntlet
+      - DA_HextechGunblade
+    transition_to:
+      - vanguard-ahri
+      - vanguard-morgana
+      - juggernaut-amumu
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Riftbeast Juggernauts
     tier: S
     core_units:
@@ -29,19 +44,19 @@ openers:
       - DA_18_Xayah
     slammable_items:
       - DA_SpearOfShojin
-      - DA_Deathblade
-      - DA_LastWhisper
+      - DA_GuinsoosRageblade
+      - DA_KrakensFury
     transition_to:
       - elderwood-aphelios
       - elderwood-ezreal-draven
       - elderwood-ezreal-alistar
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Elderwood Spellweavers
-    tier: S
+    tier: A
     core_units:
-      - DA_18_Alistar
       - DA_18_LeBlanc
       - DA_18_Ornn
+      - DA_18_RekSai
       - DA_18_Veigar
     slammable_items:
       - DA_Morellonomicon
@@ -49,9 +64,8 @@ openers:
       - DA_VoidStaff
     transition_to:
       - spellweaver-veigar
-      - elderwood-aphelios
-      - elderwood-ezreal-alistar
-    notes: LeBlanc holds items while Alistar anchors the frontline. Pivot toward Spellweaver Veigar.
+      - flora-malphite
+    notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
   - name: Blossom Swarm
     tier: A
     core_units:
@@ -59,44 +73,13 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_NashorsTooth
       - DA_SpearOfShojin
       - DA_RedBuff
+      - DA_NashorsTooth
     transition_to:
       - ashe-fast-9
       - elderwood-khazix
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
-  - name: Sprykin Brawlers
-    tier: A
-    core_units:
-      - DA_18_Alistar
-      - DA_18_Kobuko
-      - DA_18_Teemo
-      - DA_18_Veigar
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_JeweledGauntlet
-      - DA_StrikersFlail
-    transition_to:
-      - sprykin-teemo
-      - spellweaver-veigar
-      - sprykin-azir
-    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
-  - name: Coven Swarm
-    tier: A
-    core_units:
-      - DA_18_Caitlyn
-      - DA_18_Camille
-      - DA_18_Elise
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_JeweledGauntlet
-      - DA_HextechGunblade
-    transition_to:
-      - vanguard-morgana
-      - vanguard-ahri
-      - juggernaut-amumu
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Blossom Juggernauts
     tier: A
     core_units:
@@ -113,6 +96,21 @@ openers:
       - adaptor-master-yi
       - ashe-fast-9
     notes: Yunara holds items while Sejuani anchors the frontline. Pivot toward Blossom Yunara.
+  - name: Sprykin Brawlers
+    tier: A
+    core_units:
+      - DA_18_Alistar
+      - DA_18_Kobuko
+      - DA_18_Teemo
+      - DA_18_Veigar
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_JeweledGauntlet
+      - DA_StrikersFlail
+    transition_to:
+      - sprykin-teemo
+      - sprykin-azir
+    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
   - name: Juggernaut Blossoms
     tier: A
     core_units:

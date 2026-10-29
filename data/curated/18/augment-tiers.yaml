@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-28T09:09:15.083Z. Names, icons, rarity and text: CommunityDragon 16.21.
+# (per comp), updated 2026-10-29T09:08:32.280Z. Names, icons, rarity and text: CommunityDragon 16.21.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.5"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-28. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-29. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -331,15 +331,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/explosivegrowth_ii.png
     description: Now and at the start of the next 3 rounds, gain 9 XP.
-  - api_name: DA_GildedSteel
-    name: Gilded Steel
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/gildedsteel_ii.png
-    description: |-
-      Gain two 5-cost champions. If you field at least one 5-cost champion, your 1 to 4-cost champions gain 8% Durability.
-
-      K.O. Coliseum Tactician's Crown, 2025
   - api_name: DA_GoldDestinyPlus
     name: Gold Destiny+
     rarity: Gold
@@ -586,15 +577,6 @@ augments:
       Gain a random 2-star 2-cost champion. At Level 6, gain a random item component. At Level 9, gain a random 2-star 5-cost champion.
 
       Inkborn Fables Tactician's Crown, 2024
-  - api_name: DA_LegionOfThrees
-    name: Legion Of Threes
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/legionofthrees_ii.png
-    description: |-
-      Gain a random Emblem. Your 3-cost champions and all allies equipped with an Emblem gain 150 Health and 12% Attack Speed.
-
-      Reckoning Championship, 2021
   - api_name: DA_InvestedPlusPlus
     name: Invested++
     rarity: Prismatic
@@ -712,12 +694,6 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: Converting Coven Essence to rewards grants Coven champions Ability Power instead of loot. Gain a Camille, an Elise, and a Caitlyn.
-  - api_name: DA_18_FOURcing
-    name: FOURcing
-    rarity: Gold
-    tier: A
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
-    description: Gain a random 4-cost champion. For each item equipped to that champion, your team gains 100 health.
   - api_name: DA_TwinGuardians
     name: Twin Guardians
     rarity: Silver
@@ -736,6 +712,51 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/marksman_i.png
     description: Your team gains 10% Attack Damage. Every 5 seconds, they gain 5% more.
+  - api_name: DA_ExtraBuckles
+    name: Extra Buckles
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/extrabuckles_i.png
+    description: Gain a Giant's Belt. After your champions take 75000 damage, get 2 more.
+  - api_name: DA_TheTower
+    name: The Tower
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/thetower_i.png
+    description: Gain a giant Training Dummy. Every 4 seconds, it zaps the 3 nearest enemies dealing 5% max Health true damage.
+  - api_name: DA_PlotArmor
+    name: Plot Armor
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/plotarmor_ii.png
+    description: Your team gains 8 Armor and Magic Resist. After falling below 50% Health, increase this to 40 for the rest of combat.
+  - api_name: DA_GroupHugII
+    name: Group Hug II
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/grouphug2_ii.png
+    description: "Combat start: Champions grant other adjacent champions 10 Armor and Magic Resist. This effect stacks."
+  - api_name: DA_LegionOfThrees
+    name: Legion Of Threes
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/legionofthrees_ii.png
+    description: |-
+      Gain a random Emblem. Your 3-cost champions and all allies equipped with an Emblem gain 150 Health and 12% Attack Speed.
+
+      Reckoning Championship, 2021
+  - api_name: DA_SoloLeveling
+    name: Solo Leveling
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/sololeveling_ii.png
+    description: For the next 5 combats, your team size is 1, but the champion you field has massively increased stats. Gain 1 XP for every kill they get. Afterwards, gain 2 item components.
+  - api_name: DA_SpiritOfRedemption
+    name: Spirit Of Redemption
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/spiritofredemption_ii.png
+    description: Gain a Spirit Visage. Every 5 seconds, Spirit Visage heals allies within 1 hex for 9% of their missing Health.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -886,12 +907,6 @@ augments:
       Your dice and coins are luckier.
 
       Roll a die and gain gold equal to the number rolled. Then flip a coin and gain 1 gold if you flip heads.
-  - api_name: DA_TheTower
-    name: The Tower
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/thetower_i.png
-    description: Gain a giant Training Dummy. Every 4 seconds, it zaps the 3 nearest enemies dealing 5% max Health true damage.
   - api_name: DA_AdvancedLoan
     name: Advanced Loan
     rarity: Gold
@@ -1063,30 +1078,12 @@ augments:
       Gain a component anvil when you reach level 5, 6, 7, and 8.
 
       Component anvils offer 4 choices.
-  - api_name: DA_SpiritOfRedemption
-    name: Spirit Of Redemption
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/spiritofredemption_ii.png
-    description: Gain a Spirit Visage. Every 5 seconds, Spirit Visage heals allies within 1 hex for 9% of their missing Health.
-  - api_name: DA_GroupHugII
-    name: Group Hug II
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/grouphug2_ii.png
-    description: "Combat start: Champions grant other adjacent champions 10 Armor and Magic Resist. This effect stacks."
   - api_name: DA_MoneyHungryPlus
     name: Money Hungry+
     rarity: Gold
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/moneyhungry2_ii.png
     description: Gain 13 gold now, then 7 gold at the start of every stage. Picking up gold makes your Tactician larger.
-  - api_name: DA_PlotArmor
-    name: Plot Armor
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/plotarmor_ii.png
-    description: Your team gains 8 Armor and Magic Resist. After falling below 50% Health, increase this to 40 for the rest of combat.
   - api_name: DA_SalvageBinPlus
     name: Salvage Bin+
     rarity: Gold
@@ -1099,12 +1096,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/slammin_ii.png
     description: Gain 3 gold. After each player combat, if there are no items on your bench (other than consumables), gain 2 XP.
-  - api_name: DA_SoloLeveling
-    name: Solo Leveling
-    rarity: Gold
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/sololeveling_ii.png
-    description: For the next 5 combats, your team size is 1, but the champion you field has massively increased stats. Gain 1 XP for every kill they get. Afterwards, gain 2 item components.
   - api_name: DA_Pilfer
     name: Pilfer
     rarity: Gold
@@ -1481,18 +1472,27 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/constructacompanion_iii.png
     description: The next 1-cost champion you buy is 3-star. Gain 5 gold.
-  - api_name: DA_ExtraBuckles
-    name: Extra Buckles
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/extrabuckles_i.png
-    description: Gain a Giant's Belt. After your champions take 75000 damage, get 2 more.
   - api_name: DA_QuickStreaks
     name: Quick Streaks
     rarity: Silver
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
     description: You gain twice as much progress towards win and loss streaks. Gain 2 gold.
+  - api_name: DA_18_FOURcing
+    name: FOURcing
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: Gain a random 4-cost champion. For each item equipped to that champion, your team gains 100 health.
+  - api_name: DA_GildedSteel
+    name: Gilded Steel
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/gildedsteel_ii.png
+    description: |-
+      Gain two 5-cost champions. If you field at least one 5-cost champion, your 1 to 4-cost champions gain 8% Durability.
+
+      K.O. Coliseum Tactician's Crown, 2025
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1595,22 +1595,25 @@ comps:
     augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
   elderwood-aphelios:
     source: EZREAL > Executioner > Lvl 8
-    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_TheTraitTree, DA_UrfsGrabBag ]
   elderwood-ezreal-alistar:
     source: EZREAL > Executioner > Lvl 8
-    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_TheTraitTree, DA_UrfsGrabBag ]
+  elderwood-ezreal-draven:
+    source: DRAVEN & EZREAL > Lvl 9 push
+    augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
   executioner-malphite:
     source: SORAKA > Executioner > Lvl 8 push
-    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_TheTraitTree, DA_UrfsGrabBag ]
   executioner-sett:
     source: EZREAL > Executioner > Lvl 8
-    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_OneBuffTwoBuff, DA_TheTraitTree ]
+    augments: [ DA_TwinGuardians, DA_18_ResidualMagic, DA_GlassCannon_Gold, DA_BlackthornTraitAugment, DA_TheTraitTree, DA_UrfsGrabBag ]
   inferno-akali:
     source: CAMILLE & AKALI > Solar > Lvl 5 reroll
     augments: [ DA_PandorasBench, DA_EarlyLearnings, DA_NoScoutNoPivot, DA_PortableForge ]
   invoker-ahri:
-    source: AHRI & Morgana > Blossom > Lvl 8 push
-    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_BronzeForLifeII, DA_OneBuffTwoBuff ]
+    source: AHRI & MORGANA > Blossom > Lvl 8 push
+    augments: [ DA_FlowingTears, DA_TwinGuardians, DA_SeraphimsStaff, DA_GlassCannon_Gold, DA_BronzeForLifeII, DA_TheTraitTree ]
   juggernaut-amumu:
     source: DRAVEN > Legendaries > Lvl 9
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
