@@ -12,29 +12,14 @@ openers:
       - DA_18_Camille
       - DA_18_Elise
     slammable_items:
-      - DA_SpearOfShojin
       - DA_JeweledGauntlet
-      - DA_HextechGunblade
+      - DA_SpearOfShojin
+      - DA_RabadonsDeathcap
     transition_to:
-      - vanguard-ahri
       - vanguard-morgana
-      - juggernaut-amumu
+      - vanguard-ahri
+      - invoker-ahri
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
-  - name: Riftbeast Juggernauts
-    tier: S
-    core_units:
-      - DA_18_Rakan
-      - DA_18_Sentry
-      - DA_Cinderling18
-      - DA_Scuttlecrab18
-    slammable_items:
-      - DA_EdgeOfNight
-      - DA_GuinsoosRageblade
-      - DA_HandOfJustice
-    transition_to:
-      - riftbeast-pebbles
-      - draven-fast-9
-    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Elderwood Rapidfires
     tier: S
     core_units:
@@ -51,21 +36,21 @@ openers:
       - elderwood-ezreal-draven
       - elderwood-ezreal-alistar
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
-  - name: Elderwood Spellweavers
-    tier: A
+  - name: Riftbeast Juggernauts
+    tier: S
     core_units:
-      - DA_18_LeBlanc
-      - DA_18_Ornn
-      - DA_18_RekSai
-      - DA_18_Veigar
+      - DA_18_Rakan
+      - DA_18_Sentry
+      - DA_Cinderling18
+      - DA_Scuttlecrab18
     slammable_items:
-      - DA_Morellonomicon
-      - DA_SpearOfShojin
-      - DA_VoidStaff
+      - DA_EdgeOfNight
+      - DA_GuinsoosRageblade
+      - DA_HandOfJustice
     transition_to:
-      - spellweaver-veigar
-      - flora-malphite
-    notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
+      - riftbeast-pebbles
+      - draven-fast-9
+    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Blossom Swarm
     tier: A
     core_units:
@@ -73,9 +58,9 @@ openers:
       - DA_18_Yorick
       - DA_18_Yunara
     slammable_items:
-      - DA_SpearOfShojin
-      - DA_RedBuff
       - DA_NashorsTooth
+      - DA_SpearOfShojin
+      - DA_LastWhisper
     transition_to:
       - ashe-fast-9
       - elderwood-khazix
@@ -96,6 +81,21 @@ openers:
       - adaptor-master-yi
       - ashe-fast-9
     notes: Yunara holds items while Sejuani anchors the frontline. Pivot toward Blossom Yunara.
+  - name: Elderwood Spellweavers
+    tier: A
+    core_units:
+      - DA_18_LeBlanc
+      - DA_18_Ornn
+      - DA_18_RekSai
+      - DA_18_Veigar
+    slammable_items:
+      - DA_BlueBuff
+      - DA_HextechGunblade
+      - DA_JeweledGauntlet
+    transition_to:
+      - spellweaver-veigar
+      - flora-malphite
+    notes: LeBlanc holds items while Ornn anchors the frontline. Pivot toward Spellweaver Veigar.
   - name: Sprykin Brawlers
     tier: A
     core_units:
