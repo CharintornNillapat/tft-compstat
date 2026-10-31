@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-10-30T09:21:07.143Z. Names, icons, rarity and text: CommunityDragon 16.21.
+# (per comp), updated 2026-10-31T09:06:24.984Z. Names, icons, rarity and text: CommunityDragon 16.21.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.5"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-10-30. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-10-31. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -715,6 +715,12 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/tons-of-stats-ii.png
     description: Your team gains 88 Health, 8% Attack Damage, 8% Ability Power, 8 Armor, 8 Magic Resist, 8% Attack Speed, and 8 Mana.
+  - api_name: DA_BoxingLessons
+    name: Boxing Lessons
+    rarity: Silver
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/boxinglessons_i.png
+    description: Your team gains 30 Health for each champion that starts combat in the front row.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -772,12 +778,6 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/dummify_i.png
     description: Lose all champions on your board and bench. Gain a Training Dummy with 60% of their combined health. The dummy gains 1150 Health per stage. Gain a random non-tank 2-star 2 cost champion.
-  - api_name: DA_BoxingLessons
-    name: Boxing Lessons
-    rarity: Silver
-    tier: B
-    icon_url: https://raw.communitydragon.org/16.21/game/assets/maps/tft/icons/augments/hexcore/boxinglessons_i.png
-    description: Your team gains 30 Health for each champion that starts combat in the front row.
   - api_name: DA_YoungAndWildAndFree
     name: Young and Wild and Free
     rarity: Silver
