@@ -12,8 +12,8 @@ openers:
       - DA_18_Camille
       - DA_18_Elise
     slammable_items:
-      - DA_JeweledGauntlet
       - DA_SpearOfShojin
+      - DA_JeweledGauntlet
       - DA_GargoyleStoneplate
     transition_to:
       - vanguard-morgana
@@ -104,9 +104,9 @@ openers:
       - DA_18_RekSai
       - DA_18_Veigar
     slammable_items:
-      - DA_Morellonomicon
-      - DA_SpearOfShojin
-      - DA_VoidStaff
+      - DA_BlueBuff
+      - DA_HextechGunblade
+      - DA_JeweledGauntlet
     transition_to:
       - spellweaver-veigar
       - flora-malphite
