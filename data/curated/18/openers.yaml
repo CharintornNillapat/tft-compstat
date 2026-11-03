@@ -14,28 +14,12 @@ openers:
     slammable_items:
       - DA_SpearOfShojin
       - DA_JeweledGauntlet
-      - DA_HextechGunblade
+      - DA_GargoyleStoneplate
     transition_to:
       - vanguard-morgana
-      - invoker-ahri
       - vanguard-ahri
+      - invoker-ahri
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
-  - name: Elderwood Rapidfires
-    tier: S
-    core_units:
-      - DA_18_Alistar
-      - DA_18_Ornn
-      - DA_18_Varus
-      - DA_18_Xayah
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_GuinsoosRageblade
-      - DA_KrakensFury
-    transition_to:
-      - elderwood-aphelios
-      - elderwood-ezreal-draven
-      - elderwood-ezreal-alistar
-    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Riftbeast Juggernauts
     tier: S
     core_units:
@@ -46,13 +30,13 @@ openers:
     slammable_items:
       - DA_EdgeOfNight
       - DA_GuinsoosRageblade
-      - DA_HandOfJustice
+      - DA_Quicksilver
     transition_to:
       - riftbeast-pebbles
       - draven-fast-9
     notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Juggernaut Blossoms
-    tier: A
+    tier: S
     core_units:
       - DA_18_Rakan
       - DA_18_Yorick
@@ -81,6 +65,22 @@ openers:
       - adaptor-master-yi
       - blossom-rengar
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
+  - name: Elderwood Rapidfires
+    tier: A
+    core_units:
+      - DA_18_Alistar
+      - DA_18_Ornn
+      - DA_18_Varus
+      - DA_18_Xayah
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_GuinsoosRageblade
+      - DA_KrakensFury
+    transition_to:
+      - elderwood-aphelios
+      - elderwood-ezreal-draven
+      - lunar-aphelios-nidalee
+    notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Blossom Juggernauts
     tier: A
     core_units:
