@@ -3,109 +3,106 @@
 # `notes:` is the exception: it is carried across syncs, so hover notes survive.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api, ranked queue 1100, DIAMOND+, last 3 days.
-# Sample: 1,355,512 games on patch 18.5, set 18. Feed updated 2026-11-03T10:21:20.021Z.
+# Sample: 104,112 games on patch 18.6, set 18. Feed updated 2026-11-05T10:07:10.469Z.
 # Tiers are percentile bands of the ranking: S top 15%, A next 30%, B next 35%, C the rest. A tier is therefore relative to this list.
-# Where they fell, as size and worst average placement: S 14 to 4.05, A 26 to 4.21, B 32 to 4.39, C 18 to 5.05.
+# Where they fell, as size and worst average placement: S 13 to 4.08, A 26 to 4.21, B 31 to 4.42, C 17 to 5.16.
 # Within a tier, entries run best average placement first. Rated with at least 500 games.
-slug: items-18.5
+slug: items-18.6
 kind: item
-patch: "18.5"
+patch: "18.6"
 current: true
-summary: "MetaTFT DIAMOND+ ranked averages, patch 18.5: 1,355,512 games over the last 3 days."
+summary: "MetaTFT DIAMOND+ ranked averages, patch 18.6: 104,112 games over the last 3 days."
 tiers:
   S:
-    - DA_TacticiansShield
-    - DA_Artifact_Dawncore
-    - DA_TacticiansCrown
     - DA_Artifact_LudensTempest
+    - DA_TacticiansCrown
+    - DA_Artifact_Dawncore
     - DA_AdaptiveHelm
-    - DA_Bloodthirster
-    - DA_BrambleVest
-    - DA_IonicSpark
-    - DA_SteraksGage
     - DA_SteadfastHeart
-    - DA_ThiefsGloves
+    - DA_BrambleVest
     - DA_Evenshroud
+    - DA_18_EmblemBrawler
+    - DA_IonicSpark
     - DA_Artifact_SilvermereDawn
+    - DA_Bloodthirster
+    - DA_ThiefsGloves
     - DA_18_EmblemVanguard
   A:
-    - DA_Crownguard
-    - DA_GiantSlayer
-    - DA_RedBuff
     - DA_SunfireCape
-    - DA_StrikersFlail
-    - DA_Quicksilver
-    - DA_ProtectorsVow
-    - DA_RabadonsDeathcap
-    - DA_18_EmblemBrawler
-    - DA_NashorsTooth
-    - DA_BlueBuff
-    - DA_Morellonomicon
-    - DA_EdgeOfNight
-    - DA_Deathblade
     - DA_ArchangelsStaff
-    - DA_Artifact_EternalPact
-    - DA_HandOfJustice
-    - DA_TitansResolve
-    - DA_DragonsClaw
+    - DA_RabadonsDeathcap
+    - DA_Crownguard
+    - DA_SteraksGage
+    - DA_ProtectorsVow
+    - DA_GiantSlayer
+    - DA_StrikersFlail
     - DA_Artifact_HellfireHatchet
-    - DA_VoidStaff
-    - DA_18_EmblemElderwood
-    - DA_SpiritVisage
-    - DA_Artifact_LightshieldCrest
-    - DA_HextechGunblade
+    - DA_BlueBuff
+    - DA_Deathblade
+    - DA_RedBuff
+    - DA_Quicksilver
+    - DA_EdgeOfNight
     - DA_Artifact_WitsEnd
-  B:
-    - DA_Artifact_HorizonFocus
-    - DA_LastWhisper
-    - DA_18_EmblemJuggernaut
-    - DA_Artifact_Manazane
-    - DA_SpearOfShojin
-    - DA_Artifact_LichBane
-    - DA_18_EmblemDefender
-    - DA_18_EmblemExecutioner
-    - DA_InfinityEdge
-    - DA_WarmogsArmor
+    - DA_NashorsTooth
     - DA_TacticiansCape
-    - DA_18_EmblemInvoker
-    - DA_18_EmblemLunar
+    - DA_Morellonomicon
+    - DA_DragonsClaw
+    - DA_Artifact_EternalPact
+    - DA_Artifact_Manazane
+    - DA_HandOfJustice
+    - DA_VoidStaff
+    - DA_HextechGunblade
+    - DA_TitansResolve
+    - DA_SpiritVisage
+  B:
+    - DA_LastWhisper
+    - DA_18_EmblemDefender
+    - DA_18_EmblemElderwood
+    - DA_18_EmblemExecutioner
     - DA_KrakensFury
-    - DA_Item_Artifact_TalismanOfAscension
-    - DA_JeweledGauntlet
-    - DA_Artifact_InfinityForce
-    - DA_Artifact_RapidFireCannon
-    - DA_Artifact_BlightingJewel
-    - DA_18_EmblemSpellweaver
-    - DA_18_EmblemInferno
-    - DA_18_EmblemFloraFatalisAugment
-    - DA_Artifact_ZhonyasParadox
-    - DA_18_EmblemRapidfire
+    - DA_18_EmblemInvoker
+    - DA_Artifact_HorizonFocus
+    - DA_InfinityEdge
+    - DA_SpearOfShojin
+    - DA_WarmogsArmor
     - DA_18_EmblemFloraFatalis
-    - DA_GargoyleStoneplate
-    - DA_Artifact_SeekersArmguard
-    - DA_Artifact_VoidGauntlet
-    - DA_Artifact_GoldCollector
-    - DA_18_EmblemFae
-    - DA_18_EmblemHunter
-    - DA_Artifact_Mittens
-  C:
-    - DA_18_EmblemSlayer
-    - DA_Artifact_TheIndomitable
-    - DA_GuinsoosRageblade
-    - DA_Artifact_NavoriFlickerblade
-    - DA_Artifact_AegisOfDusk
+    - DA_Artifact_LightshieldCrest
+    - DA_Artifact_RapidFireCannon
     - DA_Artifact_TitanicHydra
-    - DA_18_EmblemBlossom
-    - DA_18_EmblemPrimal
-    - DA_Artifact_AegisOfDawn
-    - DA_Artifact_StatikkShiv
-    - DA_Artifact_ForbiddenIdol
+    - DA_18_EmblemJuggernaut
+    - DA_18_EmblemLunar
+    - DA_JeweledGauntlet
+    - DA_Artifact_ZhonyasParadox
+    - DA_18_EmblemSpellweaver
+    - DA_Artifact_TheIndomitable
+    - DA_GargoyleStoneplate
+    - DA_18_EmblemRapidfire
+    - DA_GuinsoosRageblade
+    - DA_Artifact_InfinityForce
+    - DA_18_EmblemFloraFatalisAugment
+    - DA_Artifact_SeekersArmguard
+    - DA_Artifact_NavoriFlickerblade
+    - DA_18_EmblemSlayer
+    - DA_18_EmblemInferno
     - DA_Artifact_GamblersBlade
-    - DA_Artifact_Fishbones
-    - DA_Artifact_Hullcrusher
+    - DA_Artifact_VoidGauntlet
+  C:
+    - DA_18_EmblemHunter
+    - DA_Artifact_LichBane
+    - DA_Artifact_AegisOfDusk
+    - DA_18_EmblemBlossom
+    - DA_18_EmblemFae
+    - DA_Artifact_GoldCollector
+    - DA_Artifact_AegisOfDawn
     - DA_Artifact_MogulsMail
     - DA_18_EmblemBlackthorn
+    - DA_Artifact_Mittens
+    - DA_Artifact_BlightingJewel
+    - DA_Artifact_Fishbones
+    - DA_Artifact_Hullcrusher
     - DA_18_EmblemSprykin
+    - DA_Artifact_ForbiddenIdol
+    - DA_18_EmblemPrimal
     - DA_18_EmblemCoven
 notes:
   DA_InfinityEdge: "Sample note: recipes and emblem traits show in the tooltip."
