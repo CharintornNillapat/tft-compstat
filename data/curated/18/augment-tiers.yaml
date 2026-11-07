@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-11-06T10:12:12.798Z. Names, icons, rarity and text: CommunityDragon 16.22.
+# (per comp), updated 2026-11-07T09:27:17.916Z. Names, icons, rarity and text: CommunityDragon 16.22.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.6"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-11-06. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-11-07. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -721,6 +721,24 @@ augments:
     tier: A
     icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/boxinglessons_i.png
     description: Your team gains 30 Health for each champion that starts combat in the front row.
+  - api_name: DA_PandorasItemsIIMinus
+    name: Pandora's Items II
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/pandora2.png
+    description: |-
+      Round start: items on your bench are randomized.
+
+      Gain 2 random components and 1 gold.
+  - api_name: DA_PandorasItemsIIPlus
+    name: Pandora's Items II+
+    rarity: Gold
+    tier: A
+    icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: |-
+      Round start: items on your bench are randomized.
+
+      Gain 2 random components and 4 gold.
   - api_name: DA_CelestialBlessingI
     name: Celestial Blessing I
     rarity: Silver
@@ -1475,6 +1493,21 @@ augments:
     tier: B
     icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
     description: While Sprykin is active, gain a second BFF summon that is 45% as powerful. Gain a Teemo, a Veigar, and a Kobuko.
+  - api_name: DA_KnowYourEnemy
+    name: Know Your Enemy
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/know-your-enemy-ii.png
+    description: You can see who you will fight next. Your team gains 8% Damage Amp, increased to 15% if you and your opponent have any of the same traits active.
+  - api_name: DA_PandorasItemsIIPlusPlus
+    name: Pandora's Items II++
+    rarity: Gold
+    tier: B
+    icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/missing-t2.png
+    description: |-
+      Round start: items on your bench are randomized.
+
+      Gain 2 random components and 6 gold.
   - api_name: DA_CalledShot
     name: Called Shot
     rarity: Silver
@@ -1580,6 +1613,12 @@ augments:
       Gain a package containing a 5-cost champion, a 2-star 1-cost champion, and 5 gold.
 
       At the start of the next 2 stages, gain the package again.
+  - api_name: DA_18_InfernoTraitAugment
+    name: Flame On
+    rarity: Silver
+    tier: C
+    icon_url: https://raw.communitydragon.org/16.22/game/assets/maps/tft/icons/augments/hexcore/missing-t1.png
+    description: Your 1 and 2-cost Inferno champions gain 0.2 Attack Damage and Ability Power. The one who did the most damage last combat gains double. Gain a Varus and an Akali.
 comps:
   adaptor-master-yi:
     source: MASTER YI > Adaptor > Lvl 7 reroll
