@@ -2,13 +2,13 @@
 # The next sync rewrites this file.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-stat-api/augments_tiers (grades) and https://api-hc.metatft.com/tft-comps-api/comp_augment_tiers
-# (per comp), updated 2026-11-07T09:27:17.916Z. Names, icons, rarity and text: CommunityDragon 16.22.
+# (per comp), updated 2026-11-08T09:42:44.828Z. Names, icons, rarity and text: CommunityDragon 16.22.
 # Tiers are MetaTFT's S-D grades with D folded into C, not percentile bands: Riot's match data
 # for set 18 carries no augments, so there is no placement to rank them by.
 # A comp's picks are its guide's best grades, preferring augments it rates above the other guides
 # on average, one per augment family, and only from a guide whose named carries the comp fields.
 patch: "18.6"
-source: "MetaTFT augment tier list by META Spencer, updated 2026-11-07. Expert grades rather than placement stats: set 18 match data carries no augments."
+source: "MetaTFT augment tier list by META Spencer, updated 2026-11-08. Expert grades rather than placement stats: set 18 match data carries no augments."
 augments:
   - api_name: DA_PandorasBench
     name: Pandora's Bench
@@ -1626,6 +1626,9 @@ comps:
   blossom-rengar:
     source: MASTER YI > Adaptor > Lvl 7 reroll
     augments: [ DA_18_BranchingOutPlus, DA_TeamBuilding, DA_CookingPot, DA_SpreadingRoots, DA_ForgedInStrength, DA_LivingForge ]
+  blossom-zyra:
+    source: AHRI & ZYRA > Lvl 8 push
+    augments: [ DA_BoxingLessons, DA_ChampDeliveryPlusPlus, DA_BronzeForLifeI, DA_BodyguardTraining, DA_HoldTheLine, DA_BaronsLair ]
   elderwood-ezreal-draven:
     source: DRAVEN & EZREAL > Lvl 9 push
     augments: [ DA_LateGameSpecialist, DA_18_OneTwoFive, DA_BirthdayReunion, DA_BonusGift, DA_InvestedPlusPlus, DA_LevelUp ]
@@ -1656,6 +1659,9 @@ comps:
   lunar-aphelios-nidalee:
     source: APHELIOS & NIDALEE > Lvl 8 push
     augments: [ DA_FutureFocused, DA_StandUnited, DA_CyberneticImplants_Gold, DA_18_PrimalAugment_Nidalee, DA_HoldTheLine, DA_BronzeForLifeII ]
+  riftbeast-pebbles:
+    source: BRAMBLEBACK > Riftbeast > Lvl 8 push
+    augments: [ DA_VerticalityI, DA_CapitalGainsI, DA_18_RiftbeastTraitAugment, DA_GildedSteel, DA_ComebackStory, DA_Coronation ]
   sprykin-azir:
     source: AZIR > Blackthorn > Lvl 7 reroll
     augments: [ DA_TeamBuilding, DA_ComponentBuffet, DA_HeroicGrabBag, DA_Replication, DA_WandOverflow ]
