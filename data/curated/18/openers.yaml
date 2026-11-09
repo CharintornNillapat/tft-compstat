@@ -5,6 +5,21 @@
 patch: "18.6"
 title: Early openers & item slams
 openers:
+  - name: Coven Swarm
+    tier: S
+    core_units:
+      - DA_18_Caitlyn
+      - DA_18_Camille
+      - DA_18_Elise
+    slammable_items:
+      - DA_SpearOfShojin
+      - DA_JeweledGauntlet
+      - DA_StrikersFlail
+    transition_to:
+      - vanguard-morgana
+      - invoker-ahri
+      - vanguard-ahri
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: S
     core_units:
@@ -21,21 +36,6 @@ openers:
       - elderwood-ezreal-draven
       - lunar-aphelios-nidalee
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
-  - name: Coven Swarm
-    tier: S
-    core_units:
-      - DA_18_Caitlyn
-      - DA_18_Camille
-      - DA_18_Elise
-    slammable_items:
-      - DA_SpearOfShojin
-      - DA_JeweledGauntlet
-      - DA_HextechGunblade
-    transition_to:
-      - vanguard-morgana
-      - invoker-ahri
-      - vanguard-ahri
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Riftbeast Juggernauts
     tier: S
     core_units:
@@ -81,6 +81,22 @@ openers:
       - adaptor-master-yi
       - blossom-rengar
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
+  - name: Blossom Juggernauts
+    tier: A
+    core_units:
+      - DA_18_Sejuani
+      - DA_18_Yorick
+      - DA_18_Yunara
+      - DA_Karma18
+    slammable_items:
+      - DA_GargoyleStoneplate
+      - DA_Deathblade
+      - DA_LastWhisper
+    transition_to:
+      - blossom-yunara
+      - adaptor-master-yi
+      - ashe-fast-9
+    notes: Yunara holds items while Sejuani anchors the frontline. Pivot toward Blossom Yunara.
   - name: Elderwood Spellweavers
     tier: A
     core_units:
@@ -89,9 +105,9 @@ openers:
       - DA_18_RekSai
       - DA_18_Veigar
     slammable_items:
-      - DA_BlueBuff
-      - DA_HextechGunblade
-      - DA_JeweledGauntlet
+      - DA_Morellonomicon
+      - DA_SpearOfShojin
+      - DA_VoidStaff
     transition_to:
       - spellweaver-veigar
       - flora-malphite
@@ -111,17 +127,3 @@ openers:
       - sprykin-teemo
       - sprykin-azir
     notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
-  - name: Blackthorn Swarm
-    tier: A
-    core_units:
-      - DA_18_RekSai
-      - DA_18_Veigar
-      - DA_18_Warwick
-    slammable_items:
-      - DA_RabadonsDeathcap
-      - DA_NashorsTooth
-      - DA_AdaptiveHelm
-    transition_to:
-      - flora-malphite
-      - spellweaver-veigar
-    notes: Warwick holds items while Rek'Sai anchors the frontline. Pivot toward Flora Malphite.
