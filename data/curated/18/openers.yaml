@@ -14,10 +14,10 @@ openers:
     slammable_items:
       - DA_SpearOfShojin
       - DA_JeweledGauntlet
-      - DA_StrikersFlail
+      - DA_HextechGunblade
     transition_to:
       - vanguard-morgana
-      - juggernaut-amumu
+      - invoker-ahri
       - vanguard-ahri
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
