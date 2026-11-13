@@ -14,7 +14,7 @@ openers:
     slammable_items:
       - DA_SpearOfShojin
       - DA_JeweledGauntlet
-      - DA_HextechGunblade
+      - DA_StrikersFlail
     transition_to:
       - vanguard-morgana
       - invoker-ahri
