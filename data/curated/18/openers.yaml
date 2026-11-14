@@ -14,7 +14,7 @@ openers:
     slammable_items:
       - DA_SpearOfShojin
       - DA_JeweledGauntlet
-      - DA_StrikersFlail
+      - DA_HextechGunblade
     transition_to:
       - vanguard-morgana
       - invoker-ahri
@@ -121,8 +121,8 @@ openers:
       - DA_18_Teemo
       - DA_18_Veigar
     slammable_items:
-      - DA_SpearOfShojin
       - DA_JeweledGauntlet
+      - DA_SpearOfShojin
       - DA_StrikersFlail
     transition_to:
       - sprykin-teemo
