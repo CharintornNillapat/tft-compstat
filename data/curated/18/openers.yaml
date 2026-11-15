@@ -13,12 +13,12 @@ openers:
       - DA_18_Elise
     slammable_items:
       - DA_SpearOfShojin
-      - DA_JeweledGauntlet
       - DA_HextechGunblade
+      - DA_JeweledGauntlet
     transition_to:
       - vanguard-morgana
-      - invoker-ahri
       - vanguard-ahri
+      - invoker-ahri
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: S
@@ -105,9 +105,9 @@ openers:
       - DA_18_Ornn
       - DA_18_Veigar
     slammable_items:
-      - DA_Morellonomicon
-      - DA_SpearOfShojin
-      - DA_VoidStaff
+      - DA_BlueBuff
+      - DA_HextechGunblade
+      - DA_JeweledGauntlet
     transition_to:
       - spellweaver-veigar
       - elderwood-aphelios
@@ -121,8 +121,8 @@ openers:
       - DA_18_Teemo
       - DA_18_Veigar
     slammable_items:
-      - DA_JeweledGauntlet
       - DA_SpearOfShojin
+      - DA_JeweledGauntlet
       - DA_StrikersFlail
     transition_to:
       - sprykin-teemo
