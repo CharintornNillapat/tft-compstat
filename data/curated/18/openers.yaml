@@ -12,9 +12,9 @@ openers:
       - DA_18_Camille
       - DA_18_Elise
     slammable_items:
+      - DA_JeweledGauntlet
       - DA_SpearOfShojin
       - DA_HextechGunblade
-      - DA_JeweledGauntlet
     transition_to:
       - vanguard-morgana
       - vanguard-ahri
@@ -34,7 +34,7 @@ openers:
     transition_to:
       - elderwood-aphelios
       - elderwood-ezreal-draven
-      - lunar-aphelios-nidalee
+      - elderwood-ezreal-alistar
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Riftbeast Juggernauts
     tier: S
