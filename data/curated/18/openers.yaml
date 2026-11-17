@@ -34,7 +34,7 @@ openers:
     transition_to:
       - elderwood-aphelios
       - elderwood-ezreal-draven
-      - elderwood-ezreal-alistar
+      - lunar-aphelios-nidalee
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Riftbeast Juggernauts
     tier: S
@@ -89,9 +89,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_GargoyleStoneplate
-      - DA_Deathblade
-      - DA_LastWhisper
+      - DA_BlueBuff
+      - DA_JeweledGauntlet
+      - DA_RabadonsDeathcap
     transition_to:
       - blossom-yunara
       - adaptor-master-yi
@@ -113,19 +113,17 @@ openers:
       - elderwood-aphelios
       - elderwood-ezreal-alistar
     notes: LeBlanc holds items while Alistar anchors the frontline. Pivot toward Spellweaver Veigar.
-  - name: Sprykin Brawlers
+  - name: Fae Juggernauts
     tier: A
     core_units:
-      - DA_18_Alistar
-      - DA_18_Kobuko
-      - DA_18_Teemo
-      - DA_18_Veigar
+      - DA_18_Rakan
+      - DA_18_Xayah
+      - DA_18_Yorick
     slammable_items:
-      - DA_SpearOfShojin
-      - DA_JeweledGauntlet
-      - DA_StrikersFlail
+      - DA_GuinsoosRageblade
+      - DA_HextechGunblade
+      - DA_GiantSlayer
     transition_to:
-      - sprykin-teemo
-      - spellweaver-veigar
-      - sprykin-azir
-    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
+      - vanguard-hecarim
+      - fae-tristana
+    notes: Xayah holds items while Rakan anchors the frontline. Pivot toward Fae Tristana.
