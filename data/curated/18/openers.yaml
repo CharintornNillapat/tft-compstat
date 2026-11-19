@@ -35,22 +35,21 @@ openers:
       - riftbeast-pebbles
       - draven-fast-9
     notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
-  - name: Sprykin Brawlers
+  - name: Fae Juggernauts
     tier: S
     core_units:
-      - DA_18_Alistar
-      - DA_18_Kobuko
-      - DA_18_Teemo
-      - DA_18_Veigar
+      - DA_18_Rakan
+      - DA_18_Xayah
+      - DA_18_Yorick
     slammable_items:
-      - DA_JeweledGauntlet
-      - DA_SpearOfShojin
-      - DA_StrikersFlail
+      - DA_GuinsoosRageblade
+      - DA_HextechGunblade
+      - DA_TitansResolve
     transition_to:
-      - sprykin-teemo
-      - spellweaver-veigar
-      - sprykin-azir
-    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
+      - vanguard-hecarim
+      - adaptor-master-yi
+      - blossom-ahri
+    notes: Xayah holds items while Rakan anchors the frontline. Pivot toward Vanguard Hecarim.
   - name: Juggernaut Blossoms
     tier: A
     core_units:
@@ -64,7 +63,7 @@ openers:
     transition_to:
       - adaptor-master-yi
       - ashe-fast-9
-      - blossom-rengar
+      - blossom-ahri
     notes: Rakan holds items while Yorick anchors the frontline. Pivot toward Adaptor Master Yi.
   - name: Blossom Swarm
     tier: A
@@ -79,7 +78,7 @@ openers:
     transition_to:
       - ashe-fast-9
       - adaptor-master-yi
-      - blossom-rengar
+      - blossom-ahri
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
   - name: Elderwood Rapidfires
     tier: A
@@ -91,10 +90,11 @@ openers:
     slammable_items:
       - DA_GuinsoosRageblade
       - DA_KrakensFury
-      - DA_Deathblade
+      - DA_InfinityEdge
     transition_to:
       - elderwood-aphelios
       - elderwood-ezreal-draven
+      - lunar-aphelios-nidalee
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
   - name: Blossom Juggernauts
     tier: A
@@ -104,9 +104,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_BlueBuff
-      - DA_JeweledGauntlet
-      - DA_RabadonsDeathcap
+      - DA_Deathblade
+      - DA_LastWhisper
+      - DA_SpearOfShojin
     transition_to:
       - blossom-yunara
       - adaptor-master-yi
