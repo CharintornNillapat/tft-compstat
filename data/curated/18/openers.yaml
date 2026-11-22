@@ -81,21 +81,6 @@ openers:
       - adaptor-master-yi
       - blossom-ahri
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
-  - name: Riftbeast Juggernauts
-    tier: A
-    core_units:
-      - DA_18_Rakan
-      - DA_18_Sentry
-      - DA_Cinderling18
-      - DA_Scuttlecrab18
-    slammable_items:
-      - DA_EdgeOfNight
-      - DA_GuinsoosRageblade
-      - DA_Quicksilver
-    transition_to:
-      - riftbeast-pebbles
-      - draven-fast-9
-    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Elderwood Rapidfires
     tier: A
     core_units:
@@ -104,13 +89,29 @@ openers:
       - DA_18_Varus
       - DA_18_Xayah
     slammable_items:
+      - DA_SpearOfShojin
       - DA_GuinsoosRageblade
       - DA_KrakensFury
-      - DA_Deathblade
     transition_to:
       - elderwood-ezreal-draven
       - elderwood-aphelios
+      - lunar-aphelios-nidalee
     notes: Varus holds items while Alistar anchors the frontline. Pivot toward Elderwood Aphelios.
+  - name: Riftbeast Juggernauts
+    tier: A
+    core_units:
+      - DA_18_Rakan
+      - DA_18_Sentry
+      - DA_Cinderling18
+      - DA_Scuttlecrab18
+    slammable_items:
+      - DA_GuinsoosRageblade
+      - DA_EdgeOfNight
+      - DA_Quicksilver
+    transition_to:
+      - riftbeast-pebbles
+      - draven-fast-9
+    notes: Pebbles holds items while Rakan anchors the frontline. Pivot toward Riftbeast Pebbles.
   - name: Blossom Juggernauts
     tier: A
     core_units:

@@ -3,7 +3,7 @@
 # treated as hand-written, and is never overwritten or pruned.
 #
 # Source: MetaTFT https://api-hc.metatft.com/tft-comps-api, cluster riftbeast-pebbles, DIAMOND+.
-# Sample: 65,562 boards, avg 4.30, patch 18.7, set 18.
+# Sample: 59,953 boards, avg 4.30, patch 18.7, set 18.
 # Board, stars and items are each unit's most-played choice in this comp.
 # The comps feed ignores rank and day filters, so the bracket above is applied here
 # from its own per-rank breakdown. It publishes no placement histogram, so there is
@@ -15,9 +15,9 @@ style: fast9
 difficulty: 3
 patch: "18.7"
 order: 2
-summary: "Ends at level 9 with Brambleback carrying. MetaTFT DIAMOND+: 65,562 boards, avg 4.30, picked 8.3% of boards."
+summary: "Ends at level 9 with Brambleback carrying. MetaTFT DIAMOND+: 59,953 boards, avg 4.30, picked 7.8% of boards."
 avg_place: 4.3
-pick_rate: 8.34
+pick_rate: 7.77
 level_recommended: 9
 early_units: [ DA_18_Rakan, DA_18_Sentry, DA_Cinderling18, DA_Scuttlecrab18 ]
 flex_units: [ DA_Cinderling18, DA_18_Sett, DA_Gromp18_AP ]
@@ -30,7 +30,7 @@ board:
   - { unit: DA_18_ElderDragon, row: 2, col: 3, star: 1, carry: true, priority: 3, items: [ DA_InfinityEdge, DA_LastWhisper, DA_StrikersFlail ] }
   - { unit: DA_Scuttlecrab18, row: 0, col: 2, items: [ DA_ThiefsGloves ] }
   - { unit: DA_Taric18, row: 2, col: 4, star: 1, items: [ DA_ThiefsGloves ] }
-  - { unit: DA_CrimsonRaptor18, row: 3, col: 1, items: [ DA_GuinsoosRageblade ] }
+  - { unit: DA_CrimsonRaptor18, row: 3, col: 1, carry: true, items: [ DA_GuinsoosRageblade, DA_HextechGunblade, DA_TitansResolve ] }
 guide: |-
   **Early:** the most-played opener is Rakan, Pebbles, Cinderling, Scuttlecrab.
 
@@ -41,7 +41,8 @@ guide: |-
   - **Krug**: Gargoyle Stoneplate, Spirit Visage, Warmog's Armor
   - **Elder Dragon**: Infinity Edge, Last Whisper, Striker's Flail
   - **Pebbles**: Blue Buff, Jeweled Gauntlet, Rabadon's Deathcap
+  - **Mama Beak**: Guinsoo's Rageblade, Hextech Gunblade, Titan's Resolve
 
   **Positioning:** every unit is on the hex it was played on most often in this comp, so treat it as a starting point rather than a solved board.
 
-  _Generated from MetaTFT DIAMOND+ boards on patch 18.7: 65,562 boards, avg 4.30. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
+  _Generated from MetaTFT DIAMOND+ boards on patch 18.7: 59,953 boards, avg 4.30. These are the boards people played, not a plan somebody wrote — read the numbers before trusting the comp._
