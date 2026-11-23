@@ -89,9 +89,9 @@ openers:
       - DA_18_Varus
       - DA_18_Xayah
     slammable_items:
-      - DA_SpearOfShojin
       - DA_GuinsoosRageblade
       - DA_KrakensFury
+      - DA_InfinityEdge
     transition_to:
       - elderwood-ezreal-draven
       - elderwood-aphelios
@@ -120,9 +120,9 @@ openers:
       - DA_18_Yunara
       - DA_Karma18
     slammable_items:
-      - DA_Deathblade
-      - DA_LastWhisper
-      - DA_SpearOfShojin
+      - DA_BlueBuff
+      - DA_JeweledGauntlet
+      - DA_RabadonsDeathcap
     transition_to:
       - blossom-yunara
       - adaptor-master-yi
