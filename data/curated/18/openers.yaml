@@ -78,8 +78,8 @@ openers:
       - DA_GargoyleStoneplate
     transition_to:
       - vanguard-morgana
-      - invoker-ahri
       - vanguard-ahri
+      - invoker-ahri
     notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: A
