@@ -5,6 +5,21 @@
 patch: "18.7"
 title: Early openers & item slams
 openers:
+  - name: Coven Swarm
+    tier: S
+    core_units:
+      - DA_18_Caitlyn
+      - DA_18_Camille
+      - DA_18_Elise
+    slammable_items:
+      - DA_JeweledGauntlet
+      - DA_SpearOfShojin
+      - DA_GargoyleStoneplate
+    transition_to:
+      - vanguard-morgana
+      - invoker-ahri
+      - vanguard-ahri
+    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Fae Juggernauts
     tier: S
     core_units:
@@ -20,22 +35,6 @@ openers:
       - vanguard-aphelios
       - fae-tristana
     notes: Xayah holds items while Rakan anchors the frontline. Pivot toward Fae Tristana.
-  - name: Sprykin Brawlers
-    tier: S
-    core_units:
-      - DA_18_Alistar
-      - DA_18_Kobuko
-      - DA_18_Teemo
-      - DA_18_Veigar
-    slammable_items:
-      - DA_JeweledGauntlet
-      - DA_SpearOfShojin
-      - DA_StrikersFlail
-    transition_to:
-      - sprykin-teemo
-      - spellweaver-veigar
-      - sprykin-azir
-    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
   - name: Juggernaut Blossoms
     tier: S
     core_units:
@@ -66,21 +65,6 @@ openers:
       - adaptor-master-yi
       - blossom-rengar
     notes: Yunara holds items while Yorick anchors the frontline. Pivot toward Ashe Fast 9.
-  - name: Coven Swarm
-    tier: A
-    core_units:
-      - DA_18_Caitlyn
-      - DA_18_Camille
-      - DA_18_Elise
-    slammable_items:
-      - DA_JeweledGauntlet
-      - DA_SpearOfShojin
-      - DA_GargoyleStoneplate
-    transition_to:
-      - vanguard-morgana
-      - invoker-ahri
-      - vanguard-ahri
-    notes: Elise holds items while Caitlyn anchors the frontline. Pivot toward Coven Elise.
   - name: Elderwood Rapidfires
     tier: A
     core_units:
@@ -128,3 +112,19 @@ openers:
       - adaptor-master-yi
       - ashe-fast-9
     notes: Yunara holds items while Sejuani anchors the frontline. Pivot toward Blossom Yunara.
+  - name: Sprykin Brawlers
+    tier: A
+    core_units:
+      - DA_18_Alistar
+      - DA_18_Kobuko
+      - DA_18_Teemo
+      - DA_18_Veigar
+    slammable_items:
+      - DA_JeweledGauntlet
+      - DA_SpearOfShojin
+      - DA_StrikersFlail
+    transition_to:
+      - sprykin-teemo
+      - spellweaver-veigar
+      - sprykin-azir
+    notes: Teemo holds items while Alistar anchors the frontline. Pivot toward Sprykin Teemo.
